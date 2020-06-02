@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace App.MailHandler.Service
+namespace Puchase_and_payables.MailHandler.Service
 {
     public interface IEmailService
     {

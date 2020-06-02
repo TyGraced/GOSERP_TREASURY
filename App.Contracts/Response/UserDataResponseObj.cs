@@ -1,8 +1,9 @@
-﻿using System;
+﻿using GOSLibraries.GOS_API_Response;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Text; 
 
-namespace App.Contracts.Response
+namespace Puchase_and_payables.Contracts.Response
 {
     public class UserDataResponseObj
     {
@@ -10,6 +11,7 @@ namespace App.Contracts.Response
         public int StaffId { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
+        public string Email { get; set; }
         public string StaffName { get; set; }
         public string CustomerName { get; set; }
         public int? BranchId { get; set; }

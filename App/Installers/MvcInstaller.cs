@@ -10,17 +10,15 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using FluentValidation.AspNetCore;
-using System;
-using System.Reflection;
-using System.IO;
-using App.Options;
+using System; 
+using GOSLibraries;
+using Puchase_and_payables.AuthHandler;
+using System.Net.Http.Headers;
 using App.AuthHandler.Inplimentation;
-using App.AuthHandler.Interface;
-using App.MailHandler.Service;
-using App.LogHandler.Service;
-using App.Filters;
+using GOSLibraries.GOS_Error_logger.Service;
+using GOSLibraries.Options;
 
-namespace App.Installers
+namespace Puchase_and_payables.Installers
 {
     public class MvcInstaller : IInstaller
     {
@@ -44,9 +42,7 @@ namespace App.Installers
             };
 
             services.AddSingleton(tokenValidatorParameters);
-
-            services.AddScoped<IUriService, UriService>();
-            services.AddScoped<IEmailService, EmailService>();
+              
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddSingleton<ILoggerService, LoggerService>();
             services.AddMvc(options =>
@@ -62,17 +58,20 @@ namespace App.Installers
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins("http://localhost:5100")
                     .AllowAnyHeader()
                     .AllowAnyMethod(); ;
                 });
             });
 
-            services.AddHttpClient("GODP", client =>
+            services.AddHttpClient("GOSDEFAULTGATEWAY", client =>
             {
-                client.BaseAddress = new Uri("http://localhost:56633/");
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-                client.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactoryExample");
+               //client.BaseAddress = new Uri("https://localhost:44362/");
+               client.BaseAddress = new Uri("http://104.238.103.48:70/"); 
+               client.DefaultRequestHeaders.Accept.Clear();
+               client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {jwt}");
             });
 
             services.AddAuthentication(x =>
@@ -86,41 +85,28 @@ namespace App.Installers
                 x.TokenValidationParameters = tokenValidatorParameters;
             });
 
-            services.AddSingleton<IUriService>(provider =>
-            {
-                var accessor = provider.GetRequiredService<IHttpContextAccessor>();
-                var request = accessor.HttpContext.Request;
-                var absoluteUrl = string.Concat(request.Scheme, "://", request.Host.ToUriComponent(), "/");
-                return new UriService(absoluteUrl);
-            });
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-
-
-
-            services.AddTransient<IEmailService, EmailService>();
-
-            services.AddSingleton<IEmailConfiguration>(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
-
+             
             services.AddSwaggerGen(x =>
             {
                 x.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Flave Cloud",
+                    Title = "Purchases and Payables Cloud",
                     Version = "V1",
                     Description = "An API to perform business automated operations",
                     TermsOfService = new Uri("http://www.godp.co.uk/"),
                     Contact = new OpenApiContact
                     {
-                        Name = "Flave Tech",
-                        Email = "Flavetechs@gmail.com",
+                        Name = "GODP Tech",
+                        Email = "Gosoftware@gmail.com",
                         Url = new Uri("https://twitter.com/FavourE65881201"),
                     },
                     License = new OpenApiLicense
                     {
                         Name = "GODP API LICX",
-                        Url = new Uri("http://www.flave.co.uk/"),
+                        Url = new Uri("http://www.GODP.co.uk/"),
                     },
 
                 });
@@ -135,7 +121,7 @@ namespace App.Installers
                 };
                 x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "FLAVE Cloud Authorization header using bearer scheme",
+                    Description = "GODP Cloud Authorization header using bearer scheme",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,

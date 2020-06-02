@@ -8,17 +8,16 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
-using App.Data;
+using Puchase_and_payables.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using App.Installers;
+using Puchase_and_payables.Installers;
 using System.IO;
 using NLog;
-using App.DomainObjects.Auth;
-using App.Options;
+using GOSLibraries.Options;
 
-namespace App
+namespace Puchase_and_payables
 {
     public class Startup
     {
@@ -53,8 +52,8 @@ namespace App
             }
             app.UseRouting();
             app.UseStaticFiles();
-            var swaggerOptions = new Options.SwaggerOptions();
-            Configuration.GetSection(nameof(Options.SwaggerOptions)).Bind(swaggerOptions);
+            var swaggerOptions = new SwaggerOptions();
+            Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
 
             app.UseSwagger(option => { option.RouteTemplate = swaggerOptions.JsonRoute; });
 
@@ -70,48 +69,8 @@ namespace App
             app.UseExceptionHandler("/errors/500");
             app.UseStatusCodePagesWithReExecute("/errors/{0}");
             app.UseMvc();
-            CreateRolesAndAdminUser(serviceProvider).Wait();
         }
 
 
-
-
-
-
-
-        private async Task CreateRolesAndAdminUser(IServiceProvider serviceProvider)
-        {
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Admin" };
-
-            IdentityResult roleResult;
-
-            foreach (var roleName in roleNames)
-            {
-                var roleExist = await RoleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                {
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole { Name = roleName });
-                }
-            }
-
-            var userSettings = new UserSettings();
-            Configuration.GetSection(nameof(UserSettings)).Bind(userSettings);
-
-            var adminPassword = userSettings.Password;
-            var adminUser = new ApplicationUser()
-            {
-                Email = userSettings.Email,
-                UserName = userSettings.UserName,
-            };
-
-            var user = await UserManager.FindByEmailAsync(userSettings.Email);
-            if (user == null)
-            {
-                var created = await UserManager.CreateAsync(adminUser, adminPassword);
-                if (created.Succeeded) { await UserManager.AddToRoleAsync(adminUser, "Admin"); }
-            }
-        }
     }
 }

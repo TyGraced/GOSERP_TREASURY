@@ -1,5 +1,5 @@
 ﻿
-namespace App.MailHandler.Service
+namespace Puchase_and_payables.MailHandler.Service
 {
     public interface IEmailConfiguration
     {

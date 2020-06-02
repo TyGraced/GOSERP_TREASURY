@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "App": {
+    "Puchase_and_payables": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

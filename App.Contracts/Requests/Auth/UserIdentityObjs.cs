@@ -1,9 +1,10 @@
-﻿using App.Contracts.Response;
+﻿using GOSLibraries.GOS_API_Response; 
+using Puchase_and_payables.Contracts.Response;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace App.Contracts.Requests.Auth
+namespace Puchase_and_payables.Contracts.Requests.Auth
 {
     public class UserRegistrationReqObj
     {
@@ -33,8 +34,8 @@ namespace App.Contracts.Requests.Auth
         public string RefreshToken { get; set; }
     }
     public class AuthFailedResponse
-    {
-        public IEnumerable<string> Errors { get; set; }
+    { 
+        public APIResponseStatus Status { get; set; }
     }
 
     public class AuthSuccessResponse

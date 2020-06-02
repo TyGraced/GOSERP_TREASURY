@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace App.MailHandler
+namespace Puchase_and_payables.MailHandler
 {
     public class EmailAddress
     {

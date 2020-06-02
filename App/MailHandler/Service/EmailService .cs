@@ -1,4 +1,4 @@
-﻿using App.MailHandler;
+﻿using Puchase_and_payables.MailHandler;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -12,17 +12,16 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading;
 using MailKit;
-using App.ErrorHandler;
+using Puchase_and_payables.ErrorHandler;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using MimeKit.Text;
 using MailKit.Net.Pop3;
 using Polly.Retry;
 using Polly;
-using System.Net.Sockets;
-using App.LogHandler.Service;
+using System.Net.Sockets; 
 
-namespace App.MailHandler.Service
+namespace Puchase_and_payables.MailHandler.Service
 {
     public class EmailService : IEmailService
     {

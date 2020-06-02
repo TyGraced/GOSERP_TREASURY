@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using App.DomainObjects.Auth;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using GODP.APIsContinuation.DomainObjects.Supplier;
 
-namespace App.Data
+namespace Puchase_and_payables.Data
 {
-    public class DataContext : IdentityDbContext<ApplicationUser>
+    public class DataContext : DbContext
     {
         public DataContext()
         {
@@ -18,8 +14,14 @@ namespace App.Data
             : base(options)
         {
         }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<ConfirmEmailCode> ConfirmEmailCodes { get; set; }
+
+        public DbSet<cor_supplier> cor_supplier { get; set; }
+        public DbSet<cor_supplierauthorization> cor_supplierauthorization { get; set; }
+        public DbSet<cor_supplierbusinessowner> cor_supplierbusinessowner { get; set; }
+        public DbSet<cor_supplierdocument> cor_supplierdocument { get; set; }
+        public DbSet<cor_suppliertype> cor_suppliertype { get; set; }
+        public DbSet<cor_topclient> cor_topclient { get; set; }
+        public DbSet<cor_topsupplier> cor_topsupplier { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

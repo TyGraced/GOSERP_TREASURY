@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace App.MailHandler.Service
+namespace Puchase_and_payables.MailHandler.Service
 {
     public class EmailConfiguration : IEmailConfiguration
     {

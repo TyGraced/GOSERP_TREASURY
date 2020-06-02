@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace App.Helper.Extensions
+namespace Puchase_and_payables.Helper.Extensions
 {
     public static class StaffCode
     {

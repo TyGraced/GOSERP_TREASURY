@@ -1,10 +1,10 @@
-﻿using App;
+﻿using Puchase_and_payables;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
-namespace App.Installers
+namespace Puchase_and_payables.Installers
 {
     public static class InstallerExtensions
     {
