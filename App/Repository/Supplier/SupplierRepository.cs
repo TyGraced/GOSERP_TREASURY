@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using Puchase_and_payables.AuthHandler;
 using Puchase_and_payables.Data;
+using Puchase_and_payables.DomainObjects.Supplier;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,8 +32,7 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             
             return added > 0;
             
-        }
-
+        } 
         public async Task<bool> DeleteSupplierAsync(cor_supplier model)
         {   
             var item = await _dataContext.cor_supplier.FindAsync(model.SupplierId);
@@ -72,7 +72,6 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             _dataContext.Entry(item).CurrentValues.SetValues(model);
             return await _dataContext.SaveChangesAsync() > 0;
         }
-
         public async Task<bool> DeleteSupplierTopSupplierAsync(cor_topsupplier model)
         {
             var item = await _dataContext.cor_supplier.FindAsync(model.SupplierId);
@@ -80,7 +79,6 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             _dataContext.Entry(item).CurrentValues.SetValues(model);
             return await _dataContext.SaveChangesAsync() > 0;
         }
-
 
         public async Task<IEnumerable<cor_supplier>> GetAllSupplierAsync()
         {
@@ -158,7 +156,6 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             return await _dataContext.cor_topsupplier.SingleOrDefaultAsync(x => x.TopSupplierId == supplierTopSupplierId && x.Deleted == false);
         }
 
-        
         public async Task<IEnumerable<cor_supplier>> SupplierInformationAwaitingApprovalAsync(string userName)
         {
             var userDetail = await _identityService.UserDataAsync(); 
@@ -235,15 +232,7 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             await _dataContext.AddAsync(model);
             return await _dataContext.SaveChangesAsync() > 0;
         }
-
-        //public int CountryIdByCountryName(string countryName)
-        //{
-        //    return _dataContext.cor_country.FirstOrDefault(x => x.CountryName.Trim().ToLower() == countryName.Trim().ToLower()).CountryId;
-        //}
-        //public int SupplierTypeBySupplierTypeName(string countryName)
-        //{
-        //    return _dataContext.cor_country.FirstOrDefault(x => x.CountryName.Trim().ToLower() == countryName.Trim().ToLower()).CountryId;
-        //}
+         
         public async Task<bool> UploadSupplierListAsync(byte[] record, string createdBy)
         {
             try
@@ -341,6 +330,102 @@ namespace GODP.APIsContinuation.Repository.Inplimentation
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+
+        public async Task<bool> AddUpdateSeviceTermAsync(cor_serviceterms model)
+        {
+            if (model.ServiceTermsId > 0)
+            {
+                var itemToEdit = await _dataContext.cor_serviceterms.FindAsync(model.ServiceTermsId);
+                _dataContext.Entry(itemToEdit).CurrentValues.SetValues(model);
+            }
+            else
+                await _dataContext.cor_serviceterms.AddAsync(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> AddUpdateSupplierTypeAsync(cor_suppliertype model)
+        {
+            if (model.SupplierTypeId > 0)
+            {
+                var itemToEdit = await _dataContext.cor_suppliertype.FindAsync(model.SupplierTypeId);
+                _dataContext.Entry(itemToEdit).CurrentValues.SetValues(model);
+            }
+            else
+                await _dataContext.cor_suppliertype.AddAsync(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> AddUpdateTaskSetupAsync(cor_tasksetup model)
+        {
+            if (model.TaskSetupId > 0)
+            {
+                var itemToEdit = await _dataContext.cor_tasksetup.FindAsync(model.TaskSetupId);
+                _dataContext.Entry(itemToEdit).CurrentValues.SetValues(model);
+            }
+            else
+                await _dataContext.cor_tasksetup.AddAsync(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteServiceTermsAsync(cor_serviceterms model)
+        {
+            var itemToDelete = await _dataContext.cor_serviceterms.FindAsync(model.ServiceTermsId);
+            itemToDelete.Deleted = true;  
+            _dataContext.Entry(itemToDelete).CurrentValues.SetValues(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> DeleteSupplierTypeAsync(cor_suppliertype model)
+        {
+            var itemToDelete = await _dataContext.cor_suppliertype.FindAsync(model.SupplierTypeId);
+            itemToDelete.Deleted = true;
+            _dataContext.Entry(itemToDelete).CurrentValues.SetValues(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteTaskSetupAsync(cor_tasksetup model)
+        {
+            var itemToDelete = await _dataContext.cor_tasksetup.FindAsync(model.TaskSetupId);
+            itemToDelete.Deleted = true;
+            _dataContext.Entry(itemToDelete).CurrentValues.SetValues(model);
+            return await _dataContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<cor_tasksetup>> GetAllTaskSetupAsync()
+        {
+            return await _dataContext.cor_tasksetup.Where(s => s.Deleted == false).ToListAsync();
+        }
+
+        public async Task<cor_serviceterms> GetServiceTermsAsync(int serviceTermsId)
+        {
+            return await _dataContext.cor_serviceterms.FirstOrDefaultAsync(s => s.Deleted == false && s.ServiceTermsId ==serviceTermsId);
+        }
+
+        public async Task<IEnumerable<cor_serviceterms>> GetAllServiceTermsAsync()
+        {
+            return await _dataContext.cor_serviceterms.Where(s => s.Deleted == false).ToListAsync();
+        }
+
+        public async Task<cor_suppliertype> GetSupplierTypeAsync(int supplierTypeId)
+        {
+            return await _dataContext.cor_suppliertype.FirstOrDefaultAsync(s => s.Deleted == false && s.SupplierTypeId == supplierTypeId);
+        }
+
+        public async Task<IEnumerable<cor_suppliertype>> GetAllSupplierTypeAsync()
+        {
+            return await _dataContext.cor_suppliertype.Where(s => s.Deleted == false).ToListAsync();
+        }
+
+        public async Task<cor_tasksetup> GetTaskSetupAsync(int taskSetupId)
+        {
+            return await _dataContext.cor_tasksetup.FirstOrDefaultAsync(s => s.Deleted == false && s.TaskSetupId == taskSetupId);
+        }
+
+        public async Task<IEnumerable<cor_supplier>> GetSupplierDataAwaitingApprovalAsync(List<int> SupplierIds)
+        {
+            var item = await _dataContext.cor_supplier.Where(s => SupplierIds.Contains(s.SupplierId) && s.Deleted == false).ToListAsync();
+            return item;
         }
     }
 }

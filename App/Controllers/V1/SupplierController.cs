@@ -5,6 +5,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Puchase_and_payables.Contracts.Commands.Supplier.setup;
+using Puchase_and_payables.Contracts.Queries.Supplier;
 using Puchase_and_payables.Contracts.V1;
 using System.Threading.Tasks;
 
@@ -15,14 +17,73 @@ namespace Puchase_and_payables.Controllers.V1
     public class SupplierController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly ISupplierRepository _supplierRepository;
-        public SupplierController(IMediator mediator, ISupplierRepository supplierRepository)
+        public SupplierController(IMediator mediator)
         {
-            _supplierRepository = supplierRepository;
             _mediator = mediator;
         }
 
-      
+        [HttpPost(ApiRoutes.SupplierEndpoints.ADD_UPDATE_TERMS)]
+        public async Task<ActionResult> ADD_UPDATE_TERMS([FromBody] AddUpdateServiceTermCommand command)
+        {
+            var response = await _mediator.Send(command);
+            if (response.Status.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpPost(ApiRoutes.SupplierEndpoints.ADD_UPDATE_SUPPLIER_TYPE)]
+        public async Task<ActionResult> ADD_UPDATE_SUPPLIER_TYPE([FromBody] AddUpdateSuppliertypeCommand command)
+        {
+            var response = await _mediator.Send(command);
+            if (response.Status.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+        }
+        [HttpPost(ApiRoutes.SupplierEndpoints.ADD_UPDATE_TASK_SETUP)]
+        public async Task<ActionResult> ADD_UPDATE_TASK_SETUP([FromBody] AddUpdateTasksetupCommand command)
+        {
+            var response = await _mediator.Send(command);
+            if (response.Status.IsSuccessful)
+                return Ok(response);
+            return BadRequest(response);
+        }
+
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_ALL_TERMS)]
+        public async Task<ActionResult> GET_ALL_TERMS()
+        {
+            var query = new GetAllServiceTermsQuery();
+            return Ok(await _mediator.Send(query)); 
+        }
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_ALL_SUPPLIER_TYPE)]
+        public async Task<ActionResult> GET_ALL_SUPPLIER_TYPE()
+        {
+            var query = new GetAllSupplierTypeQuery();
+            return Ok(await _mediator.Send(query));
+        }
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_ALL_TASK_SETUP)]
+        public async Task<ActionResult> GET_ALL_TASK_SETUP()
+        {
+            var query = new GetAllTaskSetupQuery();
+            return Ok(await _mediator.Send(query));
+        }
+
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_TERMS)]
+        public async Task<ActionResult> GET_TERMS([FromQuery] GetServiceTermsQuery query)
+        {
+            return Ok(await _mediator.Send(query));
+        }
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_SUPPLIER_TYPE)]
+        public async Task<ActionResult> GET_SUPPLIER_TYPE([FromQuery] GetSupplierTypeQuery query)
+        {
+            return Ok(await _mediator.Send(query));
+        }
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_TASK_SETUP)]
+        public async Task<ActionResult> GET_TASK_SETUP([FromQuery] GetTaskSetupQuery query)
+        {
+            return Ok(await _mediator.Send(query));
+        }
+
+
         [HttpGet(ApiRoutes.SupplierEndpoints.GET_ALL_SUPPLIERS)]
         public async Task<ActionResult> GetAllSuppliers()
         {
@@ -244,12 +305,11 @@ namespace Puchase_and_payables.Controllers.V1
             return BadRequest(response);
         }
 
-        [HttpPost(ApiRoutes.SupplierEndpoints.CHECK)]
-        public async Task<ActionResult> CHECK()
+        [HttpGet(ApiRoutes.SupplierEndpoints.GET_AWAITING_APPROVALS)]
+        public async Task<ActionResult> GET_AWAITING_APPROVALS()
         {
-            string wec = "";
-            var response = await _supplierRepository.SupplierInformationAwaitingApprovalAsync(wec); 
-            return Ok(response);
-        }
+            var query = new GetAllSupplierDataAwaitingApprovalQuery();
+            return Ok(await _mediator.Send(query));
+        } 
     }
 }

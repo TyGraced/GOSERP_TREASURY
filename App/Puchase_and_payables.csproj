@@ -29,7 +29,6 @@
     <PackageReference Include="EPPlus" Version="5.1.2" />
     <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="8.6.2" />
-    <PackageReference Include="MailKit" Version="2.6.0" />
     <PackageReference Include="MediatR" Version="8.0.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.4" />
@@ -42,7 +41,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.5.1" />
-    <PackageReference Include="NLog" Version="4.7.0" />
     <PackageReference Include="Polly" Version="7.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
@@ -52,16 +50,17 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GOSLibraries\GOSLibraries\GOSLibraries.csproj" />
     <ProjectReference Include="..\App.Contracts\Puchase_and_payables.Contracts.csproj" />
     <ProjectReference Include="..\App.Helper\Puchase_and_payables.Helper.csproj" />
   </ItemGroup>
 
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="GOSLibraries">
       <HintPath>..\..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 
   <ItemGroup>

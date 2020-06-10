@@ -10,9 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="GOSLibraries">
-      <HintPath>..\..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\GOSLibraries\GOSLibraries\GOSLibraries.csproj" />
   </ItemGroup>
 
 </Project>

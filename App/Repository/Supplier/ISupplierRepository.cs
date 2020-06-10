@@ -1,4 +1,5 @@
 ﻿using GODP.APIsContinuation.DomainObjects.Supplier;
+using Puchase_and_payables.DomainObjects.Supplier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,5 +43,26 @@ namespace GODP.APIsContinuation.Repository.Interface
         Task<IEnumerable<cor_supplier>> SupplierInformationAwaitingApprovalAsync(string userName);
         //Task<int> GoForApprovalAsync(ApprovalReq req);
         Task<bool> UploadSupplierListAsync(byte[] record, string createdBy);
+
+
+        //.........................
+        Task<bool> AddUpdateTaskSetupAsync(cor_tasksetup model);
+        Task<cor_tasksetup> GetTaskSetupAsync(int taskSetupId);
+        Task<IEnumerable<cor_tasksetup>> GetAllTaskSetupAsync();
+        Task<bool> DeleteTaskSetupAsync(cor_tasksetup model);
+
+
+        Task<bool> AddUpdateSeviceTermAsync(cor_serviceterms model);
+        Task<cor_serviceterms> GetServiceTermsAsync(int serviceTermsId);
+        Task<IEnumerable<cor_serviceterms>> GetAllServiceTermsAsync();
+        Task<bool> DeleteServiceTermsAsync(cor_serviceterms model);
+
+
+        Task<bool> AddUpdateSupplierTypeAsync(cor_suppliertype model);
+        Task<cor_suppliertype> GetSupplierTypeAsync(int serviceTermsId);
+        Task<IEnumerable<cor_suppliertype>> GetAllSupplierTypeAsync();
+        Task<bool> DeleteSupplierTypeAsync(cor_suppliertype model);
+
+        Task<IEnumerable<cor_supplier>> GetSupplierDataAwaitingApprovalAsync(List<int> SupplierIds);
     }
 }

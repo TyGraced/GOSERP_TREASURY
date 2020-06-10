@@ -18,6 +18,7 @@ namespace GODP.APIsContinuation.DomainObjects.Supplier
         [StringLength(250)]
         public string SupplierTypeName { get; set; }
 
+        public int GL { get; set; }
         public bool? Active { get; set; }
 
         public bool? Deleted { get; set; }

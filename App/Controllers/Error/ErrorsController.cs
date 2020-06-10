@@ -1,5 +1,6 @@
 ﻿using GOSLibraries;
 using GOSLibraries.GOS_API_Response;
+using GOSLibraries.GOS_Error_logger;
 using GOSLibraries.GOS_Error_logger.Service;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;

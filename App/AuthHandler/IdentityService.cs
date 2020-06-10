@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System; 
+using System;
 using System.Text;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 using Polly.Retry;
 using Polly;
 using System.Net.Http;
-using Newtonsoft.Json; 
-using System.Net.Http.Headers; 
-using Microsoft.AspNetCore.Http; 
-using Puchase_and_payables.AuthHandler;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Http;
 using GOSLibraries.GOS_Financial_Identity;
 using GOSLibraries.Options;
 using Puchase_and_payables.Data;
@@ -18,8 +17,9 @@ using Puchase_and_payables.Contracts.V1;
 using GOSLibraries.GOS_API_Response;
 using Puchase_and_payables.Contracts.Response;
 using GOSLibraries;
+using System.Net;
 
-namespace App.AuthHandler.Inplimentation
+namespace Puchase_and_payables.AuthHandler
 {
     public class IdentityService : IIdentityService
     {
@@ -28,7 +28,7 @@ namespace App.AuthHandler.Inplimentation
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly DataContext _dataContext;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILoggerService _logger; 
+        private readonly ILoggerService _logger;
         private readonly AsyncRetryPolicy _retryPolicy;
         private const int maxRetryTimes = 4;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -66,11 +66,25 @@ namespace App.AuthHandler.Inplimentation
                 var buffer = Encoding.UTF8.GetBytes(jsonContent);
                 var byteContent = new ByteArrayContent(buffer);
                 byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var result = await gosGatewayClient.PostAsync(ApiRoutes.Identity.LOGIN, byteContent);
+                var result = await gosGatewayClient.PostAsync(ApiRoutes.Identity.LOGIN.Trim(), byteContent);
 
                 var accountInfo = await result.Content.ReadAsStringAsync();
                 _authResponse = JsonConvert.DeserializeObject<AuthenticationResult>(accountInfo);
-                if(_authResponse.Token != null)
+
+                if (_authResponse == null)
+                {
+
+                    return new AuthenticationResult
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage { FriendlyMessage = "System Error!! Please contact Administrator" }
+                        }
+                    };
+                }
+
+                if (_authResponse.Token != null)
                 {
 
                     return new AuthenticationResult
@@ -92,7 +106,7 @@ namespace App.AuthHandler.Inplimentation
                         }
                     }
                 };
-                
+
 
 
             }
@@ -101,7 +115,7 @@ namespace App.AuthHandler.Inplimentation
                 #region Log error 
                 var errorCode = ErrorID.Generate(4);
                 _logger.Error($"ErrorID : LoginAsync{errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
-               
+
                 return new AuthenticationResult
                 {
 
@@ -143,6 +157,17 @@ namespace App.AuthHandler.Inplimentation
                 }
                 gosGatewayClient.DefaultRequestHeaders.Add("Authorization", authorization);
                 var result = await gosGatewayClient.GetAsync(ApiRoutes.Identity.FETCH_USERDETAILS);
+                if(!result.IsSuccessStatusCode)
+                {
+                    return new UserDataResponseObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage { FriendlyMessage = "Some thing went Wrong!", TechnicalMessage = $"{result.ReasonPhrase}  {(int)result.StatusCode}  {result.Content}" }
+                        }
+                    };
+                }
                 var accountInfo = await result.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<UserDataResponseObj>(accountInfo);
 
@@ -159,7 +184,7 @@ namespace App.AuthHandler.Inplimentation
                     {
                         Message = new APIResponseMessage
                         {
-                            FriendlyMessage = "Error occured!! Please tyr again later",
+                            FriendlyMessage = "Error occured!! Please try again later",
                             MessageId = errorCode,
                             TechnicalMessage = $"ErrorID : LoginAsync{errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}"
                         }

@@ -15,17 +15,28 @@ namespace Puchase_and_payables.Contracts.V1
 
         public static class Identity
         {
-            public const string LOGIN = Base + "/identity/login";
-            public const string REGISTER = Base + "/identity/register";
-            public const string REFRESHTOKEN = Base + "/identity/refresh";
-            public const string CHANGE_PASSWORD = Base + "/identity/changePassword";
-            public const string CONFIRM_EMAIL = Base + "/identity/confirmEmail";
-            public const string FETCH_USERDETAILS = Base + "/identity/profile";
-            public const string CONFIRM_CODE = Base + "/identity/confirmCode";
+            public const string LOGIN = "/identity/login";
+            public const string FETCH_USERDETAILS = "/identity/profile"; //Base + "/identity/profile"; 
+        }
+
+        public static  class Workflow
+        {
+            public const string APPROVAL = Base + "/workflow/goThroughApproval";
+            public const string GET_ALL_STAFF_AWAITING_APPROVALS = "/workflow/get/all/staffAwaitingApprovals";
         }
 
         public static class SupplierEndpoints
         {
+            public const string ADD_UPDATE_TERMS = Base + "/supplier/add/update/serviceTerm";
+            public const string ADD_UPDATE_SUPPLIER_TYPE = Base + "/supplier/add/update/supplierType";
+            public const string ADD_UPDATE_TASK_SETUP = Base + "/supplier/add/update/taskSetup";
+            public const string GET_ALL_TERMS = Base + "/supplier/get/all/serviceTerm";
+            public const string GET_ALL_SUPPLIER_TYPE = Base + "/supplier/get/all/supplierType";
+            public const string GET_ALL_TASK_SETUP = Base + "/supplier/get/all/taskSetup";
+            public const string GET_TERMS = Base + "/supplier/get/single/serviceTerm/serviceTermId";
+            public const string GET_SUPPLIER_TYPE = Base + "/supplier/single/all/supplierType/supplierTypeId";
+            public const string GET_TASK_SETUP = Base + "/supplier/get/single/taskSetup/taskSetupId";
+
             public const string UPDATE_SUPPLIER = Base + "/supplier/add/update/supplier";
             public const string GET_ALL_SUPPLIERS = Base + "/supplier/get/all/supplers";
             public const string GET_SUPPLIER = Base + "/supplier/get/single/supplerId";
@@ -56,7 +67,7 @@ namespace Puchase_and_payables.Contracts.V1
             public const string GET_SUPPLIER_TOP_CLIENT = Base + "/supplier/get/single/topClientId";
             public const string DELETE_SUPPLIER_TOP_CLIENT = Base + "/supplier/delete/topClient/targetIds";
 
-            public const string CHECK = Base + "/supplier/delete/topClient/check";
+            public const string GET_AWAITING_APPROVALS = Base + "/supplier/gel/all/awaitingAprovals";
         }
 
     }
