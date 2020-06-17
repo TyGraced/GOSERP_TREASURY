@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
-using Puchase_and_payables.Data;
+using PPE.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Puchase_and_payables.Installers;
+using PPE.Installers;
 using System.IO;
 using NLog;
 using GOSLibraries.Options;
 
-namespace Puchase_and_payables
+namespace PPE
 {
     public class Startup
     {

@@ -9,17 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\**" />
     <Compile Remove="MailHandler\**" />
+    <Content Remove="Data\Migrations\**" />
     <Content Remove="MailHandler\**" />
+    <EmbeddedResource Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="MailHandler\**" />
+    <None Remove="Data\Migrations\**" />
     <None Remove="MailHandler\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Data\Migrations\20200515015957_ExtendedIdentityUser.cs" />
-    <Compile Remove="Data\Migrations\20200515015957_ExtendedIdentityUser.Designer.cs" />
-    <Compile Remove="Data\Migrations\20200602011132_SupplierObj.cs" />
-    <Compile Remove="Data\Migrations\20200602011132_SupplierObj.Designer.cs" />
   </ItemGroup>
 
 
@@ -41,6 +38,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.5.1" />
+    <PackageReference Include="NLog" Version="4.7.2" />
     <PackageReference Include="Polly" Version="7.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.4.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
@@ -50,9 +48,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GOSLibraries\GOSLibraries\GOSLibraries.csproj" />
-    <ProjectReference Include="..\App.Contracts\Puchase_and_payables.Contracts.csproj" />
-    <ProjectReference Include="..\App.Helper\Puchase_and_payables.Helper.csproj" />
+    <ProjectReference Include="..\App.Contracts\PPE.Contracts.csproj" />
   </ItemGroup>
 
 
@@ -64,7 +60,15 @@
 
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
+    <Folder Include="Repository\" />
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="GOSLibraries">
+      <HintPath>..\..\GOSLibraries\GOSLibraries\bin\Debug\netstandard2.0\GOSLibraries.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

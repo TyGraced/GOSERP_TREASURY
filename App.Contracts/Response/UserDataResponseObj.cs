@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text; 
 
-namespace Puchase_and_payables.Contracts.Response
+namespace PPE.Contracts.Response
 {
     public class UserDataResponseObj
     {

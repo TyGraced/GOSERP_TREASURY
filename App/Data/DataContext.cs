@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using GODP.APIsContinuation.DomainObjects.Supplier;
-using Puchase_and_payables.DomainObjects.Supplier;
 
-namespace Puchase_and_payables.Data
+namespace PPE.Data
 {
     public class DataContext : DbContext
     {
@@ -16,15 +14,7 @@ namespace Puchase_and_payables.Data
         {
         }
 
-        public DbSet<cor_supplier> cor_supplier { get; set; }
-        public DbSet<cor_supplierauthorization> cor_supplierauthorization { get; set; }
-        public DbSet<cor_supplierbusinessowner> cor_supplierbusinessowner { get; set; }
-        public DbSet<cor_supplierdocument> cor_supplierdocument { get; set; }
-        public DbSet<cor_suppliertype> cor_suppliertype { get; set; }
-        public DbSet<cor_topclient> cor_topclient { get; set; }
-        public DbSet<cor_topsupplier> cor_topsupplier { get; set; }
-        public DbSet<cor_tasksetup> cor_tasksetup { get; set; }
-        public DbSet<cor_serviceterms> cor_serviceterms { get; set; } 
+      
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

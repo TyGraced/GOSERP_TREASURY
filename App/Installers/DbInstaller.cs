@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Puchase_and_payables.Data;
+using PPE.Data;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -7,11 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Puchase_and_payables.DomainObjects.Auth;
-using GODP.APIsContinuation.Repository.Inplimentation;
-using GODP.APIsContinuation.Repository.Interface;
+using PPE.DomainObjects.Auth;
 
-namespace Puchase_and_payables.Installers
+namespace PPE.Installers
 {
     public class DbInstaller : IInstaller
     { 
@@ -21,7 +19,6 @@ namespace Puchase_and_payables.Installers
                    options.UseSqlServer(
                        configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped<ISupplierRepository, SupplierRepository>();
             services.AddDefaultIdentity<ApplicationUser>(opt =>
             {
                 opt.Password.RequiredLength = 5;

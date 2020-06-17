@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,7 +10,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GOSLibraries\GOSLibraries\GOSLibraries.csproj" />
+    <Folder Include="Commands\" />
+    <Folder Include="Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="GOSLibraries">
+      <HintPath>..\..\GOSLibraries\GOSLibraries\bin\Debug\netstandard2.0\GOSLibraries.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

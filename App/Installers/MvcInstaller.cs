@@ -12,12 +12,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using FluentValidation.AspNetCore;
 using System;
 using GOSLibraries;
-using Puchase_and_payables.AuthHandler;
+using PPE.AuthHandler;
 using System.Net.Http.Headers;
 using GOSLibraries.GOS_Error_logger.Service;
 using GOSLibraries.Options;
 
-namespace Puchase_and_payables.Installers
+namespace PPE.Installers
 {
     public class MvcInstaller : IInstaller
     {
@@ -66,7 +66,7 @@ namespace Puchase_and_payables.Installers
             services.AddHttpClient("GOSDEFAULTGATEWAY", client =>
             {
               // client.BaseAddress = new Uri("http://localhost:59798/");
-              client.BaseAddress = new Uri("http://104.238.103.48:70/"); 
+               client.BaseAddress = new Uri("http://104.238.103.48:70/");
                client.DefaultRequestHeaders.Accept.Clear();
                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -92,7 +92,7 @@ namespace Puchase_and_payables.Installers
             {
                 x.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Purchases and Payables Cloud",
+                    Title = "PPE Cloud",
                     Version = "V1",
                     Description = "An API to perform business automated operations",
                     TermsOfService = new Uri("http://www.godp.co.uk/"),

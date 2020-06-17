@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net; 
 
-namespace Puchase_and_payables.Controllers.Error
+namespace PPE.Controllers.Error
 {
     [Route("/errors")]
     [ApiController]

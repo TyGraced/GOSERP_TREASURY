@@ -3,10 +3,10 @@ using GOSLibraries.GOS_API_Response;
 using GOSLibraries.GOS_Error_logger.Service;
 using GOSLibraries.GOS_Financial_Identity; 
 using Microsoft.AspNetCore.Mvc;
-using Puchase_and_payables.AuthHandler;
-using Puchase_and_payables.Contracts.V1;
+using PPE.AuthHandler;
+using PPE.Contracts.V1;
 
-namespace Puchase_and_payables.Controllers.V1
+namespace PPE.Controllers.V1
 {
     public class IdentityController : Controller
     {

@@ -1,10 +1,10 @@
 ﻿using GOSLibraries.GOS_Financial_Identity;
 using Microsoft.AspNetCore.Http;
-using Puchase_and_payables.Contracts.Response;
+using PPE.Contracts.Response;
 using System;
 using System.Threading.Tasks;
 
-namespace Puchase_and_payables.AuthHandler
+namespace PPE.AuthHandler
 {
     public interface IIdentityService
     {

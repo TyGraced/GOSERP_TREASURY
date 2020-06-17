@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Puchase_and_payables.DomainObjects.Auth
+namespace PPE.DomainObjects.Auth
 {
     public class ConfirmEmailCode
     {

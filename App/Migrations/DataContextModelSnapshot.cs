@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Puchase_and_payables.Data;
+using PPE.Data;
 
-namespace Puchase_and_payables.Migrations
+namespace PPE.Migrations
 {
     [DbContext(typeof(DataContext))]
     partial class DataContextModelSnapshot : ModelSnapshot
@@ -457,7 +457,7 @@ namespace Puchase_and_payables.Migrations
                     b.ToTable("cor_topsupplier");
                 });
 
-            modelBuilder.Entity("Puchase_and_payables.DomainObjects.Supplier.cor_serviceterms", b =>
+            modelBuilder.Entity("PPE.DomainObjects.Supplier.cor_serviceterms", b =>
                 {
                     b.Property<int>("ServiceTermsId")
                         .ValueGeneratedOnAdd()
@@ -496,7 +496,7 @@ namespace Puchase_and_payables.Migrations
                     b.ToTable("cor_serviceterms");
                 });
 
-            modelBuilder.Entity("Puchase_and_payables.DomainObjects.Supplier.cor_tasksetup", b =>
+            modelBuilder.Entity("PPE.DomainObjects.Supplier.cor_tasksetup", b =>
                 {
                     b.Property<int>("TaskSetupId")
                         .ValueGeneratedOnAdd()

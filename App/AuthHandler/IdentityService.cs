@@ -11,15 +11,15 @@ using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using GOSLibraries.GOS_Financial_Identity;
 using GOSLibraries.Options;
-using Puchase_and_payables.Data;
+using PPE.Data;
 using GOSLibraries.GOS_Error_logger.Service;
-using Puchase_and_payables.Contracts.V1;
+using PPE.Contracts.V1;
 using GOSLibraries.GOS_API_Response;
-using Puchase_and_payables.Contracts.Response;
+using PPE.Contracts.Response;
 using GOSLibraries;
 using System.Net;
 
-namespace Puchase_and_payables.AuthHandler
+namespace PPE.AuthHandler
 {
     public class IdentityService : IIdentityService
     {
