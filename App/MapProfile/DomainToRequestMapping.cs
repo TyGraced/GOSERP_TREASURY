@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using PPE.Contracts.Response;
+using PPE.DomainObjects.PPE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,8 @@ namespace PPE.MapProfile
     {
         public DomainToRequestMapping()
         {
-
+            CreateMap<ppe_additionform, AdditionFormObj>();
+            CreateMap<ppe_assetclassification, AssetClassificationObj>();
         }
     }
 }

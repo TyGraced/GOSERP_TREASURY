@@ -60,14 +60,13 @@
 
 
   <ItemGroup>
-    <Folder Include="Repository\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
 
   <ItemGroup>
     <Reference Include="GOSLibraries">
-      <HintPath>..\..\GOSLibraries\GOSLibraries\bin\Debug\netstandard2.0\GOSLibraries.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
     </Reference>
   </ItemGroup>
 

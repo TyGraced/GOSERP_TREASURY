@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using PPE.DomainObjects.Auth;
+using PPE.Repository.Interface;
+using PPE.Repository.Implement;
 
 namespace PPE.Installers
 {
@@ -18,6 +20,10 @@ namespace PPE.Installers
             services.AddDbContext<DataContext>(options =>
                    options.UseSqlServer(
                        configuration.GetConnectionString("DefaultConnection")));
+
+
+            services.AddScoped<IAssetClassificationService, AssetClassificationService>();
+            services.AddScoped<IAdditionService, AdditionService>();
 
             services.AddDefaultIdentity<ApplicationUser>(opt =>
             {
