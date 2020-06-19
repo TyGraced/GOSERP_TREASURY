@@ -14,6 +14,8 @@ namespace PPE.MapProfile
         {
             CreateMap<ppe_additionform, AdditionFormObj>();
             CreateMap<ppe_assetclassification, AssetClassificationObj>();
+            CreateMap<ppe_reassessment, ReassessmentObj>();
+            CreateMap<ppe_register, RegisterObj>();
         }
     }
 }

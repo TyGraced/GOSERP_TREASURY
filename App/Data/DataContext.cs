@@ -14,6 +14,8 @@ namespace PPE.Data
             : base(options) { }
         public DbSet<ppe_assetclassification> ppe_assetclassification { get; set; }
         public DbSet<ppe_additionform> ppe_additionform { get; set; }
+        public DbSet<ppe_reassessment> ppe_reassessment { get; set; }
+        public DbSet<ppe_register> ppe_register { get; set; }
 
       
 

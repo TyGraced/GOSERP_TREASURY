@@ -45,6 +45,25 @@ namespace PPE.Contracts.V1
             public const string UPLOAD_ASSETCLASSIFICATION = Base + "/assetclassification/upload/assetclassification";
         }
 
+        public class Reassessment
+        {
+            public const string ADD_UPDATE_REASSESSMENT = Base + "/reassessment/add/update/reassessment";
+            public const string GET_ALL_REASSESSMENT = Base + "/reassessment/get/all/reassessment";
+            public const string GET_REASSESSMENT_BY_ID = Base + "/reassessment/get/reassessmentbyid";
+            public const string DELETE_REASSESSMENT = Base + "/reassessment/delete/reassessment";
+            public const string DOWNLOAD_REASSESSMENT = Base + "/reassessment/download/reassessment";
+            public const string UPLOAD_REASSESSMENT = Base + "/reassessment/upload/reassessment";
+        }
+
+        public class Register
+        {
+            public const string ADD_UPDATE_REGISTER = Base + "/register/add/update/register";
+            public const string GET_ALL_REGISTER = Base + "/register/get/all/register";
+            public const string GET_REGISTER_BY_ID = Base + "/register/get/registerbyid";
+            public const string DELETE_REGISTER = Base + "/register/delete/register";
+            public const string DOWNLOAD_REGISTER = Base + "/register/download/register";
+            public const string UPLOAD_REGISTER = Base + "/register/upload/register";
+        }
 
 
     }
