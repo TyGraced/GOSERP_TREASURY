@@ -1,8 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GOSLibraries.Enums;
+using GOSLibraries.GOS_API_Response;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OfficeOpenXml;
+using PPE.AuthHandler;
+using PPE.Contracts.Response;
 using PPE.Data;
+using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,14 +25,24 @@ namespace PPE.Repository.Implement
     public class AdditionService : IAdditionService
     {
         private readonly DataContext _dataContext;
-        public AdditionService(DataContext dataContext)
+        private readonly IIdentityService _identityService;
+        private readonly IIdentityServerRequest _serverRequest;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public AdditionService(DataContext dataContext,
+            IIdentityService identityService,
+            IIdentityServerRequest serverRequest,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dataContext = dataContext;
+            _httpContextAccessor = httpContextAccessor;
+            _serverRequest = serverRequest;
+            _identityService = identityService;
         }
-        public async Task<bool> AddUpdateAdditionAsync(ppe_additionform model)
+        public async Task<AdditionFormRegRespObj> AddUpdateAdditionAsync(ppe_additionform model)
         {
             try
             {
+                var user = await _identityService.UserDataAsync();
 
                 if (model.AdditionFormId > 0)
                 {
@@ -30,13 +50,98 @@ namespace PPE.Repository.Implement
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else
+                {
                     await _dataContext.ppe_additionform.AddAsync(model);
-                return await _dataContext.SaveChangesAsync() > 0;
+                }
+                await _dataContext.SaveChangesAsync();
+
+                GoForApprovalRequest wfRequest = new GoForApprovalRequest
+                {
+                    Comment = "PPE Addition",
+                    OperationId = (int)OperationsEnum.PPEAdditionApproval,
+                    TargetId = model.AdditionFormId,
+                    ApprovalStatus = (int)ApprovalStatus.Pending,
+                    DeferredExecution = true,
+                    StaffId = user.StaffId,
+                    CompanyId = 1,
+                    EmailNotification = true,
+                    ExternalInitialization = false,
+                    StatusId = (int)ApprovalStatus.Processing,
+                };
+                var result = await _serverRequest.GotForApprovalAsync(wfRequest);
+
+                using(var _trans = _dataContext.Database.BeginTransaction())
+                {
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        new AdditionFormRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = false,
+                                Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" }
+                            }
+                        };
+                    }
+
+                    var stringData = await result.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<GoForApprovalRespObj>(stringData);
+
+
+                    if (res.ApprovalProcessStarted)
+                    {
+                        model.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                        model.WorkflowToken = res.Status.CustomToken;
+
+                        
+
+                        await _trans.CommitAsync();
+                        return new AdditionFormRegRespObj
+                        {
+                            AdditionFormId  = res.TargetId,
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+
+                    if (res.EnableWorkflow || !res.HasWorkflowAccess)
+                    {
+                        await _trans.RollbackAsync();
+                        return new AdditionFormRegRespObj
+                        { 
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+                    if (!res.EnableWorkflow)
+                    {
+                       
+                        await _trans.CommitAsync();
+                        return new AdditionFormRegRespObj
+                        {
+                            AdditionFormId = model.AdditionFormId,
+                            Status = res.Status
+                        };
+                    }
+                     
+                }
+
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+            return new AdditionFormRegRespObj
+            {
+                AdditionFormId = model.AdditionFormId,
+                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred" } }
+            };
         }
 
         public async Task<bool> DeleteAdditionAsync(int id)
@@ -182,6 +287,281 @@ namespace PPE.Repository.Implement
                 }
             }
             return fileBytes;
+        }
+
+        public async Task<StaffApprovalRegRespObj> AdditionStaffApprovals(StaffApprovalObj request)
+        {
+            try
+            {
+                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var user = await _serverRequest.UserDataAsync();
+
+                var currentItem = await _dataContext.ppe_additionform.FindAsync(request.TargetId);
+                
+                var details =  new cor_approvaldetail
+                {
+                    Comment = request.ApprovalComment,
+                    Date = DateTime.Today,
+                    StatusId = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    StaffId = user.StaffId,
+                    WorkflowToken = currentItem.WorkflowToken
+                };
+
+                var req = new IndentityServerApprovalCommand
+                {
+                    ApprovalComment = request.ApprovalComment,
+                    ApprovalStatus = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    WorkflowToken = currentItem.WorkflowToken,
+                };
+
+                using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var result = await _serverRequest.StaffApprovalRequestAsync(req);
+
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = false,
+                                    Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                                }
+                            };
+                        }
+
+                        var stringData = await result.Content.ReadAsStringAsync();
+                        var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
+
+                        if (!response.Status.IsSuccessful)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = response.Status
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Processing)
+                        {
+                            await  _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Processing,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Revert)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Revert,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Approved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+
+                            var regiister = new ppe_register
+                            {
+                                Active = true,
+                                AssetClassificationId = currentItem.AssetClassificationId,
+                                Cost = currentItem.Cost,
+                                CreatedBy = user.UserName,
+                                DateOfPurchaase = currentItem.DateOfPurchase,
+                                Description = currentItem.Description,
+                                Location = currentItem.Location,
+                                LpoNumber = currentItem.LpoNumber,
+                                Quantity = currentItem.Quantity, 
+                            };
+
+                            await AddUpdateRegisterAsync(regiister);
+
+                            await _trans.CommitAsync();
+
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Approved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Disapproved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Disapproved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _trans.RollbackAsync();
+                        throw ex;
+                    }
+                    finally { await _trans.DisposeAsync(); }
+
+                }
+
+                return new StaffApprovalRegRespObj
+                {
+                    ResponseId = request.TargetId,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> AddUpdateRegisterAsync(ppe_register model)
+        {
+            try
+            {
+                if (model.RegisterId > 0)
+                {
+                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                }
+                else
+                    await _dataContext.ppe_register.AddAsync(model);
+                return await _dataContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens)
+        {
+            var item = await _dataContext.ppe_additionform.Where(s => additonIds.Contains(s.AdditionFormId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+            return item;
+        }
+
+        public async Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync()
+        {
+            try
+            {
+                var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
+                if (!result.IsSuccessStatusCode)
+                {
+                    return new AdditionFormRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" }
+                        }
+                    };
+                }
+
+                var data = await result.Content.ReadAsStringAsync();
+                var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
+
+                if (res == null)
+                {
+                    return new AdditionFormRespObj
+                    {
+                        Status = res.Status
+                    };
+                }
+
+                if (res.workflowTasks.Count() < 1)
+                {
+                    return new AdditionFormRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = true,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "No Pending Approval"
+                            }
+                        }
+                    };
+
+                }
+                var addition = await GetAdditionAwaitingApprovals(res.workflowTasks.Select(x => x.TargetId).ToList(), res.workflowTasks.Select(d => d.WorkflowToken).ToList());
+
+
+                return new AdditionFormRespObj
+                {
+                    AdditionForms = addition.Select(a => new AdditionFormObj
+                    {
+                        LpoNumber = a.LpoNumber,
+                        DateOfPurchase = a.DateOfPurchase,
+                        Description = a.Description,
+                        Quantity = a.Quantity,
+                        Cost = a.Cost,
+                        AssetClassificationId = a.AssetClassificationId,
+                        SubGlAddition = a.SubGlAddition,
+                        DepreciationStartDate = a.DepreciationStartDate,
+                        UsefulLife = a.UsefulLife,
+                        ResidualValue = a.ResidualValue,
+                        Location = a.Location,
+                        
+                    }).ToList(),
+                    Status = new APIResponseStatus
+                    {
+                        IsSuccessful = true,
+                        Message = new APIResponseMessage
+                        {
+                            FriendlyMessage = addition.Count() < 1 ? "No addition detail awaiting approvals" : null
+                        }
+                    }
+                };
+            }
+            catch (SqlException ex)
+            {
+                throw ex;
+            }
         }
     }
 }

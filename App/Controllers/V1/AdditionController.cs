@@ -4,11 +4,14 @@ using GOSLibraries.GOS_Error_logger.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Contracts.V1;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,13 +28,21 @@ namespace PPE.Controllers.V1
         private readonly IIdentityService _identityService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILoggerService _logger;
-        public AdditionController(IAdditionService additionService, IMapper mapper, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, ILoggerService logger)
+        private readonly IIdentityServerRequest _serverRequest;
+        public AdditionController(
+            IAdditionService additionService,
+            IMapper mapper,
+            IIdentityService identityService,
+            IHttpContextAccessor httpContextAccessor,
+            IIdentityServerRequest serverRequest,
+            ILoggerService logger)
         {
             _mapper = mapper;
             _repo = additionService;
             _identityService = identityService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _serverRequest = serverRequest;
         }
 
         [HttpGet(ApiRoutes.Addition.GET_ALL_ADDITION)]
@@ -108,11 +119,11 @@ namespace PPE.Controllers.V1
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.AdditionFormId > 0 ? DateTime.Today : DateTime.Today;
 
-                var isDone = await _repo.AddUpdateAdditionAsync(domainObj);
+                var res = await _repo.AddUpdateAdditionAsync(domainObj);
                 return new AdditionFormRegRespObj
                 {
                     AdditionFormId = domainObj.AdditionFormId,
-                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
+                    Status = res.Status,
                 };
             }
             catch (Exception ex)
@@ -190,5 +201,148 @@ namespace PPE.Controllers.V1
                 };
             }
         }
+
+        [HttpPost(ApiRoutes.Addition.ADDITION_STAFF_APPROVAL)]
+        public async Task<IActionResult> AdditionStaffApproval([FromBody]StaffApprovalObj request)
+        {
+            try
+            {
+                if (request.TargetId < 1 || request.ApprovalStatus < 1 || string.IsNullOrEmpty(request.ApprovalComment))
+                {
+                    return BadRequest(new StaffApprovalRegRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "All Fields are required for this approval"
+                            }
+                        }
+                    });
+                }
+                var res = await _repo.AdditionStaffApprovals(request);
+                if (!res.Status.IsSuccessful) return BadRequest(res);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+        }
+
+        [HttpGet(ApiRoutes.Addition.ADDITION_STAFF_APPROVAL_AWAITNG)]
+        public async Task<IActionResult> GetCurrentStaffAdditionawaittingAprovals()
+        {
+
+            try
+            {
+                var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
+                if (!result.IsSuccessStatusCode)
+                {
+                    var data1 = await result.Content.ReadAsStringAsync();
+                    var res1 = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data1);
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}"
+                            }
+                        }
+                    });
+                }
+
+                var data = await result.Content.ReadAsStringAsync();
+                var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
+
+                if (res == null)
+                {
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = res.Status
+                    });
+                }
+
+                if (res.workflowTasks.Count() < 1)
+                {
+                    return Ok(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = true,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "No Pending Approval"
+                            }
+                        }
+                    });
+                }
+                var additions = await _repo.GetAdditionAwaitingApprovals(res.workflowTasks.Select(x =>
+                 x.TargetId).ToList(), res.workflowTasks.Select(s =>
+                 s.WorkflowToken).ToList());
+
+
+                return Ok(new AdditionFormRespObj
+                {
+                    AdditionForms = additions.Select(d => new AdditionFormObj
+                    {
+                        AdditionFormId = d.AdditionFormId,
+                        Active = d.Active,
+                        AssetClassificationId = d.AssetClassificationId,
+                        Cost = d.Cost,
+                        DateOfPurchase = d.DateOfPurchase,
+                        DepreciationStartDate = d.DepreciationStartDate,
+                        Description = d.Description,
+                        Quantity = d.Quantity,
+                        Location = d.Location,
+                        LpoNumber = d.LpoNumber,
+                        ResidualValue = d.ResidualValue,
+                        SubGlAddition = d.SubGlAddition,
+                        UsefulLife = d.UsefulLife
+                    }).ToList(),
+                    Status = new APIResponseStatus
+                    {
+                        IsSuccessful = true,
+                        Message = new APIResponseMessage
+                        {
+                            FriendlyMessage = additions.Count() < 1 ? "No AdditionForm  awaiting approvals" : null
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
+
+        }
+
+        [HttpGet(ApiRoutes.Addition.GET_AWAITING_APPROVAL_LIST)]
+        public async Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync()
+        {
+            try
+            {
+                return await _repo.GetAdditionForAppraisalAsync();
+
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new AdditionFormRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
     }
 }
+
+

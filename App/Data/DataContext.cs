@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 
 namespace PPE.Data
@@ -12,6 +13,8 @@ namespace PPE.Data
         }
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }
+
+        public DbSet<cor_approvaldetail> cor_approvaldetail { get; set; }
         public DbSet<ppe_assetclassification> ppe_assetclassification { get; set; }
         public DbSet<ppe_additionform> ppe_additionform { get; set; }
         public DbSet<ppe_reassessment> ppe_reassessment { get; set; }

@@ -21,8 +21,11 @@ namespace PPE.Contracts.V1
 
         public static  class Workflow
         {
-            public const string APPROVAL = Base + "/workflow/goThroughApproval";
-            public const string GET_ALL_STAFF_AWAITING_APPROVALS = "/workflow/get/all/staffAwaitingApprovals";
+
+            public const string GO_FOR_APPROVAL = "/workflow/goThroughApprovalFromCode";
+            public const string GET_ALL_STAFF_AWAITING_APPROVALS = "/workflow/get/all/staffAwaitingApprovalsFromCode";
+            public const string STAFF_APPROVAL_REQUEST = "/workflow/staff/approvaltask";
+            public const string GET_ALL_STAFF = "/admin/get/all/staff";
         }
 
         public class Addition
@@ -33,6 +36,10 @@ namespace PPE.Contracts.V1
             public const string DELETE_ADDITION = Base + "/addition/delete/addition";
             public const string DOWNLOAD_ADDITION = Base + "/addition/download/addition";
             public const string UPLOAD_ADDITION = Base + "/addition/upload/addition";
+
+            public const string ADDITION_STAFF_APPROVAL = Base + "/addition/staff/approval/request";
+            public const string ADDITION_STAFF_APPROVAL_AWAITNG = Base + "/addition/get/all/staff/awaiting/approvals";
+            public const string GET_AWAITING_APPROVAL_LIST = Base + "/addition/get/awaiting/approval/list";
         }
 
         public class AssetClassification
@@ -63,6 +70,9 @@ namespace PPE.Contracts.V1
             public const string DELETE_REGISTER = Base + "/register/delete/register";
             public const string DOWNLOAD_REGISTER = Base + "/register/download/register";
             public const string UPLOAD_REGISTER = Base + "/register/upload/register";
+
+            public const string REGISTER_STAFF_APPROVAL = Base + "/register/staff/approval/request";
+            public const string REGISTER_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/awaiting/approvals";
         }
 
 

@@ -1,4 +1,6 @@
-﻿using PPE.DomainObjects.PPE;
+﻿using Microsoft.AspNetCore.Mvc;
+using PPE.Contracts.Response;
+using PPE.DomainObjects.PPE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,7 @@ namespace PPE.Repository.Interface
 {
     public interface IAdditionService
     {
-        Task<bool> AddUpdateAdditionAsync(ppe_additionform model);
+        Task<AdditionFormRegRespObj> AddUpdateAdditionAsync(ppe_additionform model);
 
         Task<bool> DeleteAdditionAsync(int id);
 
@@ -19,5 +21,8 @@ namespace PPE.Repository.Interface
         Task<bool> UploadAdditionAsync(byte[] record, string createdBy);
 
         byte[] GenerateExportAddition();
+        Task<StaffApprovalRegRespObj> AdditionStaffApprovals(StaffApprovalObj request);
+        Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens);
+        Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync();
     }
 }

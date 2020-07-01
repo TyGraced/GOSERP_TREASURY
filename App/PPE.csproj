@@ -58,16 +58,4 @@
     </Reference>
   </ItemGroup>-->
 
-
-  <ItemGroup>
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Reference Include="GOSLibraries">
-      <HintPath>..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

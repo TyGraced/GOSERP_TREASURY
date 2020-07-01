@@ -16,6 +16,8 @@ using PPE.AuthHandler;
 using System.Net.Http.Headers;
 using GOSLibraries.GOS_Error_logger.Service;
 using GOSLibraries.Options;
+using Puchase_and_payables.Requests;
+using PPE.Requests;
 
 namespace PPE.Installers
 {
@@ -41,7 +43,7 @@ namespace PPE.Installers
             };
 
             services.AddSingleton(tokenValidatorParameters);
-              
+            services.AddSingleton<IIdentityServerRequest, IdentityServerRequest>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddSingleton<ILoggerService, LoggerService>();
             services.AddMvc(options =>
@@ -64,8 +66,7 @@ namespace PPE.Installers
             });
 
             services.AddHttpClient("GOSDEFAULTGATEWAY", client =>
-            {
-              // client.BaseAddress = new Uri("http://localhost:59798/");
+            { 
                client.BaseAddress = new Uri("http://104.238.103.48:70/");
                client.DefaultRequestHeaders.Accept.Clear();
                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

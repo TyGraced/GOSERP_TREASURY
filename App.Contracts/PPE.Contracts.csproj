@@ -5,19 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Approvals\**" />
+    <EmbeddedResource Remove="Approvals\**" />
+    <None Remove="Approvals\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GOSLibraries" Version="1.0.0" />
     <PackageReference Include="MediatR" Version="8.0.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="GOSLibraries">
-      <HintPath>..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

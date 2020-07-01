@@ -4,11 +4,13 @@ using GOSLibraries.GOS_Error_logger.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Contracts.V1;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,13 +27,15 @@ namespace PPE.Controllers.V1
         private readonly IIdentityService _identityService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILoggerService _logger;
-        public RegisterController(IRegisterService registerService, IMapper mapper, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, ILoggerService logger)
+        private readonly IIdentityServerRequest _serverRequest;
+        public RegisterController(IRegisterService registerService, IMapper mapper, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, ILoggerService logger, IIdentityServerRequest serverRequest)
         {
             _mapper = mapper;
             _repo = registerService;
             _identityService = identityService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _serverRequest = serverRequest;
         }
 
         [HttpGet(ApiRoutes.Register.GET_ALL_REGISTER)]
@@ -197,5 +201,127 @@ namespace PPE.Controllers.V1
                 };
             }
         }
+
+        //[HttpPost(ApiRoutes.Register.REGISTER_STAFF_APPROVAL)]
+        //public async Task<IActionResult> RegisterStaffApproval([FromBody]StaffApprovalObj request)
+        //{
+        //    try
+        //    {
+        //        if (request.TargetId < 1 || request.ApprovalStatus < 1 || string.IsNullOrEmpty(request.ApprovalComment))
+        //        {
+        //            return BadRequest(new StaffApprovalRegRespObj
+        //            {
+        //                Status = new APIResponseStatus
+        //                {
+        //                    IsSuccessful = false,
+        //                    Message = new APIResponseMessage
+        //                    {
+        //                        FriendlyMessage = "All Fields are required for this approval"
+        //                    }
+        //                }
+        //            });
+        //        }
+        //        var res = await _repo.RegisterStaffApprovals(request);
+        //        if (!res.Status.IsSuccessful) return BadRequest(res);
+        //        return Ok(res);
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        throw ex;
+        //    }
+
+        //}
+
+        //[HttpGet(ApiRoutes.Register.REGISTER_STAFF_APPROVAL_AWAITNG)]
+        //public async Task<IActionResult> GetCurrentStaffRegisterAwaittingAprovals()
+        //{
+
+        //    try
+        //    {
+        //        var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
+        //        if (!result.IsSuccessStatusCode)
+        //        {
+        //            var data1 = await result.Content.ReadAsStringAsync();
+        //            var res1 = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data1);
+        //            return BadRequest(new WorkflowTaskRespObj
+        //            {
+        //                Status = new APIResponseStatus
+        //                {
+        //                    IsSuccessful = false,
+        //                    Message = new APIResponseMessage
+        //                    {
+        //                        FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}"
+        //                    }
+        //                }
+        //            });
+        //        }
+
+        //        var data = await result.Content.ReadAsStringAsync();
+        //        var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
+
+        //        if (res == null)
+        //        {
+        //            return BadRequest(new WorkflowTaskRespObj
+        //            {
+        //                Status = res.Status
+        //            });
+        //        }
+
+        //        if (res.workflowTasks.Count() < 1)
+        //        {
+        //            return Ok(new WorkflowTaskRespObj
+        //            {
+        //                Status = new APIResponseStatus
+        //                {
+        //                    IsSuccessful = true,
+        //                    Message = new APIResponseMessage
+        //                    {
+        //                        FriendlyMessage = "No Pending Approval"
+        //                    }
+        //                }
+        //            });
+        //        }
+        //        var register = await _repo.GetRegisterAwaitingApprovals(res.workflowTasks.Select(x =>
+        //         x.TargetId).ToList(), res.workflowTasks.Select(s =>
+        //         s.WorkflowToken).ToList());
+
+
+        //        return Ok(new RegisterRespObj
+        //        {
+        //            Registers = register.Select(d => new RegisterObj
+        //            {
+        //                RegisterId = d.RegisterId,
+        //                Active = d.Active,
+        //                AssetClassificationId = d.AssetClassificationId,
+        //                Cost = d.Cost,
+        //                DateOfPurchaase = d.DateOfPurchaase,
+        //                DepreciationStartDate = d.DepreciationStartDate,
+        //                Description = d.Description,
+        //                Quantity = d.Quantity,
+        //                Location = d.Location,
+        //                LpoNumber = d.LpoNumber,
+        //                ResidualValue = d.ResidualValue,
+        //                SubGlAddition = d.SubGlAddition,
+        //                UsefulLife = d.UsefulLife
+        //            }).ToList(),
+        //            Status = new APIResponseStatus
+        //            {
+        //                IsSuccessful = true,
+        //                Message = new APIResponseMessage
+        //                {
+        //                    FriendlyMessage = register.Count() < 1 ? "No register  awaiting approvals" : null
+        //                }
+        //            }
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+
+
+
+        //}
     }
 }

@@ -36,5 +36,8 @@ namespace PPE.DomainObjects.PPE
         [StringLength(50)]
         public string UpdatedBy { get; set; }
         public DateTime UpdatedOn { get; set; }
+
+        public int ApprovalStatusId { get; set; }
+        public string WorkflowToken { get; set; }
     }
 }

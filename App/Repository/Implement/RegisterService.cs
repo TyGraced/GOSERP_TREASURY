@@ -1,8 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GOSLibraries.Enums;
+using GOSLibraries.GOS_API_Response;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OfficeOpenXml;
+using PPE.Contracts.Response;
 using PPE.Data;
+using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,9 +22,14 @@ namespace PPE.Repository.Implement
     public class RegisterService : IRegisterService
     {
         private readonly DataContext _dataContext;
-        public RegisterService(DataContext dataContext)
+        private readonly IIdentityServerRequest _serverRequest;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public RegisterService(DataContext dataContext, IIdentityServerRequest serverRequest, IHttpContextAccessor httpContextAccessor)
         {
             _dataContext = dataContext;
+            _serverRequest = serverRequest;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<bool> AddUpdateRegisterAsync(ppe_register model)
         {
@@ -226,5 +238,201 @@ namespace PPE.Repository.Implement
             }
             return fileBytes;
         }
+
+        //public async Task<StaffApprovalRegRespObj> RegisterStaffApprovals(StaffApprovalObj request)
+        //{
+        //    try
+        //    {
+        //        var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+        //        var user = await _serverRequest.UserDataAsync();
+
+        //        var currentItem = await _dataContext.ppe_register.FindAsync(request.TargetId);
+
+        //        var details = new cor_approvaldetail
+        //        {
+        //            Comment = request.ApprovalComment,
+        //            Date = DateTime.Today,
+        //            StatusId = request.ApprovalStatus,
+        //            TargetId = request.TargetId,
+        //            StaffId = user.StaffId,
+        //            WorkflowToken = currentItem.WorkflowToken
+        //        };
+
+        //        var req = new IndentityServerApprovalCommand
+        //        {
+        //            ApprovalComment = request.ApprovalComment,
+        //            ApprovalStatus = request.ApprovalStatus,
+        //            TargetId = request.TargetId,
+        //            WorkflowToken = currentItem.WorkflowToken,
+        //        };
+
+        //        using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+        //        {
+        //            try
+        //            {
+        //                var result = await _serverRequest.StaffApprovalRequestAsync(req);
+
+        //                if (!result.IsSuccessStatusCode)
+        //                {
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        Status = new APIResponseStatus
+        //                        {
+        //                            IsSuccessful = false,
+        //                            Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+        //                        }
+        //                    };
+        //                }
+
+        //                var stringData = await result.Content.ReadAsStringAsync();
+        //                var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
+
+        //                if (!response.Status.IsSuccessful)
+        //                {
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        Status = response.Status
+        //                    };
+        //                }
+        //                if (response.ResponseId == (int)ApprovalStatus.Processing)
+        //                {
+        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
+        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+
+        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+        //                    await _trans.CommitAsync();
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        ResponseId = (int)ApprovalStatus.Processing,
+        //                        Status = new APIResponseStatus
+        //                        {
+        //                            IsSuccessful = true,
+        //                            Message = response.Status.Message
+        //                        }
+        //                    };
+        //                }
+        //                if (response.ResponseId == (int)ApprovalStatus.Revert)
+        //                {
+        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
+        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
+        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+
+        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+        //                    await _trans.CommitAsync();
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        ResponseId = (int)ApprovalStatus.Revert,
+        //                        Status = new APIResponseStatus
+        //                        {
+        //                            IsSuccessful = true,
+        //                            Message =
+        //                    response.Status.Message
+        //                        }
+        //                    };
+        //                }
+        //                if (response.ResponseId == (int)ApprovalStatus.Approved)
+        //                {
+        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
+        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+
+        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+
+        //                    var regiister = new ppe_register
+        //                    {
+        //                        Active = true,
+        //                        AssetClassificationId = currentItem.AssetClassificationId,
+        //                        Cost = currentItem.Cost,
+        //                        CreatedBy = user.UserName,
+        //                        DateOfPurchaase = currentItem.DateOfPurchaase,
+        //                        Description = currentItem.Description,
+        //                        Location = currentItem.Location,
+        //                        LpoNumber = currentItem.LpoNumber,
+        //                        Quantity = currentItem.Quantity,
+        //                    };
+
+        //                    await AddUpdateRegisterAsync(regiister);
+
+        //                    await _trans.CommitAsync();
+
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        ResponseId = (int)ApprovalStatus.Approved,
+        //                        Status = new APIResponseStatus
+        //                        {
+        //                            IsSuccessful = true,
+        //                            Message = response.Status.Message
+        //                        }
+        //                    };
+        //                }
+        //                if (response.ResponseId == (int)ApprovalStatus.Disapproved)
+        //                {
+        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
+        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
+        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+
+        //                    var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
+        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+        //                    await _trans.CommitAsync();
+        //                    return new StaffApprovalRegRespObj
+        //                    {
+        //                        ResponseId = (int)ApprovalStatus.Disapproved,
+        //                        Status = new APIResponseStatus
+        //                        {
+        //                            IsSuccessful = true,
+        //                            Message =
+        //                    response.Status.Message
+        //                        }
+        //                    };
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                await _trans.RollbackAsync();
+        //                throw ex;
+        //            }
+        //            finally { await _trans.DisposeAsync(); }
+
+        //        }
+
+        //        return new StaffApprovalRegRespObj
+        //        {
+        //            ResponseId = request.TargetId,
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        //private async Task<bool> AddUpdateRegisterAsync(ppe_register model)
+        //{
+        //    try
+        //    {
+        //        if (model.RegisterId > 0)
+        //        {
+        //            var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+        //            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+        //        }
+        //        else
+        //            await _dataContext.ppe_register.AddAsync(model);
+        //        return await _dataContext.SaveChangesAsync() > 0;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        //public async Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens)
+        //{
+        //    var item = await _dataContext.ppe_additionform.Where(s => additonIds.Contains(s.AdditionFormId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+        //    return item;
+        //}
     }
 }
