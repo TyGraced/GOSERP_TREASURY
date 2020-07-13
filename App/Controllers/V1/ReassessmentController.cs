@@ -118,6 +118,7 @@ namespace PPE.Controllers.V1
                 domainObj.Quantity = model.Quantity;
                 domainObj.DepreciationStartDate = model.DepreciationStartDate;
                 domainObj.UsefulLife = model.UsefulLife;
+                domainObj.UsefulLife = model.ProposedUsefulLife;
                 domainObj.ResidualValue = model.ResidualValue;
                 domainObj.Location = model.Location;
                 domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;

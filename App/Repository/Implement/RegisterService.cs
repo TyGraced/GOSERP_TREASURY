@@ -247,7 +247,7 @@ namespace PPE.Repository.Implement
                             TimeSpan usedLifeOfAsset = (currentItem.DepreciationStartDate - DateTime.Today);
                             int differenceInDays = usedLifeOfAsset.Days;
                             int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
-                            //int proposedUsefulLife = ;
+                 
                             var reassessment = new ppe_reassessment
                             {
                                 Active = true,

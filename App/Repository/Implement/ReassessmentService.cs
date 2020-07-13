@@ -371,6 +371,7 @@ namespace PPE.Repository.Implement
                                 DepreciationForThePeriod = currentItem.DepreciationForThePeriod,
                                 AccumulatedDepreciation = currentItem.AccumulatedDepreciation,
                                 NetBookValue = currentItem.NetBookValue,
+                                UsefulLife = currentItem.ProposedUsefulLife,
                                 
                             };
 
