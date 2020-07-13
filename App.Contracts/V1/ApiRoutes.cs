@@ -39,7 +39,6 @@ namespace PPE.Contracts.V1
 
             public const string ADDITION_STAFF_APPROVAL = Base + "/addition/staff/approval/request";
             public const string ADDITION_STAFF_APPROVAL_AWAITNG = Base + "/addition/get/all/staff/awaiting/approvals";
-            public const string GET_AWAITING_APPROVAL_LIST = Base + "/addition/get/awaiting/approval/list";
         }
 
         public class AssetClassification
@@ -52,6 +51,18 @@ namespace PPE.Contracts.V1
             public const string UPLOAD_ASSETCLASSIFICATION = Base + "/assetclassification/upload/assetclassification";
         }
 
+        public class Disposal
+        {
+            public const string ADD_UPDATE_DISPOSAL = Base + "/disposal/add/update/disposal";
+            public const string GET_ALL_DISPOSAL = Base + "/disposal/get/all/disposal";
+            public const string GET_DISPOSAL_BY_ID = Base + "/disposal/get/disposalbyid";
+            public const string DELETE_DISPOSAL = Base + "/disposal/delete/disposal";
+            public const string DOWNLOAD_DISPOSAL = Base + "/disposal/download/disposal";
+
+            public const string DISPOSAL_STAFF_APPROVAL = Base + "/disposal/staff/approval/request";
+            public const string DISPOSAL_STAFF_APPROVAL_AWAITNG = Base + "/disposal/get/all/staff/awaiting/approvals";
+        }
+        
         public class Reassessment
         {
             public const string ADD_UPDATE_REASSESSMENT = Base + "/reassessment/add/update/reassessment";
@@ -59,7 +70,9 @@ namespace PPE.Contracts.V1
             public const string GET_REASSESSMENT_BY_ID = Base + "/reassessment/get/reassessmentbyid";
             public const string DELETE_REASSESSMENT = Base + "/reassessment/delete/reassessment";
             public const string DOWNLOAD_REASSESSMENT = Base + "/reassessment/download/reassessment";
-            public const string UPLOAD_REASSESSMENT = Base + "/reassessment/upload/reassessment";
+
+            public const string REASSESSMENT_STAFF_APPROVAL = Base + "/reassessment/staff/approval/request";
+            public const string REASSESSMENT_STAFF_APPROVAL_AWAITNG = Base + "/reassessment/get/all/staff/awaiting/approvals";
         }
 
         public class Register

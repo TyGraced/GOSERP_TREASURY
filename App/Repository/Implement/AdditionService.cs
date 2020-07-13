@@ -11,6 +11,7 @@ using PPE.Contracts.Response;
 using PPE.Data;
 using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
+using PPE.Repository.Implement.Addition;
 using PPE.Repository.Interface;
 using Puchase_and_payables.Requests;
 using System;
@@ -93,7 +94,7 @@ namespace PPE.Repository.Implement
                         model.ApprovalStatusId = (int)ApprovalStatus.Processing;
                         model.WorkflowToken = res.Status.CustomToken;
 
-                        
+                        await _dataContext.SaveChangesAsync();
 
                         await _trans.CommitAsync();
                         return new AdditionFormRegRespObj
@@ -308,7 +309,7 @@ namespace PPE.Repository.Implement
                     WorkflowToken = currentItem.WorkflowToken
                 };
 
-                var req = new IndentityServerApprovalCommand
+                var req = new IdentityServerApprovalCommand
                 {
                     ApprovalComment = request.ApprovalComment,
                     ApprovalStatus = request.ApprovalStatus,
@@ -386,13 +387,25 @@ namespace PPE.Repository.Implement
                         if (response.ResponseId == (int)ApprovalStatus.Approved)
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
-                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
                             currentItem.WorkflowToken = response.Status.CustomToken;
 
                             var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
                             _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
 
-                            var regiister = new ppe_register
+
+                            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue)/currentItem.UsefulLife);
+                            decimal dailyDepreciationCharge = (monthlyDepreciation/30);
+                            var day = DateTime.UtcNow.Date;
+                            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
+                            decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+                            TimeSpan usedLifeOfAsset = (currentItem.DepreciationStartDate - DateTime.Today);
+                            int differenceInDays = usedLifeOfAsset.Days;
+                            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+                            decimal netBookValue = currentItem.Cost * accumulatedDepreciation;
+                            var assetNumber = AssetNumber.Generate();
+
+                            var register = new ppe_register
                             {
                                 Active = true,
                                 AssetClassificationId = currentItem.AssetClassificationId,
@@ -403,9 +416,19 @@ namespace PPE.Repository.Implement
                                 Location = currentItem.Location,
                                 LpoNumber = currentItem.LpoNumber,
                                 Quantity = currentItem.Quantity, 
+                                DepreciationStartDate = currentItem.DepreciationStartDate,
+                                DepreciationForThePeriod = depreciationForThePeriod,
+                                NetBookValue = netBookValue,
+                                AccumulatedDepreciation = accumulatedDepreciation,
+                                UsefulLife = currentItem.UsefulLife,
+                                ResidualValue = currentItem.ResidualValue,
+                                AssetNumber = assetNumber,
+
                             };
 
-                            await AddUpdateRegisterAsync(regiister);
+
+
+                            await AddUpdateRegisterAsync(register);
 
                             await _trans.CommitAsync();
 
@@ -485,83 +508,5 @@ namespace PPE.Repository.Implement
             return item;
         }
 
-        public async Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync()
-        {
-            try
-            {
-                var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
-                if (!result.IsSuccessStatusCode)
-                {
-                    return new AdditionFormRespObj
-                    {
-                        Status = new APIResponseStatus
-                        {
-                            IsSuccessful = false,
-                            Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" }
-                        }
-                    };
-                }
-
-                var data = await result.Content.ReadAsStringAsync();
-                var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
-
-                if (res == null)
-                {
-                    return new AdditionFormRespObj
-                    {
-                        Status = res.Status
-                    };
-                }
-
-                if (res.workflowTasks.Count() < 1)
-                {
-                    return new AdditionFormRespObj
-                    {
-                        Status = new APIResponseStatus
-                        {
-                            IsSuccessful = true,
-                            Message = new APIResponseMessage
-                            {
-                                FriendlyMessage = "No Pending Approval"
-                            }
-                        }
-                    };
-
-                }
-                var addition = await GetAdditionAwaitingApprovals(res.workflowTasks.Select(x => x.TargetId).ToList(), res.workflowTasks.Select(d => d.WorkflowToken).ToList());
-
-
-                return new AdditionFormRespObj
-                {
-                    AdditionForms = addition.Select(a => new AdditionFormObj
-                    {
-                        LpoNumber = a.LpoNumber,
-                        DateOfPurchase = a.DateOfPurchase,
-                        Description = a.Description,
-                        Quantity = a.Quantity,
-                        Cost = a.Cost,
-                        AssetClassificationId = a.AssetClassificationId,
-                        SubGlAddition = a.SubGlAddition,
-                        DepreciationStartDate = a.DepreciationStartDate,
-                        UsefulLife = a.UsefulLife,
-                        ResidualValue = a.ResidualValue,
-                        Location = a.Location,
-                        
-                    }).ToList(),
-                    Status = new APIResponseStatus
-                    {
-                        IsSuccessful = true,
-                        Message = new APIResponseMessage
-                        {
-                            FriendlyMessage = addition.Count() < 1 ? "No addition detail awaiting approvals" : null
-                        }
-                    }
-                };
-            }
-            catch (SqlException ex)
-            {
-                throw ex;
-            }
-        }
     }
 }

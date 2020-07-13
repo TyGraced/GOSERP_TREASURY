@@ -30,7 +30,7 @@ namespace PPE.Contracts.Response
         public APIResponseStatus Status { get; set; }
     }
 
-    public class IndentityServerApprovalCommand
+    public class IdentityServerApprovalCommand
     {
         public int ApprovalStatus { get; set; }
         public string ApprovalComment { get; set; }
@@ -44,6 +44,8 @@ namespace PPE.Contracts.Response
         public int ApprovalStatus { get; set; }
         public string ApprovalComment { get; set; }
         public int TargetId { get; set; }
+        public int ProposedUsefulLife { get; set; }
+
     }
     public class StaffApprovalRegRespObj
     {

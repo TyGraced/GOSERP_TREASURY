@@ -181,7 +181,7 @@ namespace PPE.Requests
                 #endregion
             }
         }
-        public async Task<HttpResponseMessage> StaffApprovalRequestAsync(IndentityServerApprovalCommand request)
+        public async Task<HttpResponseMessage> StaffApprovalRequestAsync(IdentityServerApprovalCommand request)
         {
             var gosGatewayClient = _httpClientFactory.CreateClient("GOSDEFAULTGATEWAY");
             string authorization = _accessor.HttpContext.Request.Headers["Authorization"];

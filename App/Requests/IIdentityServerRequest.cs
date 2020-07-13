@@ -12,7 +12,7 @@ namespace Puchase_and_payables.Requests
     {
         Task<AuthenticationResult> IdentityServerLoginAsync(string userName, string password);
         Task<UserDataResponseObj> UserDataAsync();
-        Task<HttpResponseMessage> StaffApprovalRequestAsync(IndentityServerApprovalCommand request); 
+        Task<HttpResponseMessage> StaffApprovalRequestAsync(IdentityServerApprovalCommand request); 
         Task<HttpResponseMessage> GetAllStaff();
         Task<HttpResponseMessage> GotForApprovalAsync(GoForApprovalRequest  request);
 

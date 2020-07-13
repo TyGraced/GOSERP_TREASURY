@@ -10,6 +10,7 @@ using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Contracts.V1;
 using PPE.DomainObjects.PPE;
+using PPE.Repository.Implement.Addition;
 using PPE.Repository.Interface;
 using Puchase_and_payables.Requests;
 using System;
@@ -51,6 +52,7 @@ namespace PPE.Controllers.V1
         {
             try
             {
+                
                 var response = await _repo.GetAllAdditionAsync();
                 return new AdditionFormRespObj
                 {
@@ -324,24 +326,6 @@ namespace PPE.Controllers.V1
 
         }
 
-        [HttpGet(ApiRoutes.Addition.GET_AWAITING_APPROVAL_LIST)]
-        public async Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync()
-        {
-            try
-            {
-                return await _repo.GetAdditionForAppraisalAsync();
-
-            }
-            catch (Exception ex)
-            {
-                var errorCode = ErrorID.Generate(5);
-                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
-                return new AdditionFormRespObj
-                {
-                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
-                };
-            }
-        }
     }
 }
 

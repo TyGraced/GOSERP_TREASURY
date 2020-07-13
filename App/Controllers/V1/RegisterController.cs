@@ -173,155 +173,126 @@ namespace PPE.Controllers.V1
             };
         }
 
-        [HttpPost(ApiRoutes.Register.UPLOAD_REGISTER)]
-        public async Task<ActionResult<RegisterRegRespObj>> UploadRegisterAsync()
+        [HttpPost(ApiRoutes.Register.REGISTER_STAFF_APPROVAL)]
+        public async Task<IActionResult> RegisterStaffApproval([FromBody]StaffApprovalObj request)
         {
             try
             {
-                var postedFile = _httpContextAccessor.HttpContext.Request.Form.Files["Image"];
-                var fileName = _httpContextAccessor.HttpContext.Request.Form.Files["Image"].FileName;
-                var fileExtention = Path.GetExtension(fileName);
-                var image = new byte[postedFile.Length];
-                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
-
-                var createdBy = _identityService.UserDataAsync().Result.UserName;
-
-                var isDone = await _repo.UploadRegisterAsync(image, createdBy);
-                return new RegisterRegRespObj
+                if (request.TargetId < 1 || request.ApprovalStatus < 1 || string.IsNullOrEmpty(request.ApprovalComment))
                 {
-                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
-                };
+                    return BadRequest(new StaffApprovalRegRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "All Fields are required for this approval"
+                            }
+                        }
+                    });
+                }
+                var res = await _repo.RegisterStaffApprovals(request);
+                if (!res.Status.IsSuccessful) return BadRequest(res);
+                return Ok(res);
             }
             catch (Exception ex)
             {
-                var errorCode = ErrorID.Generate(5);
-                return new RegisterRegRespObj
-                {
-                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
-                };
+
+                throw ex;
             }
+
         }
 
-        //[HttpPost(ApiRoutes.Register.REGISTER_STAFF_APPROVAL)]
-        //public async Task<IActionResult> RegisterStaffApproval([FromBody]StaffApprovalObj request)
-        //{
-        //    try
-        //    {
-        //        if (request.TargetId < 1 || request.ApprovalStatus < 1 || string.IsNullOrEmpty(request.ApprovalComment))
-        //        {
-        //            return BadRequest(new StaffApprovalRegRespObj
-        //            {
-        //                Status = new APIResponseStatus
-        //                {
-        //                    IsSuccessful = false,
-        //                    Message = new APIResponseMessage
-        //                    {
-        //                        FriendlyMessage = "All Fields are required for this approval"
-        //                    }
-        //                }
-        //            });
-        //        }
-        //        var res = await _repo.RegisterStaffApprovals(request);
-        //        if (!res.Status.IsSuccessful) return BadRequest(res);
-        //        return Ok(res);
-        //    }
-        //    catch (Exception ex)
-        //    {
+        [HttpGet(ApiRoutes.Register.REGISTER_STAFF_APPROVAL_AWAITNG)]
+        public async Task<IActionResult> GetCurrentStaffRegisterAwaittingAprovals()
+        {
 
-        //        throw ex;
-        //    }
+            try
+            {
+                var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
+                if (!result.IsSuccessStatusCode)
+                {
+                    var data1 = await result.Content.ReadAsStringAsync();
+                    var res1 = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data1);
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}"
+                            }
+                        }
+                    });
+                }
 
-        //}
+                var data = await result.Content.ReadAsStringAsync();
+                var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
 
-        //[HttpGet(ApiRoutes.Register.REGISTER_STAFF_APPROVAL_AWAITNG)]
-        //public async Task<IActionResult> GetCurrentStaffRegisterAwaittingAprovals()
-        //{
+                if (res == null)
+                {
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = res.Status
+                    });
+                }
 
-        //    try
-        //    {
-        //        var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
-        //        if (!result.IsSuccessStatusCode)
-        //        {
-        //            var data1 = await result.Content.ReadAsStringAsync();
-        //            var res1 = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data1);
-        //            return BadRequest(new WorkflowTaskRespObj
-        //            {
-        //                Status = new APIResponseStatus
-        //                {
-        //                    IsSuccessful = false,
-        //                    Message = new APIResponseMessage
-        //                    {
-        //                        FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}"
-        //                    }
-        //                }
-        //            });
-        //        }
-
-        //        var data = await result.Content.ReadAsStringAsync();
-        //        var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
-
-        //        if (res == null)
-        //        {
-        //            return BadRequest(new WorkflowTaskRespObj
-        //            {
-        //                Status = res.Status
-        //            });
-        //        }
-
-        //        if (res.workflowTasks.Count() < 1)
-        //        {
-        //            return Ok(new WorkflowTaskRespObj
-        //            {
-        //                Status = new APIResponseStatus
-        //                {
-        //                    IsSuccessful = true,
-        //                    Message = new APIResponseMessage
-        //                    {
-        //                        FriendlyMessage = "No Pending Approval"
-        //                    }
-        //                }
-        //            });
-        //        }
-        //        var register = await _repo.GetRegisterAwaitingApprovals(res.workflowTasks.Select(x =>
-        //         x.TargetId).ToList(), res.workflowTasks.Select(s =>
-        //         s.WorkflowToken).ToList());
+                if (res.workflowTasks.Count() < 1)
+                {
+                    return Ok(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = true,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "No Pending Approval"
+                            }
+                        }
+                    });
+                }
+                var register = await _repo.GetRegisterAwaitingApprovals(res.workflowTasks.Select(x =>
+                 x.TargetId).ToList(), res.workflowTasks.Select(s =>
+                 s.WorkflowToken).ToList());
 
 
-        //        return Ok(new RegisterRespObj
-        //        {
-        //            Registers = register.Select(d => new RegisterObj
-        //            {
-        //                RegisterId = d.RegisterId,
-        //                Active = d.Active,
-        //                AssetClassificationId = d.AssetClassificationId,
-        //                Cost = d.Cost,
-        //                DateOfPurchaase = d.DateOfPurchaase,
-        //                DepreciationStartDate = d.DepreciationStartDate,
-        //                Description = d.Description,
-        //                Quantity = d.Quantity,
-        //                Location = d.Location,
-        //                LpoNumber = d.LpoNumber,
-        //                ResidualValue = d.ResidualValue,
-        //                SubGlAddition = d.SubGlAddition,
-        //                UsefulLife = d.UsefulLife
-        //            }).ToList(),
-        //            Status = new APIResponseStatus
-        //            {
-        //                IsSuccessful = true,
-        //                Message = new APIResponseMessage
-        //                {
-        //                    FriendlyMessage = register.Count() < 1 ? "No register  awaiting approvals" : null
-        //                }
-        //            }
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
+                return Ok(new RegisterRespObj
+                {
+                    Registers = register.Select(d => new RegisterObj
+                    {
+                        RegisterId = d.RegisterId,
+                        Active = d.Active,
+                        AssetClassificationId = d.AssetClassificationId,
+                        Cost = d.Cost,
+                        //DateOfPurchase = d.DateOfPurchase,
+                        DepreciationStartDate = d.DepreciationStartDate,
+                        Description = d.Description,
+                        Quantity = d.Quantity,
+                        Location = d.Location,
+                        LpoNumber = d.LpoNumber,
+                        ResidualValue = d.ResidualValue,
+                        //SubGlAddition = d.SubGlAddition,
+                        UsefulLife = d.UsefulLife
+                    }).ToList(),
+                    Status = new APIResponseStatus
+                    {
+                        IsSuccessful = true,
+                        Message = new APIResponseMessage
+                        {
+                            FriendlyMessage = register.Count() < 1 ? "No Register  awaiting approvals" : null
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
 
 
-        //}
+        }
     }
 }

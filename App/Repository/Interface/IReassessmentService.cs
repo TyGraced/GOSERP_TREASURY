@@ -1,4 +1,5 @@
-﻿using PPE.DomainObjects.PPE;
+﻿using PPE.Contracts.Response;
+using PPE.DomainObjects.PPE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,9 @@ namespace PPE.Repository.Interface
         Task<bool> UploadReassessmentAsync(byte[] record, string createdBy);
 
         byte[] GenerateExportReassessment();
+
+        Task<StaffApprovalRegRespObj> ReassessmentStaffApprovals(StaffApprovalObj request);
+
+        Task<IEnumerable<ppe_reassessment>> GetReassessmentAwaitingApprovals(List<int> reassessmentIds, List<string> tokens);
     }
 }

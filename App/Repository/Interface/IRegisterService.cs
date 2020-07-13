@@ -1,4 +1,5 @@
-﻿using PPE.DomainObjects.PPE;
+﻿using PPE.Contracts.Response;
+using PPE.DomainObjects.PPE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,10 @@ namespace PPE.Repository.Interface
 
         Task<IEnumerable<ppe_register>> GetAllRegisterAsync();
 
-        Task<bool> UploadRegisterAsync(byte[] record, string createdBy);
-
         byte[] GenerateExportRegister();
+
+        Task<StaffApprovalRegRespObj> RegisterStaffApprovals(StaffApprovalObj request);
+
+        Task<IEnumerable<ppe_register>> GetRegisterAwaitingApprovals(List<int> registerIds, List<string> tokens);
     }
 }

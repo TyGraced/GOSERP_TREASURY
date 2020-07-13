@@ -69,104 +69,6 @@ namespace PPE.Repository.Implement
             return await _dataContext.ppe_register.Where(d => d.Deleted == false).ToListAsync();
         }
 
-        public async Task<bool> UploadRegisterAsync(byte[] record, string createdBy)
-        {
-            try
-            {
-                if (record == null) return false;
-                List<ppe_register> uploadedRecord = new List<ppe_register>();
-                using (MemoryStream stream = new MemoryStream(record))
-                using (ExcelPackage excelPackage = new ExcelPackage(stream))
-                {
-                    //Use first sheet by default
-                    ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[1];
-                    int totalRows = workSheet.Dimension.Rows;
-                    //First row is considered as the header
-                    for (int i = 2; i <= totalRows; i++)
-                    {
-                        uploadedRecord.Add(new ppe_register
-                        {
-                            AssetNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                            LpoNumber = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : null,
-                            AssetClassificationId = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
-                            Description = workSheet.Cells[i, 4].Value != null ? workSheet.Cells[i, 4].Value.ToString() : null,
-                            Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                            DateOfPurchaase = workSheet.Cells[i, 6].Value != null ? DateTime.Parse(workSheet.Cells[i, 6].Value.ToString()) : DateTime.Now,
-                            Quantity = workSheet.Cells[i, 7].Value != null ? int.Parse(workSheet.Cells[i, 7].Value.ToString()) : 0,
-                            DepreciationStartDate = workSheet.Cells[i, 8].Value != null ? DateTime.Parse(workSheet.Cells[i, 8].Value.ToString()) : DateTime.Now,
-                            UsefulLife = workSheet.Cells[i, 9].Value != null ? int.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
-                            ResidualValue = workSheet.Cells[i, 10].Value != null ? decimal.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
-                            Location = workSheet.Cells[i, 11].Value != null ? workSheet.Cells[i, 11].Value.ToString() : null,
-                            DepreciationForThePeriod = workSheet.Cells[i, 12].Value != null ? decimal.Parse(workSheet.Cells[i, 12].Value.ToString()) : 0,
-                            AccumulatedDepreciation = workSheet.Cells[i, 13].Value != null ? decimal.Parse(workSheet.Cells[i, 13].Value.ToString()) : 0,
-                            NetBookValue = workSheet.Cells[i, 14].Value != null ? decimal.Parse(workSheet.Cells[i, 14].Value.ToString()) : 0,
-                        });
-                    }
-                }
-                if (uploadedRecord.Count > 0)
-                {
-                    foreach (var item in uploadedRecord)
-                    {
-                        var category = _dataContext.ppe_register.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
-                        if (category != null)
-                        {
-                            category.AssetNumber = item.AssetNumber;
-                            category.LpoNumber = item.LpoNumber;
-                            category.AssetClassificationId = item.AssetClassificationId;
-                            category.Description = item.Description;
-                            category.Cost = item.Cost;
-                            category.DateOfPurchaase = item.DateOfPurchaase;
-                            category.Quantity = item.Quantity;
-                            category.DepreciationStartDate = item.DepreciationStartDate;
-                            category.UsefulLife = item.UsefulLife;
-                            category.ResidualValue = item.ResidualValue;
-                            category.Location = item.Location;
-                            category.DepreciationForThePeriod = item.DepreciationForThePeriod;
-                            category.AccumulatedDepreciation = item.AccumulatedDepreciation;
-                            category.NetBookValue = item.NetBookValue;
-                            category.Active = true;
-                            category.Deleted = false;
-                            category.UpdatedBy = createdBy;
-                            category.UpdatedOn = DateTime.Now;
-                        }
-                        else
-                        {
-                            var structure = new ppe_register
-                            {
-                                AssetNumber = item.AssetNumber,
-                                LpoNumber = item.LpoNumber,
-                                AssetClassificationId = item.AssetClassificationId,
-                                Description = item.Description,
-                                Cost = item.Cost,
-                                DateOfPurchaase = item.DateOfPurchaase,
-                                Quantity = item.Quantity,
-                                DepreciationStartDate = item.DepreciationStartDate,
-                                UsefulLife = item.UsefulLife,
-                                ResidualValue = item.ResidualValue,
-                                Location = item.Location,
-                                DepreciationForThePeriod = item.DepreciationForThePeriod,
-                                AccumulatedDepreciation = item.AccumulatedDepreciation,
-                                NetBookValue = item.NetBookValue,
-                                Active = true,
-                                Deleted = false,
-                                CreatedBy = createdBy,
-                                CreatedOn = DateTime.Now,
-                            };
-                            await _dataContext.ppe_register.AddAsync(structure);
-                        }
-                    }
-                }
-
-                var response = _dataContext.SaveChanges() > 0;
-                return response;
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
         public byte[] GenerateExportRegister()
         {
             DataTable dt = new DataTable();
@@ -239,200 +141,213 @@ namespace PPE.Repository.Implement
             return fileBytes;
         }
 
-        //public async Task<StaffApprovalRegRespObj> RegisterStaffApprovals(StaffApprovalObj request)
-        //{
-        //    try
-        //    {
-        //        var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
-        //        var user = await _serverRequest.UserDataAsync();
+        public async Task<StaffApprovalRegRespObj> RegisterStaffApprovals(StaffApprovalObj request)
+        {
+            try
+            {
+                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var user = await _serverRequest.UserDataAsync();
 
-        //        var currentItem = await _dataContext.ppe_register.FindAsync(request.TargetId);
+                var currentItem = await _dataContext.ppe_register.FindAsync(request.TargetId);
 
-        //        var details = new cor_approvaldetail
-        //        {
-        //            Comment = request.ApprovalComment,
-        //            Date = DateTime.Today,
-        //            StatusId = request.ApprovalStatus,
-        //            TargetId = request.TargetId,
-        //            StaffId = user.StaffId,
-        //            WorkflowToken = currentItem.WorkflowToken
-        //        };
+                var details = new cor_approvaldetail
+                {
+                    Comment = request.ApprovalComment,
+                    Date = DateTime.Today,
+                    StatusId = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    StaffId = user.StaffId,
+                    WorkflowToken = currentItem.WorkflowToken
+                };
 
-        //        var req = new IndentityServerApprovalCommand
-        //        {
-        //            ApprovalComment = request.ApprovalComment,
-        //            ApprovalStatus = request.ApprovalStatus,
-        //            TargetId = request.TargetId,
-        //            WorkflowToken = currentItem.WorkflowToken,
-        //        };
+                var req = new IdentityServerApprovalCommand
+                {
+                    ApprovalComment = request.ApprovalComment,
+                    ApprovalStatus = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    WorkflowToken = currentItem.WorkflowToken,
+                };
 
-        //        using (var _trans = await _dataContext.Database.BeginTransactionAsync())
-        //        {
-        //            try
-        //            {
-        //                var result = await _serverRequest.StaffApprovalRequestAsync(req);
+                using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var result = await _serverRequest.StaffApprovalRequestAsync(req);
 
-        //                if (!result.IsSuccessStatusCode)
-        //                {
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        Status = new APIResponseStatus
-        //                        {
-        //                            IsSuccessful = false,
-        //                            Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
-        //                        }
-        //                    };
-        //                }
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = false,
+                                    Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                                }
+                            };
+                        }
 
-        //                var stringData = await result.Content.ReadAsStringAsync();
-        //                var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
+                        var stringData = await result.Content.ReadAsStringAsync();
+                        var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
 
-        //                if (!response.Status.IsSuccessful)
-        //                {
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        Status = response.Status
-        //                    };
-        //                }
-        //                if (response.ResponseId == (int)ApprovalStatus.Processing)
-        //                {
-        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
-        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
-        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+                        if (!response.Status.IsSuccessful)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = response.Status
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Processing)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
 
-        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
-        //                    await _trans.CommitAsync();
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        ResponseId = (int)ApprovalStatus.Processing,
-        //                        Status = new APIResponseStatus
-        //                        {
-        //                            IsSuccessful = true,
-        //                            Message = response.Status.Message
-        //                        }
-        //                    };
-        //                }
-        //                if (response.ResponseId == (int)ApprovalStatus.Revert)
-        //                {
-        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
-        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
-        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Processing,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Revert)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
 
-        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
-        //                    await _trans.CommitAsync();
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        ResponseId = (int)ApprovalStatus.Revert,
-        //                        Status = new APIResponseStatus
-        //                        {
-        //                            IsSuccessful = true,
-        //                            Message =
-        //                    response.Status.Message
-        //                        }
-        //                    };
-        //                }
-        //                if (response.ResponseId == (int)ApprovalStatus.Approved)
-        //                {
-        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
-        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
-        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Revert,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Approved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
 
-        //                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
 
-        //                    var regiister = new ppe_register
-        //                    {
-        //                        Active = true,
-        //                        AssetClassificationId = currentItem.AssetClassificationId,
-        //                        Cost = currentItem.Cost,
-        //                        CreatedBy = user.UserName,
-        //                        DateOfPurchaase = currentItem.DateOfPurchaase,
-        //                        Description = currentItem.Description,
-        //                        Location = currentItem.Location,
-        //                        LpoNumber = currentItem.LpoNumber,
-        //                        Quantity = currentItem.Quantity,
-        //                    };
+                            TimeSpan usedLifeOfAsset = (currentItem.DepreciationStartDate - DateTime.Today);
+                            int differenceInDays = usedLifeOfAsset.Days;
+                            int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
+                            //int proposedUsefulLife = ;
+                            var reassessment = new ppe_reassessment
+                            {
+                                Active = true,
+                                AssetClassificationId = currentItem.AssetClassificationId,
+                                Cost = currentItem.Cost,
+                                CreatedBy = user.UserName,
+                                DateOfPurchaase = currentItem.DateOfPurchaase,
+                                Description = currentItem.Description,
+                                Location = currentItem.Location,
+                                LpoNumber = currentItem.LpoNumber,
+                                Quantity = currentItem.Quantity,
+                                DepreciationForThePeriod = currentItem.DepreciationForThePeriod,
+                                AccumulatedDepreciation = currentItem.AccumulatedDepreciation,
+                                NetBookValue = currentItem.NetBookValue,
+                                UsefulLife = currentItem.UsefulLife,
+                                ResidualValue = currentItem.ResidualValue,
+                                RemainingUsefulLife = remainingUsefulLife,
+                                AssetNumber = currentItem.AssetNumber,
+                            };
 
-        //                    await AddUpdateRegisterAsync(regiister);
 
-        //                    await _trans.CommitAsync();
 
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        ResponseId = (int)ApprovalStatus.Approved,
-        //                        Status = new APIResponseStatus
-        //                        {
-        //                            IsSuccessful = true,
-        //                            Message = response.Status.Message
-        //                        }
-        //                    };
-        //                }
-        //                if (response.ResponseId == (int)ApprovalStatus.Disapproved)
-        //                {
-        //                    await _dataContext.cor_approvaldetail.AddAsync(details);
-        //                    currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
-        //                    currentItem.WorkflowToken = response.Status.CustomToken;
+                            await AddUpdateReassessmentAsync(reassessment);
 
-        //                    var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
-        //                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
-        //                    await _trans.CommitAsync();
-        //                    return new StaffApprovalRegRespObj
-        //                    {
-        //                        ResponseId = (int)ApprovalStatus.Disapproved,
-        //                        Status = new APIResponseStatus
-        //                        {
-        //                            IsSuccessful = true,
-        //                            Message =
-        //                    response.Status.Message
-        //                        }
-        //                    };
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                await _trans.RollbackAsync();
-        //                throw ex;
-        //            }
-        //            finally { await _trans.DisposeAsync(); }
+                            await _trans.CommitAsync();
 
-        //        }
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Approved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Disapproved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
 
-        //        return new StaffApprovalRegRespObj
-        //        {
-        //            ResponseId = request.TargetId,
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Disapproved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _trans.RollbackAsync();
+                        throw ex;
+                    }
+                    finally { await _trans.DisposeAsync(); }
 
-        //private async Task<bool> AddUpdateRegisterAsync(ppe_register model)
-        //{
-        //    try
-        //    {
-        //        if (model.RegisterId > 0)
-        //        {
-        //            var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
-        //            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
-        //        }
-        //        else
-        //            await _dataContext.ppe_register.AddAsync(model);
-        //        return await _dataContext.SaveChangesAsync() > 0;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
+                }
 
-        //public async Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens)
-        //{
-        //    var item = await _dataContext.ppe_additionform.Where(s => additonIds.Contains(s.AdditionFormId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
-        //    return item;
-        //}
+                return new StaffApprovalRegRespObj
+                {
+                    ResponseId = request.TargetId,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> AddUpdateReassessmentAsync(ppe_reassessment model)
+        {
+            try
+            {
+                if (model.ReassessmentId > 0)
+                {
+                    var itemToUpdate = await _dataContext.ppe_reassessment.FindAsync(model.ReassessmentId);
+                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                }
+                else
+                    await _dataContext.ppe_reassessment.AddAsync(model);
+                return await _dataContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<ppe_register>> GetRegisterAwaitingApprovals(List<int> registerIds, List<string> tokens)
+        {
+            var item = await _dataContext.ppe_register.Where(s => registerIds.Contains(s.RegisterId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+            return item;
+        }
     }
 }

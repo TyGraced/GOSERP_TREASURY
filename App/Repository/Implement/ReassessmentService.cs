@@ -1,8 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GOSLibraries.Enums;
+using GOSLibraries.GOS_API_Response;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OfficeOpenXml;
+using PPE.Contracts.Response;
 using PPE.Data;
+using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,9 +22,17 @@ namespace PPE.Repository.Implement
     public class ReassessmentService : IReassessmentService
     {
         private readonly DataContext _dataContext;
-        public ReassessmentService(DataContext dataContext)
+        private readonly IIdentityServerRequest _serverRequest;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ReassessmentService(
+            DataContext dataContext,
+            IIdentityServerRequest serverRequest,
+            IHttpContextAccessor httpContextAccessor)
         {
             _dataContext = dataContext;
+            _httpContextAccessor = httpContextAccessor;
+            _serverRequest = serverRequest;
+
         }
         public async Task<bool> AddUpdateReassessmentAsync(ppe_reassessment model)
         {
@@ -237,6 +252,208 @@ namespace PPE.Repository.Implement
                 }
             }
             return fileBytes;
+        }
+
+        public async Task<StaffApprovalRegRespObj> ReassessmentStaffApprovals(StaffApprovalObj request)
+        {
+            try
+            {
+                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var user = await _serverRequest.UserDataAsync();
+
+                var currentItem = await _dataContext.ppe_reassessment.FindAsync(request.TargetId);
+
+                var details = new cor_approvaldetail
+                {
+                    Comment = request.ApprovalComment,
+                    Date = DateTime.Today,
+                    StatusId = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    StaffId = user.StaffId,
+                    WorkflowToken = currentItem.WorkflowToken
+                };
+
+                var req = new IdentityServerApprovalCommand
+                {
+                    ApprovalComment = request.ApprovalComment,
+                    ApprovalStatus = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    WorkflowToken = currentItem.WorkflowToken,
+                };
+
+                using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var result = await _serverRequest.StaffApprovalRequestAsync(req);
+
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = false,
+                                    Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                                }
+                            };
+                        }
+
+                        var stringData = await result.Content.ReadAsStringAsync();
+                        var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
+
+                        if (!response.Status.IsSuccessful)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = response.Status
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Processing)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_reassessment.FindAsync(currentItem.ReassessmentId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Processing,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Revert)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_reassessment.FindAsync(currentItem.ReassessmentId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Revert,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Approved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_reassessment.FindAsync(currentItem.ReassessmentId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+
+                            var disposal = new ppe_disposal
+                            {
+                                Active = true,
+                                AssetClassificationId = currentItem.AssetClassificationId,
+                                Cost = currentItem.Cost,
+                                CreatedBy = user.UserName,
+                                DateOfPurchaase = currentItem.DateOfPurchaase,
+                                Description = currentItem.Description,
+                                Location = currentItem.Location,
+                                Quantity = currentItem.Quantity,
+                                AssetNumber = currentItem.AssetNumber,
+                                DepreciationForThePeriod = currentItem.DepreciationForThePeriod,
+                                AccumulatedDepreciation = currentItem.AccumulatedDepreciation,
+                                NetBookValue = currentItem.NetBookValue,
+                                
+                            };
+
+
+
+                            await AddUpdateDisposalAsync(disposal);
+
+                            await _trans.CommitAsync();
+
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Approved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Disapproved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_reassessment.FindAsync(currentItem.ReassessmentId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Disapproved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _trans.RollbackAsync();
+                        throw ex;
+                    }
+                    finally { await _trans.DisposeAsync(); }
+
+                }
+
+                return new StaffApprovalRegRespObj
+                {
+                    ResponseId = request.TargetId,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task<bool> AddUpdateDisposalAsync(ppe_disposal model)
+        {
+            try
+            {
+                if (model.DisposalId > 0)
+                {
+                    var itemToUpdate = await _dataContext.ppe_disposal.FindAsync(model.DisposalId);
+                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                }
+                else
+                    await _dataContext.ppe_disposal.AddAsync(model);
+                return await _dataContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<ppe_reassessment>> GetReassessmentAwaitingApprovals(List<int> reassessmentIds, List<string> tokens)
+        {
+            var item = await _dataContext.ppe_reassessment.Where(s => reassessmentIds.Contains(s.ReassessmentId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+            return item;
         }
     }
 }

@@ -23,6 +23,5 @@ namespace PPE.Repository.Interface
         byte[] GenerateExportAddition();
         Task<StaffApprovalRegRespObj> AdditionStaffApprovals(StaffApprovalObj request);
         Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens);
-        Task<ActionResult<AdditionFormRespObj>> GetAdditionForAppraisalAsync();
     }
 }
