@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PPE.Data;
 
 namespace PPE.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200722093615_schedule")]
+    partial class schedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,7 +196,7 @@ namespace PPE.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal>("AccumulatedDepreciation")
+                    b.Property<decimal?>("AccumulatedDepreciation")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool?>("Active")
@@ -203,7 +205,7 @@ namespace PPE.Migrations
                     b.Property<int>("AdditionId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("CB")
+                    b.Property<decimal?>("CB")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Createdby")
@@ -218,9 +220,6 @@ namespace PPE.Migrations
 
                     b.Property<bool?>("Deleted")
                         .HasColumnType("bit");
-
-                    b.Property<decimal>("DepreciationForThePeriod")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool?>("EndPeriod")
                         .HasColumnType("bit");
@@ -503,9 +502,6 @@ namespace PPE.Migrations
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
-
-                    b.Property<int>("AdditionFormId")
-                        .HasColumnType("int");
 
                     b.Property<int>("ApprovalStatusId")
                         .HasColumnType("int");

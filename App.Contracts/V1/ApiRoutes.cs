@@ -31,6 +31,8 @@ namespace PPE.Contracts.V1
         public class Addition
         {
             public const string ADD_UPDATE_ADDITION = Base + "/addition/add/update/addition";
+            //public const string ADD_UPDATE_DAILYSCHEDULE = Base + "/addition/add/update/dailyschedule";
+            //public const string ADD_UPDATE_MONTHLYSCHEDULE = Base + "/addition/add/update/monthlyschedule";
             public const string GET_ALL_ADDITION = Base + "/addition/get/all/addition";
             public const string GET_ADDITION_BY_ID = Base + "/addition/get/additionbyid";
             public const string DELETE_ADDITION = Base + "/addition/delete/addition";

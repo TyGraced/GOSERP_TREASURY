@@ -42,7 +42,10 @@ namespace PPE.Repository.Implement
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else
+                {
                     await _dataContext.ppe_register.AddAsync(model);
+                }
+                    
                 return await _dataContext.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
@@ -64,9 +67,42 @@ namespace PPE.Repository.Implement
             return await _dataContext.ppe_register.FindAsync(id);
         }
 
-        public async Task<IEnumerable<ppe_register>> GetAllRegisterAsync()
+        public IEnumerable<RegisterObj> GetAllRegister(int AdditionFormId)
         {
-            return await _dataContext.ppe_register.Where(d => d.Deleted == false).ToListAsync();
+            try
+            {
+                var now = DateTime.Now.Date;
+                var Application = (from a in _dataContext.ppe_register
+                                   join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
+                                   where a.Deleted == false  && e.PeriodDate.Value.Date == now.Date
+                                   && a.AdditionFormId == AdditionFormId
+                                   orderby a.CreatedOn descending
+                                   select new RegisterObj
+                                   {
+                                       RegisterId = a.RegisterId,
+                                       AdditionFormId = a.AdditionFormId,
+                                       AssetClassificationId = a.AssetClassificationId,
+                                       AssetNumber = a.AssetNumber,
+                                       LpoNumber = a.LpoNumber,
+                                       Description = a.Description,
+                                       Cost = a.Cost,
+                                       DateOfPurchaase = a.DateOfPurchaase,
+                                       Quantity = a.Quantity,
+                                       DepreciationStartDate = a.DepreciationStartDate,
+                                       UsefulLife = a.UsefulLife,
+                                       ResidualValue = a.ResidualValue,
+                                       Location = a.Location,
+                                       DepreciationForThePeriod = e.DepreciationForThePeriod,
+                                       AccumulatedDepreciation = e.AccumulatedDepreciation,
+                                       NetBookValue = e.CB,
+                                   }).ToList();
+
+                return Application;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public byte[] GenerateExportRegister()

@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Contracts.V1;
+using PPE.Data;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Implement.Addition;
 using PPE.Repository.Interface;
@@ -24,6 +25,7 @@ namespace PPE.Controllers.V1
     [Authorize]
     public class AdditionController : Controller
     {
+        private readonly DataContext _dataContext;
         private readonly IAdditionService _repo;
         private readonly IMapper _mapper;
         private readonly IIdentityService _identityService;
@@ -31,6 +33,7 @@ namespace PPE.Controllers.V1
         private readonly ILoggerService _logger;
         private readonly IIdentityServerRequest _serverRequest;
         public AdditionController(
+            DataContext dataContext,
             IAdditionService additionService,
             IMapper mapper,
             IIdentityService identityService,
@@ -38,6 +41,7 @@ namespace PPE.Controllers.V1
             IIdentityServerRequest serverRequest,
             ILoggerService logger)
         {
+            _dataContext = dataContext;
             _mapper = mapper;
             _repo = additionService;
             _identityService = identityService;
@@ -48,11 +52,22 @@ namespace PPE.Controllers.V1
 
         [HttpGet(ApiRoutes.Addition.GET_ALL_ADDITION)]
 
-        public async Task<ActionResult<AdditionFormRespObj>> GetAllAdditionAsync()
+        public async Task<ActionResult<AdditionFormRespObj>> GetAllAdditionAsync(int AdditionId)
         {
             try
             {
-                
+                var currentItem = _dataContext.ppe_additionform.Find(AdditionId);
+                decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
+                decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+                var day = DateTime.UtcNow.Date;
+                var noOfDaysInThePeriod = day.ToString("D").Split()[0];
+                decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+                TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+                int differenceInDays = usedLifeOfAsset.Days;
+                decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+                decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
+                var assetNumber = AssetNumber.Generate();
+
                 var response = await _repo.GetAllAdditionAsync();
                 return new AdditionFormRespObj
                 {
@@ -118,6 +133,10 @@ namespace PPE.Controllers.V1
                 domainObj.Cost = model.Cost;
                 domainObj.SubGlAddition = model.SubGlAddition;
                 domainObj.Location = model.Location;
+                domainObj.AssetClassificationId = model.AssetClassificationId;
+                domainObj.DepreciationStartDate = model.DepreciationStartDate;
+                domainObj.UsefulLife = model.UsefulLife;
+                domainObj.ResidualValue = model.ResidualValue;
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.AdditionFormId > 0 ? DateTime.Today : DateTime.Today;
 
@@ -180,15 +199,26 @@ namespace PPE.Controllers.V1
         {
             try
             {
-                var postedFile = _httpContextAccessor.HttpContext.Request.Form.Files["Image"];
-                var fileName = _httpContextAccessor.HttpContext.Request.Form.Files["Image"].FileName;
-                var fileExtention = Path.GetExtension(fileName);
-                var image = new byte[postedFile.Length];
-                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var files = _httpContextAccessor.HttpContext.Request.Form.Files;
 
-                var createdBy = _identityService.UserDataAsync().Result.UserName;
+                var byteList = new List<byte[]>();
+                foreach (var fileBit in files)
+                {
+                    if (fileBit.Length > 0)
+                    {
+                        using (var ms = new MemoryStream())
+                        {
+                            await fileBit.CopyToAsync(ms);
+                            byteList.Add(ms.ToArray());
+                        }
+                    }
 
-                var isDone = await _repo.UploadAdditionAsync(image, createdBy);
+                }
+
+                var user = await _identityService.UserDataAsync();
+                var createdBy = user.UserName;
+
+                var isDone = await _repo.UploadAdditionAsync(byteList, createdBy);
                 return new AdditionFormRegRespObj
                 {
                     Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
@@ -197,12 +227,14 @@ namespace PPE.Controllers.V1
             catch (Exception ex)
             {
                 var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
                 return new AdditionFormRegRespObj
                 {
                     Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
                 };
             }
         }
+
 
         [HttpPost(ApiRoutes.Addition.ADDITION_STAFF_APPROVAL)]
         public async Task<IActionResult> AdditionStaffApproval([FromBody]StaffApprovalObj request)
@@ -325,6 +357,22 @@ namespace PPE.Controllers.V1
 
 
         }
+
+
+        //[HttpPost(ApiRoutes.Addition.ADD_UPDATE_DAILYSCHEDULE)]
+        //public ActionResult<bool> GenerateInvestmentDailySchedule([FromBody] AdditionFormObj entity)
+        //{
+        //    try
+        //    {
+        //        var response = _repo.GenerateInvestmentDailySchedule(16);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}
+
 
     }
 }

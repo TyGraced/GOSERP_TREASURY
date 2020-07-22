@@ -11,17 +11,13 @@ namespace PPE.Repository.Interface
     public interface IAdditionService
     {
         Task<AdditionFormRegRespObj> AddUpdateAdditionAsync(ppe_additionform model);
-
         Task<bool> DeleteAdditionAsync(int id);
-
         Task<ppe_additionform> GetAdditionByIdAsync(int id);
-
         Task<IEnumerable<ppe_additionform>> GetAllAdditionAsync();
-
-        Task<bool> UploadAdditionAsync(byte[] record, string createdBy);
-
+        Task<bool> UploadAdditionAsync(List<byte[]> record, string createdBy);
         byte[] GenerateExportAddition();
         Task<StaffApprovalRegRespObj> AdditionStaffApprovals(StaffApprovalObj request);
         Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens);
+
     }
 }

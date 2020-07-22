@@ -10,6 +10,7 @@ namespace PPE.DomainObjects.PPE
     {
         [Key]
         public int RegisterId { get; set; }
+        public int AdditionFormId { get; set; }
         [StringLength(50)]
         public string AssetNumber { get; set; }
         [StringLength(50)]

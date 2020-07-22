@@ -46,7 +46,6 @@ namespace PPE.Controllers.V1
         }
 
         [HttpGet(ApiRoutes.Reassessment.GET_ALL_REASSESSMENT)]
-
         public async Task<ActionResult<ReassessmentRespObj>> GetAllReassessmentAsync()
         {
             try

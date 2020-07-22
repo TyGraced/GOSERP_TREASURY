@@ -57,35 +57,43 @@ namespace PPE.Repository.Implement
             return await _dataContext.ppe_assetclassification.Where(d => d.Deleted == false).ToListAsync();
         }
 
-        public async Task<bool> UploadAssetClassificationAsync(byte[] record, string createdBy)
+        public async Task<bool> UploadAssetClassificationAsync(List<byte[]> record, string createdBy)
         {
             try
             {
                 if (record == null) return false;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 List<ppe_assetclassification> uploadedRecord = new List<ppe_assetclassification>();
-                using (MemoryStream stream = new MemoryStream(record))
-                using (ExcelPackage excelPackage = new ExcelPackage(stream))
+                if (record.Count() > 0)
                 {
-                    //Use first sheet by default
-                    ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[1];
-                    int totalRows = workSheet.Dimension.Rows;
-                    //First row is considered as the header
-                    for (int i = 2; i <= totalRows; i++)
+                    foreach (var byteItem in record)
                     {
-                        uploadedRecord.Add(new ppe_assetclassification
+                        using (MemoryStream stream = new MemoryStream(byteItem))
+                        using (ExcelPackage excelPackage = new ExcelPackage(stream))
                         {
-                            ClassificationName = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                            UsefulLifeMin = workSheet.Cells[i, 2].Value != null ? int.Parse(workSheet.Cells[i, 2].Value.ToString()) : 0,
-                            UsefulLifeMax = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
-                            ResidualValue = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
-                            Depreciable = workSheet.Cells[i, 5].Value != null ? bool.Parse(workSheet.Cells[i, 5].Value.ToString()) : false,
-                            DepreciationMethod = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                            SubGlAddition = workSheet.Cells[i, 7].Value != null ? int.Parse(workSheet.Cells[i, 7].Value.ToString()) : 0,
-                            SubGlDepreciation = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
-                            SubGlAccumulatedDepreciation = workSheet.Cells[i, 9].Value != null ? int.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
-                            SubGlDisposal = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
-                        });
+                            ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[0];
+                            int totalRows = workSheet.Dimension.Rows;
+
+                            for (int i = 2; i <= totalRows; i++)
+                            {
+                                var item = new ppe_assetclassification
+                                {
+                                    ClassificationName = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
+                                    UsefulLifeMin = workSheet.Cells[i, 2].Value != null ? int.Parse(workSheet.Cells[i, 2].Value.ToString()) : 0,
+                                    UsefulLifeMax = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
+                                    ResidualValue = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
+                                    Depreciable = workSheet.Cells[i, 5].Value != null ? bool.Parse(workSheet.Cells[i, 5].Value.ToString()) : false,
+                                    DepreciationMethod = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    SubGlAddition = workSheet.Cells[i, 7].Value != null ? int.Parse(workSheet.Cells[i, 7].Value.ToString()) : 0,
+                                    SubGlDepreciation = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
+                                    SubGlAccumulatedDepreciation = workSheet.Cells[i, 9].Value != null ? int.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
+                                    SubGlDisposal = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
+                                };
+                                uploadedRecord.Add(item);
+                            }
+                        }
                     }
+
                 }
                 if (uploadedRecord.Count > 0)
                 {
@@ -109,9 +117,10 @@ namespace PPE.Repository.Implement
                             category.UpdatedBy = createdBy;
                             category.UpdatedOn = DateTime.Now;
                         }
+
                         else
                         {
-                            var structure = new ppe_assetclassification
+                            var assetclassification = new ppe_assetclassification
                             {
                                 ClassificationName = item.ClassificationName,
                                 UsefulLifeMin = item.UsefulLifeMin,
@@ -129,7 +138,7 @@ namespace PPE.Repository.Implement
                                 CreatedBy = createdBy,
                                 CreatedOn = DateTime.Now,
                             };
-                            await _dataContext.ppe_assetclassification.AddAsync(structure);
+                            await _dataContext.ppe_assetclassification.AddAsync(assetclassification);
                         }
                     }
                 }
@@ -147,7 +156,7 @@ namespace PPE.Repository.Implement
         public byte[] GenerateExportAssetClassification()
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("Classification Name");
+            dt.Columns.Add("Classification Name");                                                                            
             dt.Columns.Add("Useful Life (Min)");
             dt.Columns.Add("Useful Life (Max)");
             dt.Columns.Add("Residual Value");

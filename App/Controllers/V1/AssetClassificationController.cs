@@ -35,7 +35,6 @@ namespace PPE.Controllers.V1
         }
 
         [HttpGet(ApiRoutes.AssetClassification.GET_ALL_ASSETCLASSIFICATION)]
-
         public async Task<ActionResult<AssetClassificationRespObj>> GetAllAssetClassificationAsync()
         {
             try
@@ -170,15 +169,26 @@ namespace PPE.Controllers.V1
         {
             try
             {
-                var postedFile = _httpContextAccessor.HttpContext.Request.Form.Files["Image"];
-                var fileName = _httpContextAccessor.HttpContext.Request.Form.Files["Image"].FileName;
-                var fileExtention = Path.GetExtension(fileName);
-                var image = new byte[postedFile.Length];
-                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var files = _httpContextAccessor.HttpContext.Request.Form.Files;
 
-                var createdBy = _identityService.UserDataAsync().Result.UserName;
+                var byteList = new List<byte[]>();
+                foreach (var fileBit in files)
+                {
+                    if (fileBit.Length > 0)
+                    {
+                        using (var ms = new MemoryStream())
+                        {
+                            await fileBit.CopyToAsync(ms);
+                            byteList.Add(ms.ToArray());
+                        }
+                    }
 
-                var isDone = await _repo.UploadAssetClassificationAsync(image, createdBy);
+                }
+
+                var user = await _identityService.UserDataAsync();
+                var createdBy = user.UserName;
+
+                var isDone = await _repo.UploadAssetClassificationAsync(byteList, createdBy);
                 return new AssetClassificationRegRespObj
                 {
                     Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
@@ -187,6 +197,7 @@ namespace PPE.Controllers.V1
             catch (Exception ex)
             {
                 var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
                 return new AssetClassificationRegRespObj
                 {
                     Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }

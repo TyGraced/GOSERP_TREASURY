@@ -17,7 +17,7 @@ namespace PPE.Repository.Interface
 
         Task<IEnumerable<ppe_assetclassification>> GetAllAssetClassificationAsync();
 
-        Task<bool> UploadAssetClassificationAsync(byte[] record, string createdBy);
+        Task<bool> UploadAssetClassificationAsync(List<byte[]> record, string createdBy);
 
         byte[] GenerateExportAssetClassification();
     }

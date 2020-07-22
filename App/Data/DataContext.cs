@@ -20,8 +20,8 @@ namespace PPE.Data
         public DbSet<ppe_reassessment> ppe_reassessment { get; set; }
         public DbSet<ppe_register> ppe_register { get; set; }
         public DbSet<ppe_disposal> ppe_disposal { get; set; }
-
-      
+        public DbSet<ppe_dailyschedule> ppe_dailyschedule { get; set; }
+        public DbSet<ppe_periodicschedule> ppe_periodicschedule { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

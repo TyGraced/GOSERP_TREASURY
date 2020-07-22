@@ -93,7 +93,15 @@ namespace PPE.Repository.Implement
                     {
                         model.ApprovalStatusId = (int)ApprovalStatus.Processing;
                         model.WorkflowToken = res.Status.CustomToken;
-
+                        if (model.AdditionFormId > 0)
+                        {
+                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(model.AdditionFormId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                        }
+                        else
+                        {
+                            await _dataContext.ppe_additionform.AddAsync(model);
+                        }
                         await _dataContext.SaveChangesAsync();
 
                         await _trans.CommitAsync();
@@ -163,32 +171,40 @@ namespace PPE.Repository.Implement
             return await _dataContext.ppe_additionform.Where(d => d.Deleted == false).ToListAsync();
         }
 
-        public async Task<bool> UploadAdditionAsync(byte[] record, string createdBy)
+        public async Task<bool> UploadAdditionAsync(List<byte[]> record, string createdBy)
         {
             try
             {
                 if (record == null) return false;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 List<ppe_additionform> uploadedRecord = new List<ppe_additionform>();
-                using (MemoryStream stream = new MemoryStream(record))
-                using (ExcelPackage excelPackage = new ExcelPackage(stream))
+                if (record.Count() > 0)
                 {
-                    //Use first sheet by default
-                    ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[1];
-                    int totalRows = workSheet.Dimension.Rows;
-                    //First row is considered as the header
-                    for (int i = 2; i <= totalRows; i++)
+                    foreach (var byteItem in record)
                     {
-                        uploadedRecord.Add(new ppe_additionform
+                        using (MemoryStream stream = new MemoryStream(byteItem))
+                        using (ExcelPackage excelPackage = new ExcelPackage(stream))
                         {
-                            LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                            DateOfPurchase = workSheet.Cells[i, 2].Value != null ? DateTime.Parse(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
-                            Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
-                            Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
-                            Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                            SubGlAddition = workSheet.Cells[i, 6].Value != null ? int.Parse(workSheet.Cells[i, 6].Value.ToString()) : 0,
-                            Location = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                        });
+                            ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[0];
+                            int totalRows = workSheet.Dimension.Rows;
+
+                            for (int i = 2; i <= totalRows; i++)
+                            {
+                                var item = new ppe_additionform
+                                {
+                                    LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
+                                    DateOfPurchase = workSheet.Cells[i, 2].Value != null ? DateTime.Parse(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
+                                    Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
+                                    Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
+                                    Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
+                                    SubGlAddition = workSheet.Cells[i, 6].Value != null ? int.Parse(workSheet.Cells[i, 6].Value.ToString()) : 0,
+                                    Location = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                };
+                                uploadedRecord.Add(item);
+                            }
+                        }
                     }
+
                 }
                 if (uploadedRecord.Count > 0)
                 {
@@ -209,9 +225,10 @@ namespace PPE.Repository.Implement
                             category.UpdatedBy = createdBy;
                             category.UpdatedOn = DateTime.Now;
                         }
+
                         else
                         {
-                            var structure = new ppe_additionform
+                            var addition = new ppe_additionform
                             {
                                 LpoNumber = item.LpoNumber,
                                 DateOfPurchase = item.DateOfPurchase,
@@ -225,7 +242,7 @@ namespace PPE.Repository.Implement
                                 CreatedBy = createdBy,
                                 CreatedOn = DateTime.Now,
                             };
-                            await _dataContext.ppe_additionform.AddAsync(structure);
+                            await _dataContext.ppe_additionform.AddAsync(addition);
                         }
                     }
                 }
@@ -394,21 +411,31 @@ namespace PPE.Repository.Implement
                             _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
 
 
-                            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue)/currentItem.UsefulLife);
-                            decimal dailyDepreciationCharge = (monthlyDepreciation/30);
-                            var day = DateTime.UtcNow.Date;
-                            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-                            decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
-                            TimeSpan usedLifeOfAsset = (currentItem.DepreciationStartDate - DateTime.Today);
-                            int differenceInDays = usedLifeOfAsset.Days;
-                            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
-                            decimal netBookValue = currentItem.Cost * accumulatedDepreciation;
+                            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
+                            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+                            //var day = DateTime.UtcNow.Date;
+                            //var noOfDaysInThePeriod = day.ToString("D").Split()[0];
+                            //decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+                            //TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+                            //int differenceInDays = usedLifeOfAsset.Days;
+                            //decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+                            //decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
                             var assetNumber = AssetNumber.Generate();
+
+                            var depreciationStartDate = currentItem.DepreciationStartDate;
+                            //var freq = 30;
+                            int dailyPeriod = currentItem.UsefulLife * 30;
+                            decimal dailyCB = currentItem.Cost;
+                            int i = 1;
+                            //int count = 0;
+                            decimal accdailyDepreciationCharge = 0;
+                            decimal accdailyAccumilative = 0;
 
                             var register = new ppe_register
                             {
                                 Active = true,
                                 AssetClassificationId = currentItem.AssetClassificationId,
+                                AdditionFormId = currentItem.AdditionFormId,
                                 Cost = currentItem.Cost,
                                 CreatedBy = user.UserName,
                                 DateOfPurchaase = currentItem.DateOfPurchase,
@@ -417,9 +444,9 @@ namespace PPE.Repository.Implement
                                 LpoNumber = currentItem.LpoNumber,
                                 Quantity = currentItem.Quantity, 
                                 DepreciationStartDate = currentItem.DepreciationStartDate,
-                                DepreciationForThePeriod = depreciationForThePeriod,
-                                NetBookValue = netBookValue,
-                                AccumulatedDepreciation = accumulatedDepreciation,
+                                DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative,
+                                NetBookValue = (dailyCB - dailyDepreciationCharge),
+                                AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge,
                                 UsefulLife = currentItem.UsefulLife,
                                 ResidualValue = currentItem.ResidualValue,
                                 AssetNumber = assetNumber,
@@ -506,6 +533,80 @@ namespace PPE.Repository.Implement
         {
             var item = await _dataContext.ppe_additionform.Where(s => additonIds.Contains(s.AdditionFormId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
             return item;
+        }
+
+        private bool GenerateInvestmentDailySchedule(int AdditionId)
+        {
+            var currentItem =  _dataContext.ppe_additionform.Find(AdditionId);
+            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
+            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+            var day = DateTime.UtcNow.Date;
+            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
+            decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+            TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+            int differenceInDays = usedLifeOfAsset.Days;
+            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+            decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
+            var assetNumber = AssetNumber.Generate();
+
+            var depreciationStartDate = currentItem.DepreciationStartDate;
+            var freq = 30;
+            int dailyPeriod = currentItem.UsefulLife * 30;
+            decimal dailyCB = currentItem.Cost;
+            int i = 1;
+            int count = 0;
+            decimal accdailyDepreciationCharge = 0;
+            decimal accdailyAccumilative = 0;
+
+            for (int k = 0; k <= dailyPeriod; k++)
+            {
+                ppe_dailyschedule dailyschedule = new ppe_dailyschedule();               
+                if (count == freq)
+                {
+                    i++;
+                    count = 0;
+                    dailyschedule.EndPeriod = true;
+                }
+                if (k == 0)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = 0;
+                    dailyschedule.AccumulatedDepreciation = 0;
+                    dailyschedule.CB = dailyCB;                  
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyschedule.AdditionId = currentItem.AdditionFormId;
+                    dailyschedule.EndPeriod = true;
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+                else if (k == 1 || k <= dailyPeriod)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = (dailyDepreciationCharge);
+                    dailyschedule.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    dailyschedule.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.CB = (dailyCB - dailyDepreciationCharge);
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyCB = (dailyCB - dailyDepreciationCharge);
+                    accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.AdditionId = currentItem.AdditionFormId;
+                    if (k == freq)
+                    {
+                        //dailyschedule.DepreciationForThePeriod = 0;
+                        accdailyAccumilative = 0;
+                    }
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+                
+                count++;
+            }
+            return true;
         }
 
     }

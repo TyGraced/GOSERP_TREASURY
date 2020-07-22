@@ -9,6 +9,7 @@ namespace PPE.Contracts.Response
     public class RegisterObj
     {
         public int RegisterId { get; set; }
+        public int AdditionFormId { get; set; }
         public string AssetNumber { get; set; }
         public string LpoNumber { get; set; }
         public int AssetClassificationId { get; set; }
