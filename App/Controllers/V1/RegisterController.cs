@@ -40,11 +40,11 @@ namespace PPE.Controllers.V1
 
         [HttpGet(ApiRoutes.Register.GET_ALL_REGISTER)]
 
-        public async Task<ActionResult<RegisterRespObj>> GetAllRegister(int AdditionFormId)
+        public async Task<ActionResult<RegisterRespObj>> GetAllRegister()
         {
             try
             {
-                var response =  _repo.GetAllRegister(AdditionFormId);
+                var response =  _repo.GetAllRegister();
                 return new RegisterRespObj
                 {
                     Registers = _mapper.Map<List<RegisterObj>>(response),

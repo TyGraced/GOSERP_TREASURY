@@ -59,7 +59,7 @@ namespace PPE.Installers
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:5100")
+                    builder.WithOrigins("http://localhost:5200")
                     .AllowAnyHeader()
                     .AllowAnyMethod(); ;
                 });

@@ -15,7 +15,7 @@ namespace PPE.Repository.Interface
 
         Task<ppe_register> GetRegisterByIdAsync(int id);
 
-        IEnumerable<RegisterObj> GetAllRegister(int AdditionFormId);
+        IEnumerable<RegisterObj> GetAllRegister();
 
         byte[] GenerateExportRegister();
 

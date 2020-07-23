@@ -67,7 +67,7 @@ namespace PPE.Repository.Implement
             return await _dataContext.ppe_register.FindAsync(id);
         }
 
-        public IEnumerable<RegisterObj> GetAllRegister(int AdditionFormId)
+        public IEnumerable<RegisterObj> GetAllRegister()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace PPE.Repository.Implement
                 var Application = (from a in _dataContext.ppe_register
                                    join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
                                    where a.Deleted == false  && e.PeriodDate.Value.Date == now.Date
-                                   && a.AdditionFormId == AdditionFormId
+                                   //&& a.AdditionFormId == AdditionFormId
                                    orderby a.CreatedOn descending
                                    select new RegisterObj
                                    {

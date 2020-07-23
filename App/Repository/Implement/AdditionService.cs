@@ -316,28 +316,29 @@ namespace PPE.Repository.Implement
 
                 var currentItem = await _dataContext.ppe_additionform.FindAsync(request.TargetId);
                 
-                var details =  new cor_approvaldetail
-                {
-                    Comment = request.ApprovalComment,
-                    Date = DateTime.Today,
-                    StatusId = request.ApprovalStatus,
-                    TargetId = request.TargetId,
-                    StaffId = user.StaffId,
-                    WorkflowToken = currentItem.WorkflowToken
-                };
-
-                var req = new IdentityServerApprovalCommand
-                {
-                    ApprovalComment = request.ApprovalComment,
-                    ApprovalStatus = request.ApprovalStatus,
-                    TargetId = request.TargetId,
-                    WorkflowToken = currentItem.WorkflowToken,
-                };
+                
 
                 using (var _trans = await _dataContext.Database.BeginTransactionAsync())
                 {
                     try
                     {
+                        var details = new cor_approvaldetail
+                        {
+                            Comment = request.ApprovalComment,
+                            Date = DateTime.Today,
+                            StatusId = request.ApprovalStatus,
+                            TargetId = request.TargetId,
+                            StaffId = user.StaffId,
+                            WorkflowToken = currentItem.WorkflowToken
+                        };
+
+                        var req = new IdentityServerApprovalCommand
+                        {
+                            ApprovalComment = request.ApprovalComment,
+                            ApprovalStatus = request.ApprovalStatus,
+                            TargetId = request.TargetId,
+                            WorkflowToken = currentItem.WorkflowToken,
+                        };
                         var result = await _serverRequest.StaffApprovalRequestAsync(req);
 
                         if (!result.IsSuccessStatusCode)
@@ -407,29 +408,17 @@ namespace PPE.Repository.Implement
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
                             currentItem.WorkflowToken = response.Status.CustomToken;
 
-                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
-
-
                             decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
                             decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
-                            //var day = DateTime.UtcNow.Date;
-                            //var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-                            //decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
-                            //TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-                            //int differenceInDays = usedLifeOfAsset.Days;
-                            //decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
-                            //decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
                             var assetNumber = AssetNumber.Generate();
 
                             var depreciationStartDate = currentItem.DepreciationStartDate;
-                            //var freq = 30;
                             int dailyPeriod = currentItem.UsefulLife * 30;
                             decimal dailyCB = currentItem.Cost;
-                            int i = 1;
-                            //int count = 0;
                             decimal accdailyDepreciationCharge = 0;
                             decimal accdailyAccumilative = 0;
+
+                            var res = GenerateInvestmentDailySchedule(currentItem.AdditionFormId);
 
                             var register = new ppe_register
                             {
@@ -456,6 +445,7 @@ namespace PPE.Repository.Implement
 
 
                             await AddUpdateRegisterAsync(register);
+                            await _dataContext.SaveChangesAsync();
 
                             await _trans.CommitAsync();
 
@@ -542,7 +532,7 @@ namespace PPE.Repository.Implement
             decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
             var day = DateTime.UtcNow.Date;
             var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-            decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+            //decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
             TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
             int differenceInDays = usedLifeOfAsset.Days;
             decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));

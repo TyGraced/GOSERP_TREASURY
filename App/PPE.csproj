@@ -52,6 +52,13 @@
   </ItemGroup>
 
 
+  <ItemGroup>
+    <Reference Include="GOSLibraries">
+      <HintPath>..\App.Contracts\Lib\GOSLibraries.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
   <!--<ItemGroup>
     <Reference Include="GOSLibraries">
       <HintPath>..\..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
