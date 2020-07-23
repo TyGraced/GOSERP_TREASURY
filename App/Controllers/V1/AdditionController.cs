@@ -52,22 +52,10 @@ namespace PPE.Controllers.V1
 
         [HttpGet(ApiRoutes.Addition.GET_ALL_ADDITION)]
 
-        public async Task<ActionResult<AdditionFormRespObj>> GetAllAdditionAsync(int AdditionId)
+        public async Task<ActionResult<AdditionFormRespObj>> GetAllAdditionAsync( )
         {
             try
             {
-                var currentItem = _dataContext.ppe_additionform.Find(AdditionId);
-                decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
-                decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
-                var day = DateTime.UtcNow.Date;
-                var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-                decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
-                TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-                int differenceInDays = usedLifeOfAsset.Days;
-                decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
-                decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
-                var assetNumber = AssetNumber.Generate();
-
                 var response = await _repo.GetAllAdditionAsync();
                 return new AdditionFormRespObj
                 {
