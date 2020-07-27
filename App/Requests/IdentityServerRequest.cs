@@ -20,7 +20,7 @@ namespace PPE.Requests
     public class IdentityServerRequest : IIdentityServerRequest
     {
         private readonly AsyncRetryPolicy _retryPolicy;
-        private const int MaxRetries = 100;
+        private const int maxRetryTimes = 10;
         private readonly IHttpClientFactory _httpClientFactory; 
         private HttpResponseMessage result = new HttpResponseMessage();
         private readonly IHttpContextAccessor _accessor;
@@ -35,11 +35,12 @@ namespace PPE.Requests
             _accessor = httpContextAccessor;
             _logger = loggerService;
             _httpClientFactory = httpClientFactory;
-            _retryPolicy = Policy.Handle<Exception>()
-              .WaitAndRetryAsync(MaxRetries, times =>
-              TimeSpan.FromMilliseconds(times * 100));
+            _retryPolicy = Policy.Handle<HttpRequestException>()
+             .WaitAndRetryAsync(maxRetryTimes, times =>
+             TimeSpan.FromSeconds(times * 2));
         }
 
+       
         public async Task<AuthenticationResult> IdentityServerLoginAsync(string userName, string password)
         {
             try

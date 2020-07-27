@@ -44,6 +44,7 @@ namespace PPE.Installers
 
             services.AddSingleton(tokenValidatorParameters);
             services.AddSingleton<IIdentityServerRequest, IdentityServerRequest>();
+            services.AddSingleton<IFinanceServerRequest, FinanceServerRequest>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddSingleton<ILoggerService, LoggerService>();
             services.AddMvc(options =>

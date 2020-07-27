@@ -28,6 +28,12 @@ namespace PPE.Contracts.V1
             public const string GET_ALL_STAFF = "/admin/get/all/staff";
         }
 
+        public static class SubGl
+        {
+            public const string GET_ALL_SUBGL = "/subgl/get/all";
+            public const string GET_SUBGL_BY_ID = "/subgl/get/single/subgl/id";
+        }
+
         public class Addition
         {
             public const string ADD_UPDATE_ADDITION = Base + "/addition/add/update/addition";

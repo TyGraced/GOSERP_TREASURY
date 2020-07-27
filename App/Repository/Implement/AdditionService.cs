@@ -442,8 +442,6 @@ namespace PPE.Repository.Implement
 
                             };
 
-
-
                             await AddUpdateRegisterAsync(register);
                             await _dataContext.SaveChangesAsync();
 
@@ -539,7 +537,7 @@ namespace PPE.Repository.Implement
             decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
             var assetNumber = AssetNumber.Generate();
 
-            var depreciationStartDate = currentItem.DepreciationStartDate;
+            var depreciationStartDate = DateTime.Now;
             var freq = 30;
             int dailyPeriod = currentItem.UsefulLife * 30;
             decimal dailyCB = currentItem.Cost;

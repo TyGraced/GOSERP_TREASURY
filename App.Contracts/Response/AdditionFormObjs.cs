@@ -11,6 +11,7 @@ namespace PPE.Contracts.Response
         public string LpoNumber { get; set; }
         public DateTime DateOfPurchase { get; set; }
         public string Description { get; set; }
+        public string SubGlName { get; set; }
         public int Quantity { get; set; }
         public decimal Cost { get; set; }
         public int AssetClassificationId { get; set; }
@@ -33,6 +34,7 @@ namespace PPE.Contracts.Response
         public string LpoNumber { get; set; }
         public DateTime DateOfPurchase { get; set; }
         public string Description { get; set; }
+        public string SubGlName { get; set; }
         public int Quantity { get; set; }
         public decimal Cost { get; set; }
         public int AssetClassificationId { get; set; }

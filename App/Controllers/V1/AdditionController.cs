@@ -13,6 +13,7 @@ using PPE.Data;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Implement.Addition;
 using PPE.Repository.Interface;
+using PPE.Requests;
 using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace PPE.Controllers.V1
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILoggerService _logger;
         private readonly IIdentityServerRequest _serverRequest;
+        private readonly IFinanceServerRequest _financeRequest;
         public AdditionController(
             DataContext dataContext,
             IAdditionService additionService,
@@ -39,12 +41,14 @@ namespace PPE.Controllers.V1
             IIdentityService identityService,
             IHttpContextAccessor httpContextAccessor,
             IIdentityServerRequest serverRequest,
+            IFinanceServerRequest financeRequest,
             ILoggerService logger)
         {
             _dataContext = dataContext;
             _mapper = mapper;
             _repo = additionService;
             _identityService = identityService;
+            _financeRequest = financeRequest;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _serverRequest = serverRequest;
@@ -57,9 +61,23 @@ namespace PPE.Controllers.V1
             try
             {
                 var response = await _repo.GetAllAdditionAsync();
+                var resObj = new List<AdditionFormObj>();
+                if (response.Count() > 0){
+                    var subGlResponse = await _financeRequest.GetAllSubGlAsync();
+                    
+                    resObj = _mapper.Map<List<AdditionFormObj>>(response);
+                    foreach (var res in resObj)
+                    {
+                        res.SubGlName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
+
+                    }
+                }
+
+
                 return new AdditionFormRespObj
                 {
-                    AdditionForms = _mapper.Map<List<AdditionFormObj>>(response),
+                    AdditionForms = resObj,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Search complete, no record found."} }
                 };
             }
             catch (Exception ex)
