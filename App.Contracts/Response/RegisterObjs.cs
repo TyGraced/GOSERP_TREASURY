@@ -24,6 +24,10 @@ namespace PPE.Contracts.Response
         public decimal DepreciationForThePeriod { get; set; }
         public decimal AccumulatedDepreciation { get; set; }
         public decimal NetBookValue { get; set; }
+        public int SubGlAddition { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }
@@ -53,6 +57,10 @@ namespace PPE.Contracts.Response
         public decimal DepreciationForThePeriod { get; set; }
         public decimal AccumulatedDepreciation { get; set; }
         public decimal NetBookValue { get; set; }
+        public int SubGlAddition { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
     }
 
     public class RegisterRegRespObj

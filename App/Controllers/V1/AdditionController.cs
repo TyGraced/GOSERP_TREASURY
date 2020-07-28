@@ -62,8 +62,9 @@ namespace PPE.Controllers.V1
             {
                 var response = await _repo.GetAllAdditionAsync();
                 var resObj = new List<AdditionFormObj>();
+                var subGlResponse = await _financeRequest.GetAllSubGlAsync();
+
                 if (response.Count() > 0){
-                    var subGlResponse = await _financeRequest.GetAllSubGlAsync();
                     
                     resObj = _mapper.Map<List<AdditionFormObj>>(response);
                     foreach (var res in resObj)
@@ -125,7 +126,8 @@ namespace PPE.Controllers.V1
                             Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
                         };
                 }
-
+                //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == model.AssetClassificationId).FirstOrDefault().ResidualValue;
+                //var residualValue = ((residlValue * model.Cost) / 100);
                 var domainObj = new ppe_additionform();
                 domainObj.AdditionFormId = model.AdditionFormId > 0 ? model.AdditionFormId : 0;
                 domainObj.Active = true;
@@ -138,6 +140,9 @@ namespace PPE.Controllers.V1
                 domainObj.Quantity = model.Quantity;
                 domainObj.Cost = model.Cost;
                 domainObj.SubGlAddition = model.SubGlAddition;
+                domainObj.SubGlDisposal = model.SubGlDisposal;
+                domainObj.SubGlDepreciation = model.SubGlDepreciation;
+                domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
                 domainObj.Location = model.Location;
                 domainObj.AssetClassificationId = model.AssetClassificationId;
                 domainObj.DepreciationStartDate = model.DepreciationStartDate;
@@ -343,6 +348,9 @@ namespace PPE.Controllers.V1
                         LpoNumber = d.LpoNumber,
                         ResidualValue = d.ResidualValue,
                         SubGlAddition = d.SubGlAddition,
+                        SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
+                        SubGlDepreciation = d.SubGlDepreciation,
+                        SubGlDisposal = d.SubGlDisposal,
                         UsefulLife = d.UsefulLife
                     }).ToList(),
                     Status = new APIResponseStatus

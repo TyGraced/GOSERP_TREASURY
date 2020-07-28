@@ -25,6 +25,9 @@ namespace PPE.Contracts.Response
         public decimal NetBookValue { get; set; }
         public int RemainingUsefulLife { get; set; }
         public int ProposedUsefulLife { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }

@@ -90,7 +90,6 @@ namespace PPE.Controllers.V1
                             Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
                         };
                 }
-
                 var domainObj = new ppe_assetclassification();
                 domainObj.AsetClassificationId = model.AsetClassificationId > 0 ? model.AsetClassificationId : 0;
                 domainObj.Active = true;

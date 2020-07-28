@@ -411,7 +411,8 @@ namespace PPE.Repository.Implement
                             decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
                             decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
                             var assetNumber = AssetNumber.Generate();
-
+                            //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == currentItem.AssetClassificationId).FirstOrDefault().ResidualValue;
+                            //var residualValue = ((residlValue * currentItem.Cost)/100);
                             var depreciationStartDate = currentItem.DepreciationStartDate;
                             int dailyPeriod = currentItem.UsefulLife * 30;
                             decimal dailyCB = currentItem.Cost;
@@ -439,6 +440,9 @@ namespace PPE.Repository.Implement
                                 UsefulLife = currentItem.UsefulLife,
                                 ResidualValue = currentItem.ResidualValue,
                                 AssetNumber = assetNumber,
+                                SubGlDepreciation = currentItem.SubGlDepreciation,
+                                SubGlAccumulatedDepreciation = currentItem.SubGlAccumulatedDepreciation,
+                                SubGlDisposal = currentItem.SubGlDisposal
 
                             };
 

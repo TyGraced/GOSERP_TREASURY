@@ -124,7 +124,9 @@ namespace PPE.Controllers.V1
                 domainObj.ProceedFromDisposal = model.ProceedFromDisposal;
                 domainObj.ProposedDisposalDate = model.ProposedDisposalDate;
                 domainObj.ReasonForDisposal = model.ReasonForDisposal;
-                domainObj.RequestDate = model.RequestDate;
+                domainObj.SubGlDisposal = model.SubGlDisposal;
+                domainObj.SubGlDepreciation = model.SubGlDepreciation;
+                domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.DisposalId > 0 ? DateTime.Today : DateTime.Today;
 
@@ -283,7 +285,11 @@ namespace PPE.Controllers.V1
                         //LpoNumber = d.LpoNumber,
                         ResidualValue = d.ResidualValue,
                         //SubGlAddition = d.SubGlAddition,
-                        UsefulLife = d.UsefulLife
+                        UsefulLife = d.UsefulLife,
+                        SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
+                        SubGlDepreciation = d.SubGlDepreciation,
+                        SubGlDisposal = d.SubGlDisposal
+                        
                     }).ToList(),
                     Status = new APIResponseStatus
                     {

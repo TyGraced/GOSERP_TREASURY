@@ -16,6 +16,9 @@ namespace PPE.Contracts.Response
         public decimal Cost { get; set; }
         public int AssetClassificationId { get; set; }
         public int SubGlAddition { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
         public decimal ResidualValue { get; set; }
@@ -39,6 +42,9 @@ namespace PPE.Contracts.Response
         public decimal Cost { get; set; }
         public int AssetClassificationId { get; set; }
         public int SubGlAddition { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
         public decimal ResidualValue { get; set; }

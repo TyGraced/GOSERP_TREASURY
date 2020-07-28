@@ -31,6 +31,9 @@ namespace PPE.DomainObjects.PPE
         public string ReasonForDisposal { get; set; }
         public DateTime RequestDate { get; set; }
         public DateTime ProposedDisposalDate { get; set; }
+        public int SubGlDepreciation { get; set; }
+        public int SubGlAccumulatedDepreciation { get; set; }
+        public int SubGlDisposal { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         [StringLength(50)]
