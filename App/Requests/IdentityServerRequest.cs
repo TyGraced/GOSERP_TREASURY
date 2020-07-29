@@ -24,7 +24,6 @@ namespace PPE.Requests
         private readonly IHttpClientFactory _httpClientFactory; 
         private HttpResponseMessage result = new HttpResponseMessage();
         private readonly IHttpContextAccessor _accessor;
-        private static HttpClient Client;
         private AuthenticationResult _authResponse = null;
         private readonly ILoggerService _logger;
 

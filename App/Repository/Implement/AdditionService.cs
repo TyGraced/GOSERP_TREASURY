@@ -210,7 +210,7 @@ namespace PPE.Repository.Implement
                 {
                     foreach (var item in uploadedRecord)
                     {
-                        var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
+                        var category = _dataContext.ppe_additionform.Where(x => x.AdditionFormId == item.AdditionFormId && x.Deleted == false).FirstOrDefault();
                         if (category != null)
                         {
                             category.LpoNumber = item.LpoNumber;
@@ -413,7 +413,7 @@ namespace PPE.Repository.Implement
                             var assetNumber = AssetNumber.Generate();
                             //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == currentItem.AssetClassificationId).FirstOrDefault().ResidualValue;
                             //var residualValue = ((residlValue * currentItem.Cost)/100);
-                            var depreciationStartDate = currentItem.DepreciationStartDate;
+                            var depreciationStartDate = DateTime.Now;
                             int dailyPeriod = currentItem.UsefulLife * 30;
                             decimal dailyCB = currentItem.Cost;
                             decimal accdailyDepreciationCharge = 0;
@@ -433,7 +433,7 @@ namespace PPE.Repository.Implement
                                 Location = currentItem.Location,
                                 LpoNumber = currentItem.LpoNumber,
                                 Quantity = currentItem.Quantity, 
-                                DepreciationStartDate = currentItem.DepreciationStartDate,
+                                DepreciationStartDate = depreciationStartDate,
                                 DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative,
                                 NetBookValue = (dailyCB - dailyDepreciationCharge),
                                 AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge,

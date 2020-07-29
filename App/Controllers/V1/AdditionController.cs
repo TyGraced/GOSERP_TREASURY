@@ -145,7 +145,7 @@ namespace PPE.Controllers.V1
                 domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
                 domainObj.Location = model.Location;
                 domainObj.AssetClassificationId = model.AssetClassificationId;
-                domainObj.DepreciationStartDate = model.DepreciationStartDate;
+                //domainObj.DepreciationStartDate = model.DepreciationStartDate;
                 domainObj.UsefulLife = model.UsefulLife;
                 domainObj.ResidualValue = model.ResidualValue;
                 domainObj.UpdatedBy = user.UserName;
@@ -341,7 +341,7 @@ namespace PPE.Controllers.V1
                         AssetClassificationId = d.AssetClassificationId,
                         Cost = d.Cost,
                         DateOfPurchase = d.DateOfPurchase,
-                        DepreciationStartDate = d.DepreciationStartDate,
+                        //DepreciationStartDate = d.DepreciationStartDate,
                         Description = d.Description,
                         Quantity = d.Quantity,
                         Location = d.Location,
@@ -368,25 +368,7 @@ namespace PPE.Controllers.V1
                 throw ex;
             }
 
-
-
         }
-
-
-        //[HttpPost(ApiRoutes.Addition.ADD_UPDATE_DAILYSCHEDULE)]
-        //public ActionResult<bool> GenerateInvestmentDailySchedule([FromBody] AdditionFormObj entity)
-        //{
-        //    try
-        //    {
-        //        var response = _repo.GenerateInvestmentDailySchedule(16);
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return false;
-        //    }
-        //}
-
 
     }
 }

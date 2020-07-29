@@ -104,7 +104,7 @@ namespace PPE.Controllers.V1
                 domainObj.DepreciationMethod = model.DepreciationMethod;
                 domainObj.SubGlAddition = model.SubGlAddition;
                 domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
-                domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
+                domainObj.SubGlDepreciation = model.SubGlDepreciation;
                 domainObj.SubGlDisposal = model.SubGlDisposal;
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.AsetClassificationId > 0 ? DateTime.Today : DateTime.Today;
