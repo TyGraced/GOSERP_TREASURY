@@ -139,7 +139,7 @@ namespace PPE.Controllers.V1
         [HttpPost(ApiRoutes.Register.DELETE_REGISTER)]
         public async Task<IActionResult> DeleteRegister([FromBody] DeleteRequest item)
         {
-            var response = false;
+            var response = true;
             var Ids = item.ItemIds;
             foreach (var id in Ids)
             {
@@ -150,13 +150,13 @@ namespace PPE.Controllers.V1
                     new DeleteRespObjt
                     {
                         Deleted = false,
-                        Status = new APIResponseStatus { Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
+                        Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
                     });
             return Ok(
                 new DeleteRespObjt
                 {
                     Deleted = true,
-                    Status = new APIResponseStatus { Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
                 });
 
         }

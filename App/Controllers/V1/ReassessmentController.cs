@@ -149,7 +149,7 @@ namespace PPE.Controllers.V1
         [HttpPost(ApiRoutes.Reassessment.DELETE_REASSESSMENT)]
         public async Task<IActionResult> DeleteReassessment([FromBody] DeleteRequest item)
         {
-            var response = false;
+            var response = true;
             var Ids = item.ItemIds;
             foreach (var id in Ids)
             {
@@ -160,13 +160,13 @@ namespace PPE.Controllers.V1
                     new DeleteRespObjt
                     {
                         Deleted = false,
-                        Status = new APIResponseStatus { Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
+                        Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
                     });
             return Ok(
                 new DeleteRespObjt
                 {
                     Deleted = true,
-                    Status = new APIResponseStatus { Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
                 });
 
         }
