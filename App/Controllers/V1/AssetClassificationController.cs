@@ -109,11 +109,11 @@ namespace PPE.Controllers.V1
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.AsetClassificationId > 0 ? DateTime.Today : DateTime.Today;
 
-                var isDone = await _repo.AddUpdateAssetClassificationAsync(domainObj);
+                 await _repo.AddUpdateAssetClassificationAsync(domainObj);
                 return new AssetClassificationRegRespObj
                 {
                     AsetClassificationId = domainObj.AsetClassificationId,
-                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
+                    Status = new APIResponseStatus { IsSuccessful = true    , Message = new APIResponseMessage { FriendlyMessage =  "successful"  } }
                 };
             }
             catch (Exception ex)

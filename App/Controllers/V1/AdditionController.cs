@@ -151,11 +151,11 @@ namespace PPE.Controllers.V1
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.AdditionFormId > 0 ? DateTime.Today : DateTime.Today;
 
-                var res = await _repo.AddUpdateAdditionAsync(domainObj);
+                 await _repo.AddUpdateAdditionAsync(domainObj);
                 return new AdditionFormRegRespObj
                 {
                     AdditionFormId = domainObj.AdditionFormId,
-                    Status = res.Status,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }
                 };
             }
             catch (Exception ex)

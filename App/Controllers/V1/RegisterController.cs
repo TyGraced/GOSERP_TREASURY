@@ -119,12 +119,11 @@ namespace PPE.Controllers.V1
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.RegisterId > 0 ? DateTime.Today : DateTime.Today;
 
-                var isDone = await _repo.AddUpdateRegisterAsync(domainObj);
+               await _repo.AddUpdateRegisterAsync(domainObj);
                 return new RegisterRegRespObj
                 {
                     RegisterId = domainObj.RegisterId,
-                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
-                };
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }                };
             }
             catch (Exception ex)
             {
