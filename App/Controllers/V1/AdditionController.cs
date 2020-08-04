@@ -69,7 +69,7 @@ namespace PPE.Controllers.V1
                     resObj = _mapper.Map<List<AdditionFormObj>>(response);
                     foreach (var res in resObj)
                     {
-                        res.SubGlName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
+                        res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
 
                     }
                 }

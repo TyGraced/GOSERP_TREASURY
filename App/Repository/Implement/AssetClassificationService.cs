@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using PPE.Contracts.Response;
 using PPE.Data;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using PPE.Requests;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,9 +17,11 @@ namespace PPE.Repository.Implement
     public class AssetClassificationService : IAssetClassificationService
     {
         private readonly DataContext _dataContext;
-        public AssetClassificationService(DataContext dataContext)
+        private readonly IFinanceServerRequest _financeRequest;
+        public AssetClassificationService(DataContext dataContext, IFinanceServerRequest financeRequest)
         {
             _dataContext = dataContext;
+            _financeRequest = financeRequest;
         }
         public async Task<bool> AddUpdateAssetClassificationAsync(ppe_assetclassification model)
         {
@@ -61,9 +65,10 @@ namespace PPE.Repository.Implement
         {
             try
             {
+                var subGlResponse = await _financeRequest.GetAllSubGlAsync();
                 if (record == null) return false;
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                List<ppe_assetclassification> uploadedRecord = new List<ppe_assetclassification>();
+                List<AssetClassificationObj> uploadedRecord = new List<AssetClassificationObj>();
                 if (record.Count() > 0)
                 {
                     foreach (var byteItem in record)
@@ -76,18 +81,17 @@ namespace PPE.Repository.Implement
 
                             for (int i = 2; i <= totalRows; i++)
                             {
-                                var item = new ppe_assetclassification
+                                var item = new AssetClassificationObj
                                 {
                                     ClassificationName = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
                                     UsefulLifeMin = workSheet.Cells[i, 2].Value != null ? int.Parse(workSheet.Cells[i, 2].Value.ToString()) : 0,
                                     UsefulLifeMax = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
                                     ResidualValue = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
                                     Depreciable = workSheet.Cells[i, 5].Value != null ? bool.Parse(workSheet.Cells[i, 5].Value.ToString()) : false,
-                                    DepreciationMethod = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                                    SubGlAddition = workSheet.Cells[i, 7].Value != null ? int.Parse(workSheet.Cells[i, 7].Value.ToString()) : 0,
-                                    SubGlDepreciation = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
-                                    SubGlAccumulatedDepreciation = workSheet.Cells[i, 9].Value != null ? int.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
-                                    SubGlDisposal = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
+                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    SubGlDepreciationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    SubGlAccumulatedDepreciationName = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
+                                    SubGlDisposalName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
                                 };
                                 uploadedRecord.Add(item);
                             }
@@ -99,6 +103,10 @@ namespace PPE.Repository.Implement
                 {
                     foreach (var item in uploadedRecord)
                     {
+                        var SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
+                        var SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDepreciationName)?.SubGLId ?? 0;
+                        var SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAccumulatedDepreciationName)?.SubGLId ?? 0;
+                        var SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDisposalName)?.SubGLId ?? 0;
                         var category = _dataContext.ppe_assetclassification.Where(x => x.ClassificationName == item.ClassificationName && x.Deleted == false).FirstOrDefault();
                         if (category != null)
                         {
@@ -107,11 +115,10 @@ namespace PPE.Repository.Implement
                             category.UsefulLifeMax = item.UsefulLifeMax;
                             category.ResidualValue = item.ResidualValue;
                             category.Depreciable = item.Depreciable;
-                            category.DepreciationMethod = item.DepreciationMethod;
-                            category.SubGlAddition = item.SubGlAddition;
-                            category.SubGlDepreciation = item.SubGlDepreciation;
-                            category.SubGlAccumulatedDepreciation = item.SubGlAccumulatedDepreciation;
-                            category.SubGlDisposal = item.SubGlDisposal;
+                            category.SubGlAddition = SubGlAdditionName;
+                            category.SubGlDepreciation = SubGlDepreciationName;
+                            category.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            category.SubGlDisposal = SubGlDisposalName;
                             category.Active = true;
                             category.Deleted = false;
                             category.UpdatedBy = createdBy;
@@ -120,24 +127,23 @@ namespace PPE.Repository.Implement
 
                         else
                         {
-                            var assetclassification = new ppe_assetclassification
-                            {
-                                ClassificationName = item.ClassificationName,
-                                UsefulLifeMin = item.UsefulLifeMin,
-                                UsefulLifeMax = item.UsefulLifeMax,
-                                ResidualValue = item.ResidualValue,
-                                Depreciable = item.Depreciable,
-                                DepreciationMethod = item.DepreciationMethod,
-                                SubGlAddition = item.SubGlAddition,
-                                SubGlDepreciation = item.SubGlDepreciation,
-                                SubGlAccumulatedDepreciation = item.SubGlAccumulatedDepreciation,
-                                SubGlDisposal = item.SubGlDisposal,
-                                AsetClassificationId = item.AsetClassificationId,
-                                Active = true,
-                                Deleted = false,
-                                CreatedBy = createdBy,
-                                CreatedOn = DateTime.Now,
-                            };
+                            var assetclassification = new ppe_assetclassification();
+
+                            assetclassification.ClassificationName = item.ClassificationName;
+                            assetclassification.UsefulLifeMin = item.UsefulLifeMin;
+                            assetclassification.UsefulLifeMax = item.UsefulLifeMax;
+                            assetclassification.ResidualValue = item.ResidualValue;
+                            assetclassification.Depreciable = item.Depreciable;
+                            assetclassification.SubGlAddition = SubGlAdditionName;
+                            assetclassification.SubGlDepreciation = SubGlDepreciationName;
+                            assetclassification.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            assetclassification.SubGlDisposal = SubGlDisposalName;
+                            assetclassification.AsetClassificationId = item.AsetClassificationId;
+                            assetclassification.Active = true;
+                            assetclassification.Deleted = false;
+                            assetclassification.CreatedBy = createdBy;
+                            assetclassification.CreatedOn = DateTime.Now;
+                            
                             await _dataContext.ppe_assetclassification.AddAsync(assetclassification);
                         }
                     }
@@ -161,18 +167,37 @@ namespace PPE.Repository.Implement
             dt.Columns.Add("Useful Life (Max)");
             dt.Columns.Add("Residual Value");
             dt.Columns.Add("Depreciable");
-            dt.Columns.Add("Depreciation Method");
+            dt.Columns.Add("SubGL Addition");
+            dt.Columns.Add("SubGL Depreciation");
+            dt.Columns.Add("SubGL Accumulated Depreciation");
+            dt.Columns.Add("SubGL Disposal");
+            var subGlResponse = _financeRequest.GetAllSubGlAsync().Result;
             var category = (from a in _dataContext.ppe_assetclassification
                             where a.Deleted == false
-                            select new ppe_assetclassification
+                            select new AssetClassificationObj
                             {
                                 ClassificationName = a.ClassificationName,
                                 UsefulLifeMin = a.UsefulLifeMin,
                                 UsefulLifeMax = a.UsefulLifeMax,
                                 ResidualValue = a.ResidualValue,
                                 Depreciable = a.Depreciable,
-                                DepreciationMethod = a.DepreciationMethod,
+                                SubGlAddition = a.SubGlAddition,
+                                SubGlDepreciation = a.SubGlDepreciation,
+                                SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation,
+                                SubGlDisposal = a.SubGlDisposal,
                             }).ToList();
+
+            if (category.Count() > 0)
+            {
+                foreach (var res in category)
+                {
+                    res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
+                    res.SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLName;
+                    res.SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLName;
+                    res.SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLName;
+
+                }
+            }
             foreach (var kk in category)
             {
                 var row = dt.NewRow();
@@ -181,7 +206,10 @@ namespace PPE.Repository.Implement
                 row["Useful Life (Max)"] = kk.UsefulLifeMax;
                 row["Residual Value"] = kk.ResidualValue;
                 row["Depreciable"] = kk.Depreciable;
-                row["Depreciation Method"] = kk.DepreciationMethod;
+                row["SubGL Addition"] = kk.SubGlAdditionName;
+                row["SubGL Depreciation"] = kk.SubGlDepreciationName;
+                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationName;
+                row["SubGL Disposal"] = kk.SubGlDisposalName;
                 dt.Rows.Add(row);
             }
             Byte[] fileBytes = null;

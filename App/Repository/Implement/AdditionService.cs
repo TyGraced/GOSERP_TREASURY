@@ -1,4 +1,5 @@
-﻿using GOSLibraries.Enums;
+﻿using AutoMapper;
+using GOSLibraries.Enums;
 using GOSLibraries.GOS_API_Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Implement.Addition;
 using PPE.Repository.Interface;
+using PPE.Requests;
 using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
@@ -29,15 +31,18 @@ namespace PPE.Repository.Implement
         private readonly IIdentityService _identityService;
         private readonly IIdentityServerRequest _serverRequest;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFinanceServerRequest _financeRequest;
         public AdditionService(DataContext dataContext,
             IIdentityService identityService,
             IIdentityServerRequest serverRequest,
+            IFinanceServerRequest financeRequest,
             IHttpContextAccessor httpContextAccessor)
         {
             _dataContext = dataContext;
             _httpContextAccessor = httpContextAccessor;
             _serverRequest = serverRequest;
             _identityService = identityService;
+            _financeRequest = financeRequest;
         }
         public async Task<AdditionFormRegRespObj> AddUpdateAdditionAsync(ppe_additionform model)
         {
@@ -175,9 +180,10 @@ namespace PPE.Repository.Implement
         {
             try
             {
+                var subGlResponse = await _financeRequest.GetAllSubGlAsync();
                 if (record == null) return false;
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                List<ppe_additionform> uploadedRecord = new List<ppe_additionform>();
+                List<AdditionFormObj> uploadedRecord = new List<AdditionFormObj>();
                 if (record.Count() > 0)
                 {
                     foreach (var byteItem in record)
@@ -190,14 +196,17 @@ namespace PPE.Repository.Implement
 
                             for (int i = 2; i <= totalRows; i++)
                             {
-                                var item = new ppe_additionform
+                                var item = new AdditionFormObj
                                 {
                                     LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
                                     DateOfPurchase = workSheet.Cells[i, 2].Value != null ? DateTime.Parse(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
                                     Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
                                     Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
                                     Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                                    SubGlAddition = workSheet.Cells[i, 6].Value != null ? int.Parse(workSheet.Cells[i, 6].Value.ToString()) : 0,
+                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    SubGlDepreciationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    SubGlAccumulatedDepreciationName = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
+                                    SubGlDisposalName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
                                     Location = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
                                 };
                                 uploadedRecord.Add(item);
@@ -210,7 +219,11 @@ namespace PPE.Repository.Implement
                 {
                     foreach (var item in uploadedRecord)
                     {
-                        var category = _dataContext.ppe_additionform.Where(x => x.AdditionFormId == item.AdditionFormId && x.Deleted == false).FirstOrDefault();
+                        var SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId??0;
+                        var SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDepreciationName)?.SubGLId ?? 0;
+                        var SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAccumulatedDepreciationName)?.SubGLId ?? 0;
+                        var SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDisposalName)?.SubGLId ?? 0;
+                        var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
                         if (category != null)
                         {
                             category.LpoNumber = item.LpoNumber;
@@ -218,7 +231,10 @@ namespace PPE.Repository.Implement
                             category.Description = item.Description;
                             category.Quantity = item.Quantity;
                             category.Cost = item.Cost;
-                            category.SubGlAddition = item.SubGlAddition;
+                            category.SubGlAddition = SubGlAdditionName;
+                            category.SubGlDepreciation = SubGlDepreciationName;
+                            category.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            category.SubGlDisposal = SubGlDisposalName;
                             category.Location = item.Location;
                             category.Active = true;
                             category.Deleted = false;
@@ -228,20 +244,23 @@ namespace PPE.Repository.Implement
 
                         else
                         {
-                            var addition = new ppe_additionform
-                            {
-                                LpoNumber = item.LpoNumber,
-                                DateOfPurchase = item.DateOfPurchase,
-                                Description = item.Description,
-                                Quantity = item.Quantity,
-                                Cost = item.Cost,
-                                SubGlAddition = item.SubGlAddition,
-                                Location = item.Location,
-                                Active = true,
-                                Deleted = false,
-                                CreatedBy = createdBy,
-                                CreatedOn = DateTime.Now,
-                            };
+                            var addition = new ppe_additionform();
+
+                            addition.LpoNumber = item.LpoNumber;
+                            addition.DateOfPurchase = item.DateOfPurchase;
+                            addition.Description = item.Description;
+                            addition.Quantity = item.Quantity;
+                            addition.Cost = item.Cost;
+                            addition.SubGlAddition = SubGlAdditionName;
+                            addition.SubGlDepreciation = SubGlDepreciationName;
+                            addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            addition.SubGlDisposal = SubGlDisposalName;
+                            addition.Location = item.Location;
+                            addition.Active = true;
+                            addition.Deleted = false;
+                            addition.CreatedBy = createdBy;
+                            addition.CreatedOn = DateTime.Now;
+                            
                             await _dataContext.ppe_additionform.AddAsync(addition);
                         }
                     }
@@ -265,11 +284,15 @@ namespace PPE.Repository.Implement
             dt.Columns.Add("Description");
             dt.Columns.Add("Quantity");
             dt.Columns.Add("Cost");
-            dt.Columns.Add("SubGl Addition");
+            dt.Columns.Add("SubGL Addition");
+            dt.Columns.Add("SubGL Depreciation");
+            dt.Columns.Add("SubGL Accumulated Depreciation");
+            dt.Columns.Add("SubGL Disposal");
             dt.Columns.Add("Location");
+            var subGlResponse = _financeRequest.GetAllSubGlAsync().Result;
             var category = (from a in _dataContext.ppe_additionform
                             where a.Deleted == false
-                            select new ppe_additionform
+                            select new AdditionFormObj
                             {
                                 LpoNumber = a.LpoNumber,
                                 DateOfPurchase = a.DateOfPurchase,
@@ -277,8 +300,24 @@ namespace PPE.Repository.Implement
                                 Quantity = a.Quantity,
                                 Cost = a.Cost,
                                 SubGlAddition = a.SubGlAddition,
+                                SubGlDepreciation = a.SubGlDepreciation,
+                                SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation, 
+                                SubGlDisposal = a.SubGlDisposal,
                                 Location = a.Location,
                             }).ToList();
+             
+
+            if (category.Count() > 0)
+            {  
+                foreach (var res in category)
+                {
+                    res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
+                    res.SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLName;
+                    res.SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLName;
+                    res.SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLName;
+
+                }
+            }
             foreach (var kk in category)
             {
                 var row = dt.NewRow();
@@ -287,7 +326,10 @@ namespace PPE.Repository.Implement
                 row["Description"] = kk.Description;
                 row["Quantity"] = kk.Quantity;
                 row["Cost"] = kk.Cost;
-                row["SubGl Addition"] = kk.SubGlAddition;
+                row["SubGL Addition"] = kk.SubGlAdditionName;
+                row["SubGL Depreciation"] = kk.SubGlDepreciationName;
+                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationName;
+                row["SubGL Disposal"] = kk.SubGlDisposalName;
                 row["Location"] = kk.Location;
                 dt.Rows.Add(row);
             }
