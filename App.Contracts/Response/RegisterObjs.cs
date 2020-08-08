@@ -49,6 +49,7 @@ namespace PPE.Contracts.Response
     public class AddUpdateRegisterObj
     {
         public int RegisterId { get; set; }
+        public int AdditionFormId { get; set; }
         [StringLength(50)]
         public string AssetNumber { get; set; }
         [StringLength(50)]

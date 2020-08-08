@@ -130,6 +130,7 @@ namespace PPE.Controllers.V1
                 domainObj.RegisterId = model.RegisterId > 0 ? model.RegisterId : 0;
                 domainObj.Active = true;
                 domainObj.CreatedBy = user.UserName;
+                domainObj.AdditionFormId = model.AdditionFormId;
                 domainObj.CreatedOn = DateTime.Today;
                 domainObj.Deleted = false;
                 domainObj.AssetNumber = model.AssetNumber;
