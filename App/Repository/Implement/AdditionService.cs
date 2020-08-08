@@ -203,11 +203,11 @@ namespace PPE.Repository.Implement
                                     Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
                                     Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
                                     Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                                    SubGlDepreciationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    SubGlAccumulatedDepreciationName = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
-                                    SubGlDisposalName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
-                                    Location = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    SubGlAdditionCode = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    SubGlDepreciationCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    SubGlAccumulatedDepreciationCode = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
+                                    SubGlDisposalCode = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
+                                    Location = workSheet.Cells[i, 10].Value != null ? workSheet.Cells[i, 10].Value.ToString() : null,
                                 };
                                 uploadedRecord.Add(item);
                             }
@@ -219,10 +219,10 @@ namespace PPE.Repository.Implement
                 {
                     foreach (var item in uploadedRecord)
                     {
-                        var SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId??0;
-                        var SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDepreciationName)?.SubGLId ?? 0;
-                        var SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAccumulatedDepreciationName)?.SubGLId ?? 0;
-                        var SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDisposalName)?.SubGLId ?? 0;
+                        var SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAdditionCode)?.SubGLId ?? 0;
+                        var SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDepreciationCode)?.SubGLId ?? 0;
+                        var SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAccumulatedDepreciationCode)?.SubGLId ?? 0;
+                        var SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDisposalCode)?.SubGLId ?? 0;
                         var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
                         if (category != null)
                         {
@@ -231,10 +231,10 @@ namespace PPE.Repository.Implement
                             category.Description = item.Description;
                             category.Quantity = item.Quantity;
                             category.Cost = item.Cost;
-                            category.SubGlAddition = SubGlAdditionName;
-                            category.SubGlDepreciation = SubGlDepreciationName;
-                            category.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
-                            category.SubGlDisposal = SubGlDisposalName;
+                            category.SubGlAddition = SubGlAdditionCode;
+                            category.SubGlDepreciation = SubGlDepreciationCode;
+                            category.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
+                            category.SubGlDisposal = SubGlDisposalCode;
                             category.Location = item.Location;
                             category.Active = true;
                             category.Deleted = false;
@@ -251,10 +251,10 @@ namespace PPE.Repository.Implement
                             addition.Description = item.Description;
                             addition.Quantity = item.Quantity;
                             addition.Cost = item.Cost;
-                            addition.SubGlAddition = SubGlAdditionName;
-                            addition.SubGlDepreciation = SubGlDepreciationName;
-                            addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
-                            addition.SubGlDisposal = SubGlDisposalName;
+                            addition.SubGlAddition = SubGlAdditionCode;
+                            addition.SubGlDepreciation = SubGlDepreciationCode;
+                            addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
+                            addition.SubGlDisposal = SubGlAccumulatedDepreciationCode;
                             addition.Location = item.Location;
                             addition.Active = true;
                             addition.Deleted = false;
@@ -311,10 +311,10 @@ namespace PPE.Repository.Implement
             {  
                 foreach (var res in category)
                 {
-                    res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
-                    res.SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLName;
-                    res.SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLName;
-                    res.SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLName;
+                    res.SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLCode;
+                    res.SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLCode;
+                    res.SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLCode;
+                    res.SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLCode;
 
                 }
             }
@@ -326,10 +326,10 @@ namespace PPE.Repository.Implement
                 row["Description"] = kk.Description;
                 row["Quantity"] = kk.Quantity;
                 row["Cost"] = kk.Cost;
-                row["SubGL Addition"] = kk.SubGlAdditionName;
-                row["SubGL Depreciation"] = kk.SubGlDepreciationName;
-                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationName;
-                row["SubGL Disposal"] = kk.SubGlDisposalName;
+                row["SubGL Addition"] = kk.SubGlAdditionCode;
+                row["SubGL Depreciation"] = kk.SubGlDepreciationCode;
+                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationCode;
+                row["SubGL Disposal"] = kk.SubGlDisposalCode;
                 row["Location"] = kk.Location;
                 dt.Rows.Add(row);
             }
@@ -358,8 +358,6 @@ namespace PPE.Repository.Implement
 
                 var currentItem = await _dataContext.ppe_additionform.FindAsync(request.TargetId);
                 
-                
-
                 using (var _trans = await _dataContext.Database.BeginTransactionAsync())
                 {
                     try
@@ -474,7 +472,7 @@ namespace PPE.Repository.Implement
                                 Description = currentItem.Description,
                                 Location = currentItem.Location,
                                 LpoNumber = currentItem.LpoNumber,
-                                Quantity = currentItem.Quantity, 
+                                Quantity = currentItem.Quantity,
                                 DepreciationStartDate = depreciationStartDate,
                                 DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative,
                                 NetBookValue = (dailyCB - dailyDepreciationCharge),
@@ -485,6 +483,7 @@ namespace PPE.Repository.Implement
                                 SubGlDepreciation = currentItem.SubGlDepreciation,
                                 SubGlAccumulatedDepreciation = currentItem.SubGlAccumulatedDepreciation,
                                 SubGlDisposal = currentItem.SubGlDisposal
+
 
                             };
 
@@ -561,6 +560,38 @@ namespace PPE.Repository.Implement
             {
                 throw ex;
             }
+            //try
+            //{
+
+            //    if (model.RegisterId > 0)
+            //    {
+            //        var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+            //        model.Deleted = false;
+            //        model.Active = true;
+            //        _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+
+            //    }
+            //    else
+            //    {
+            //        await _dataContext.ppe_register.AddAsync(model);
+            //    }
+
+            //    await _dataContext.SaveChangesAsync();
+            //    return new RegisterRegRespObj
+            //    {
+            //        RegisterId = model.RegisterId,
+
+            //        Status = new APIResponseStatus
+            //        {
+            //            IsSuccessful = true,
+            //            Message = new APIResponseMessage { FriendlyMessage = "Successful" }
+            //        }
+            //    };
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
         }
 
         public async Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens)

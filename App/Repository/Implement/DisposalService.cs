@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OfficeOpenXml;
+using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Data;
 using PPE.DomainObjects.Approval;
@@ -23,18 +24,21 @@ namespace PPE.Repository.Implement
     {
         private readonly DataContext _dataContext;
         private readonly IIdentityServerRequest _serverRequest;
+        private readonly IIdentityService _identityService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public DisposalService(DataContext dataContext, IIdentityServerRequest serverRequest, IHttpContextAccessor httpContextAccessor)
+        public DisposalService(DataContext dataContext, IIdentityServerRequest serverRequest, IHttpContextAccessor httpContextAccessor, IIdentityService identityService)
         {
             _dataContext = dataContext;
             _serverRequest = serverRequest;
             _httpContextAccessor = httpContextAccessor;
+            _identityService = identityService;
         }
-        public async Task<bool> AddUpdateDisposalAsync(ppe_disposal model)
+        public async Task<DisposalRegRespObj> AddUpdateDisposalAsync(ppe_disposal model)
         {
             try
             {
+                var user = await _identityService.UserDataAsync();
 
                 if (model.DisposalId > 0)
                 {
@@ -42,13 +46,106 @@ namespace PPE.Repository.Implement
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else
+                {
                     await _dataContext.ppe_disposal.AddAsync(model);
-                return await _dataContext.SaveChangesAsync() > 0;
+                }
+                await _dataContext.SaveChangesAsync();
+
+                GoForApprovalRequest wfRequest = new GoForApprovalRequest
+                {
+                    Comment = "PPE Disposal",
+                    OperationId = (int)OperationsEnum.PPEDisposal,
+                    TargetId = model.DisposalId,
+                    ApprovalStatus = (int)ApprovalStatus.Pending,
+                    DeferredExecution = true,
+                    StaffId = user.StaffId,
+                    CompanyId = 1,
+                    EmailNotification = true,
+                    ExternalInitialization = false,
+                    StatusId = (int)ApprovalStatus.Processing,
+                };
+                var result = await _serverRequest.GotForApprovalAsync(wfRequest);
+
+                using (var _trans = _dataContext.Database.BeginTransaction())
+                {
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        new DisposalRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = false,
+                                Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" }
+                            }
+                        };
+                    }
+
+                    var stringData = await result.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<GoForApprovalRespObj>(stringData);
+
+
+                    if (res.ApprovalProcessStarted)
+                    {
+                        model.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                        model.WorkflowToken = res.Status.CustomToken;
+                        if (model.DisposalId > 0)
+                        {
+                            var itemToUpdate = await _dataContext.ppe_disposal.FindAsync(model.DisposalId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                        }
+                        else
+                        {
+                            await _dataContext.ppe_disposal.AddAsync(model);
+                        }
+                        await _dataContext.SaveChangesAsync();
+
+                        await _trans.CommitAsync();
+                        return new DisposalRegRespObj
+                        {
+                            DisposalId = res.TargetId,
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+
+                    if (res.EnableWorkflow || !res.HasWorkflowAccess)
+                    {
+                        await _trans.RollbackAsync();
+                        return new DisposalRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+                    if (!res.EnableWorkflow)
+                    {
+
+                        await _trans.CommitAsync();
+                        return new DisposalRegRespObj
+                        {
+                            DisposalId = model.DisposalId,
+                            Status = res.Status
+                        };
+                    }
+
+                }
+
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+            return new DisposalRegRespObj
+            {
+                DisposalId = model.DisposalId,
+                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred" } }
+            };
         }
 
         public async Task<bool> DeleteDisposalAsync(int id)
@@ -148,28 +245,29 @@ namespace PPE.Repository.Implement
 
                 var currentItem = await _dataContext.ppe_disposal.FindAsync(request.TargetId);
 
-                var details = new cor_approvaldetail
-                {
-                    Comment = request.ApprovalComment,
-                    Date = DateTime.Today,
-                    StatusId = request.ApprovalStatus,
-                    TargetId = request.TargetId,
-                    StaffId = user.StaffId,
-                    WorkflowToken = currentItem.WorkflowToken
-                };
-
-                var req = new IdentityServerApprovalCommand
-                {
-                    ApprovalComment = request.ApprovalComment,
-                    ApprovalStatus = request.ApprovalStatus,
-                    TargetId = request.TargetId,
-                    WorkflowToken = currentItem.WorkflowToken,
-                };
-
                 using (var _trans = await _dataContext.Database.BeginTransactionAsync())
                 {
                     try
                     {
+                        var details = new cor_approvaldetail
+                        {
+                            Comment = request.ApprovalComment,
+                            Date = DateTime.Today,
+                            StatusId = request.ApprovalStatus,
+                            TargetId = request.TargetId,
+                            StaffId = user.StaffId,
+                            WorkflowToken = currentItem.WorkflowToken
+                        };
+
+                        var req = new IdentityServerApprovalCommand
+                        {
+                            ApprovalComment = request.ApprovalComment,
+                            ApprovalStatus = request.ApprovalStatus,
+                            TargetId = request.TargetId,
+                            WorkflowToken = currentItem.WorkflowToken,
+                        };
+
+
                         var result = await _serverRequest.StaffApprovalRequestAsync(req);
 
                         if (!result.IsSuccessStatusCode)
@@ -239,12 +337,6 @@ namespace PPE.Repository.Implement
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
                             currentItem.WorkflowToken = response.Status.CustomToken;
 
-                            var itemToUpdate = await _dataContext.ppe_disposal.FindAsync(currentItem.DisposalId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
-
-
-
-
                             await _trans.CommitAsync();
 
                             return new StaffApprovalRegRespObj
@@ -291,25 +383,6 @@ namespace PPE.Repository.Implement
                 {
                     ResponseId = request.TargetId,
                 };
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        private async Task<bool> AddUpdateRegisterAsync(ppe_register model)
-        {
-            try
-            {
-                if (model.RegisterId > 0)
-                {
-                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
-                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
-                }
-                else
-                    await _dataContext.ppe_register.AddAsync(model);
-                return await _dataContext.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {

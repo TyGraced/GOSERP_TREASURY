@@ -146,7 +146,7 @@ namespace PPE.Controllers.V1
             }
         }
 
-        [HttpPost(ApiRoutes.Reassessment.DELETE_REASSESSMENT)]
+        /*[HttpPost(ApiRoutes.Reassessment.DELETE_REASSESSMENT)]
         public async Task<IActionResult> DeleteReassessment([FromBody] DeleteRequest item)
         {
             var response = true;
@@ -180,7 +180,7 @@ namespace PPE.Controllers.V1
             {
                 export = response,
             };
-        }
+        }*/
 
         [HttpPost(ApiRoutes.Reassessment.REASSESSMENT_STAFF_APPROVAL)]
         public async Task<IActionResult> ReassessmentStaffApproval([FromBody]StaffApprovalObj request)
@@ -275,14 +275,18 @@ namespace PPE.Controllers.V1
                         Active = d.Active,
                         AssetClassificationId = d.AssetClassificationId,
                         Cost = d.Cost,
-                        //DateOfPurchase = d.DateOfPurchase,
+                        DateOfPurchaase = d.DateOfPurchaase,
                         DepreciationStartDate = d.DepreciationStartDate,
+                        DepreciationForThePeriod = d.DepreciationForThePeriod,
+                        AccumulatedDepreciation = d.AccumulatedDepreciation,
+                        NetBookValue = d.NetBookValue,
                         Description = d.Description,
                         Quantity = d.Quantity,
                         Location = d.Location,
                         LpoNumber = d.LpoNumber,
                         ResidualValue = d.ResidualValue,
-                        //SubGlAddition = d.SubGlAddition,
+                        RemainingUsefulLife = d.RemainingUsefulLife,
+                        AssetNumber = d.AssetNumber,
                         UsefulLife = d.UsefulLife
                     }).ToList(),
                     Status = new APIResponseStatus

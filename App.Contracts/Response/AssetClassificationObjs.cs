@@ -16,12 +16,16 @@ namespace PPE.Contracts.Response
         public string DepreciationMethod { get; set; }
         public int SubGlAddition { get; set; }
         public string SubGlAdditionName { get; set; }
+        public string SubGlAdditionCode { get; set; }
         public int SubGlDepreciation { get; set; }
         public string SubGlDepreciationName { get; set; }
+        public string SubGlDepreciationCode { get; set; }
         public int SubGlAccumulatedDepreciation { get; set; }
         public string SubGlAccumulatedDepreciationName { get; set; }
+        public string SubGlAccumulatedDepreciationCode { get; set; }
         public int SubGlDisposal { get; set; }
         public string SubGlDisposalName { get; set; }
+        public string SubGlDisposalCode { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }
@@ -43,12 +47,16 @@ namespace PPE.Contracts.Response
         public string DepreciationMethod { get; set; }
         public int SubGlAddition { get; set; }
         public string SubGlAdditionName { get; set; }
+        public string SubGlAdditionCode { get; set; }
         public int SubGlDepreciation { get; set; }
         public string SubGlDepreciationName { get; set; }
+        public string SubGlDepreciationCode { get; set; }
         public int SubGlAccumulatedDepreciation { get; set; }
         public string SubGlAccumulatedDepreciationName { get; set; }
+        public string SubGlAccumulatedDepreciationCode { get; set; }
         public int SubGlDisposal { get; set; }
         public string SubGlDisposalName { get; set; }
+        public string SubGlDisposalCode { get; set; }
     }
 
     public class AssetClassificationRegRespObj

@@ -4,10 +4,12 @@ using GOSLibraries.GOS_Error_logger.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PPE.AuthHandler;
 using PPE.Contracts.Response;
 using PPE.Contracts.V1;
+using PPE.Data;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
 using Puchase_and_payables.Requests;
@@ -28,7 +30,8 @@ namespace PPE.Controllers.V1
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILoggerService _logger;
         private readonly IIdentityServerRequest _serverRequest;
-        public RegisterController(IRegisterService registerService, IMapper mapper, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, ILoggerService logger, IIdentityServerRequest serverRequest)
+        private readonly DataContext _dataContext;
+        public RegisterController(IRegisterService registerService, IMapper mapper, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, ILoggerService logger, IIdentityServerRequest serverRequest, DataContext dataContext)
         {
             _mapper = mapper;
             _repo = registerService;
@@ -36,6 +39,7 @@ namespace PPE.Controllers.V1
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _serverRequest = serverRequest;
+            _dataContext = dataContext;
         }
 
         [HttpGet(ApiRoutes.Register.GET_ALL_REGISTER)]
@@ -67,28 +71,54 @@ namespace PPE.Controllers.V1
             {
                 return new RegisterRespObj
                 {
-                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Register Id is required" } }
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Reassessment Id is required" } }
                 };
             }
 
-            var response = await _repo.GetRegisterByIdAsync(search.SearchId);
-            var resplist = new List<ppe_register> { response };
+            var response =   _repo.GetRegisterByIdAsync(search.SearchId);
+            //var resplist = new List<ppe_register> { response };
             return new RegisterRespObj
             {
-                Registers = _mapper.Map<List<RegisterObj>>(resplist),
+                Registers = _mapper.Map<List<RegisterObj>>(response),
             };
         }
 
+        //public async Task<ActionResult<RegisterRespObj>> GetRegisterByIdAsync([FromQuery] SearchObj search)
+        //{
+        //    if (search.SearchId < 1)
+        //    {
+        //        return new RegisterRespObj
+        //        {
+        //            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Register Id is required" } }
+        //        };
+        //    }
+
+        //    var now = DateTime.Now.Date;
+        //    var dailySchedule = await _dataContext.ppe_dailyschedule.ToListAsync();
+        //    var response =  _repo.GetRegisterByIdAsync(search.SearchId);
+        //    var resObj = new List<RegisterObj>();
+        //    var dbObj = new List<ppe_register>() { response };
+        //    resObj = _mapper.Map<List<RegisterObj>>(dbObj);
+        //    foreach (var res in resObj)
+        //    {
+        //        res.DepreciationForThePeriod = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.DepreciationForThePeriod ?? 0;
+        //        res.AccumulatedDepreciation = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.AccumulatedDepreciation ?? 0;
+        //        res.NetBookValue = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.CB ?? 0;
+
+        //    }
+        //    return new RegisterRespObj { Registers = resObj };
+        //}
+
         [HttpPost(ApiRoutes.Register.ADD_UPDATE_REGISTER)]
-        public async Task<ActionResult<RegisterRegRespObj>> AddUpDateRegister([FromBody] AddUpdateRegisterObj model)
+        public async Task<ActionResult<RegisterRegRespObj>> AddUpdateRegisterAsync([FromBody] AddUpdateRegisterObj model)
         {
             try
             {
                 var user = await _identityService.UserDataAsync();
-                ppe_register item = null;
+                IEnumerable<RegisterObj> item = null;
                 if (model.RegisterId > 0)
                 {
-                    item = await _repo.GetRegisterByIdAsync(model.RegisterId);
+                    item = _repo.GetRegisterByIdAsync(model.RegisterId);  //_repo.GetRegisterByIdAsync(model.RegisterId);
                     if (item == null)
                         return new RegisterRegRespObj
                         {
@@ -123,7 +153,7 @@ namespace PPE.Controllers.V1
                 return new RegisterRegRespObj
                 {
                     RegisterId = domainObj.RegisterId,
-                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }                };
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } } };
             }
             catch (Exception ex)
             {
@@ -136,30 +166,30 @@ namespace PPE.Controllers.V1
             }
         }
 
-        [HttpPost(ApiRoutes.Register.DELETE_REGISTER)]
-        public async Task<IActionResult> DeleteRegister([FromBody] DeleteRequest item)
-        {
-            var response = true;
-            var Ids = item.ItemIds;
-            foreach (var id in Ids)
-            {
-                response = await _repo.DeleteRegisterAsync(id);
-            }
-            if (!response)
-                return BadRequest(
-                    new DeleteRespObjt
-                    {
-                        Deleted = false,
-                        Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
-                    });
-            return Ok(
-                new DeleteRespObjt
-                {
-                    Deleted = true,
-                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
-                });
+        //[HttpPost(ApiRoutes.Register.DELETE_REGISTER)]
+        //public async Task<IActionResult> DeleteRegister([FromBody] DeleteRequest item)
+        //{
+        //    var response = true;
+        //    var Ids = item.ItemIds;
+        //    foreach (var id in Ids)
+        //    {
+        //        response = await _repo.DeleteRegisterAsync(id);
+        //    }
+        //    if (!response)
+        //        return BadRequest(
+        //            new DeleteRespObjt
+        //            {
+        //                Deleted = false,
+        //                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
+        //            });
+        //    return Ok(
+        //        new DeleteRespObjt
+        //        {
+        //            Deleted = true,
+        //            Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+        //        });
 
-        }
+        //}
 
         [HttpGet(ApiRoutes.Register.DOWNLOAD_REGISTER)]
         public async Task<ActionResult<RegisterRespObj>> GenerateExportRegister()
@@ -170,6 +200,47 @@ namespace PPE.Controllers.V1
             {
                 export = response,
             };
+        }
+
+        [HttpPost(ApiRoutes.Register.UPLOAD_REGISTER)]
+        public async Task<ActionResult<RegisterRegRespObj>> UploadRegisterAsync()
+        {
+            try
+            {
+                var files = _httpContextAccessor.HttpContext.Request.Form.Files;
+
+                var byteList = new List<byte[]>();
+                foreach (var fileBit in files)
+                {
+                    if (fileBit.Length > 0)
+                    {
+                        using (var ms = new MemoryStream())
+                        {
+                            await fileBit.CopyToAsync(ms);
+                            byteList.Add(ms.ToArray());
+                        }
+                    }
+
+                }
+
+                var user = await _identityService.UserDataAsync();
+                var createdBy = user.UserName;
+
+                var isDone = await _repo.UploadRegisterAsync(byteList, createdBy);
+                return new RegisterRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new RegisterRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
         }
 
         [HttpPost(ApiRoutes.Register.REGISTER_STAFF_APPROVAL)]

@@ -9,6 +9,7 @@ using PPE.Data;
 using PPE.DomainObjects.Approval;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Interface;
+using PPE.Requests;
 using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
@@ -24,58 +25,94 @@ namespace PPE.Repository.Implement
         private readonly DataContext _dataContext;
         private readonly IIdentityServerRequest _serverRequest;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFinanceServerRequest _financeRequest;
 
-        public RegisterService(DataContext dataContext, IIdentityServerRequest serverRequest, IHttpContextAccessor httpContextAccessor)
+        public RegisterService(DataContext dataContext, IIdentityServerRequest serverRequest, IHttpContextAccessor httpContextAccessor, IFinanceServerRequest financeRequest)
         {
             _dataContext = dataContext;
             _serverRequest = serverRequest;
             _httpContextAccessor = httpContextAccessor;
+            _financeRequest = financeRequest;
         }
         public async Task<bool> AddUpdateRegisterAsync(ppe_register model)
         {
+
             try
             {
-
                 if (model.RegisterId > 0)
                 {
                     var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else
-                {
                     await _dataContext.ppe_register.AddAsync(model);
-                }
-                    
                 return await _dataContext.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+
+            //try
+            //{
+
+            //    if (model.RegisterId > 0)
+            //    {
+            //        var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+            //        model.Deleted = false;
+            //        model.Active = true;
+            //        _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+
+            //    }
+            //    else
+            //    {
+            //        await _dataContext.ppe_register.AddAsync(model);
+            //    }
+                    
+            //    await _dataContext.SaveChangesAsync();
+            //    return new RegisterRegRespObj
+            //    {
+            //        RegisterId = model.RegisterId,
+
+            //        Status = new APIResponseStatus
+            //        {
+            //            IsSuccessful = true,
+            //            Message = new APIResponseMessage { FriendlyMessage = "Successful"}
+            //        }
+            //    };
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
         }
 
-        public async Task<bool> DeleteRegisterAsync(int id)
-        {
-            var itemToDelete = await _dataContext.ppe_register.FindAsync(id);
-            itemToDelete.Deleted = true;
-            _dataContext.Entry(itemToDelete).CurrentValues.SetValues(itemToDelete);
-            return await _dataContext.SaveChangesAsync() > 0;
-        }
+        //public async Task<bool> DeleteRegisterAsync(int id)
+        //{
+        //    var itemToDelete = await _dataContext.ppe_register.FindAsync(id);
+        //    itemToDelete.Deleted = true;
+        //    _dataContext.Entry(itemToDelete).CurrentValues.SetValues(itemToDelete);
+        //    return await _dataContext.SaveChangesAsync() > 0;
+        //}
 
-        public async Task<ppe_register> GetRegisterByIdAsync(int id)
-        {
-            return await _dataContext.ppe_register.FindAsync(id);
-        }
+        //public async Task<ppe_register> GetRegisterByIdAsync(int id)
+        //{
+        //    return await _dataContext.ppe_register.FindAsync(id);
+        //}
 
-        public IEnumerable<RegisterObj> GetAllRegister()
+        public IEnumerable<RegisterObj> GetRegisterByIdAsync(int id)
         {
             try
             {
+                var currentItem = _dataContext.ppe_register.Where(a => a.RegisterId == id).FirstOrDefault();
+                TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+                int differenceInDays = usedLifeOfAsset.Days;
+                int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
                 var now = DateTime.Now.Date;
                 var Application = (from a in _dataContext.ppe_register
                                    join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
-                                   where a.Deleted == false  && e.PeriodDate.Value.Date == now.Date
-                                   //&& a.AdditionFormId == AdditionFormId
+                                   where a.Deleted == false && e.PeriodDate.Value.Date == now.Date
+                                   && a.RegisterId == id
                                    orderby a.CreatedOn descending
                                    select new RegisterObj
                                    {
@@ -95,9 +132,179 @@ namespace PPE.Repository.Implement
                                        DepreciationForThePeriod = e.DepreciationForThePeriod,
                                        AccumulatedDepreciation = e.AccumulatedDepreciation,
                                        NetBookValue = e.CB,
+                                       RemainingUsefulLife = remainingUsefulLife,
                                    }).ToList();
 
                 return Application;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public IEnumerable<RegisterObj> GetAllRegister()
+        {
+            try
+            {
+                //var currentItem = _dataContext.ppe_register.Where(a => a.RegisterId == a.RegisterId).FirstOrDefault();
+                //TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+                //int differenceInDays = usedLifeOfAsset.Days;
+                //int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
+                var now = DateTime.Now.Date;
+                var Application = (from a in _dataContext.ppe_register
+                                   join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
+                                   where a.Deleted == false  && e.PeriodDate.Value.Date == now.Date
+                                   orderby a.CreatedOn descending
+                                   select new RegisterObj
+
+
+                                   {
+                                       RegisterId = a.RegisterId,
+                                       AdditionFormId = a.AdditionFormId,
+                                       AssetClassificationId = a.AssetClassificationId,
+                                       AssetNumber = a.AssetNumber,
+                                       LpoNumber = a.LpoNumber,
+                                       Description = a.Description,
+                                       Cost = a.Cost,
+                                       DateOfPurchaase = a.DateOfPurchaase,
+                                       Quantity = a.Quantity,
+                                       DepreciationStartDate = a.DepreciationStartDate,
+                                       UsefulLife = a.UsefulLife,
+                                       ResidualValue = a.ResidualValue,
+                                       Location = a.Location,
+                                       DepreciationForThePeriod = e.DepreciationForThePeriod,
+                                       AccumulatedDepreciation = e.AccumulatedDepreciation,
+                                       NetBookValue = e.CB,
+                                       //RemainingUsefulLife = remainingUsefulLife,
+                                   }).ToList();
+
+                return Application;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<bool> UploadRegisterAsync(List<byte[]> record, string createdBy)
+        {
+            try
+            {
+                var subGlResponse = await _financeRequest.GetAllSubGlAsync();
+                if (record == null) return false;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                List<RegisterObj> uploadedRecord = new List<RegisterObj>();
+                if (record.Count() > 0)
+                {
+                    foreach (var byteItem in record)
+                    {
+                        using (MemoryStream stream = new MemoryStream(byteItem))
+                        using (ExcelPackage excelPackage = new ExcelPackage(stream))
+                        {
+                            ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets[0];
+                            int totalRows = workSheet.Dimension.Rows;
+
+                            for (int i = 2; i <= totalRows; i++)
+                            {
+                                var item = new RegisterObj
+                                {
+                                    AssetNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
+                                    LpoNumber = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : null,
+                                    ClassificationName = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
+                                    Description = workSheet.Cells[i, 4].Value != null ? workSheet.Cells[i, 4].Value.ToString() : null,
+                                    Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
+                                    DateOfPurchaase = workSheet.Cells[i, 6].Value != null ? DateTime.Parse(workSheet.Cells[i, 6].Value.ToString()) : DateTime.Now,
+                                    Quantity = workSheet.Cells[i, 7].Value != null ? int.Parse(workSheet.Cells[i, 7].Value.ToString()) : 0,
+                                    DepreciationStartDate = workSheet.Cells[i, 8].Value != null ? DateTime.Parse(workSheet.Cells[i, 8].Value.ToString()) : DateTime.Now,
+                                    UsefulLife = workSheet.Cells[i, 9].Value != null ? int.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
+                                    ResidualValue = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
+                                    SubGlAdditionCode = workSheet.Cells[i, 11].Value != null ? workSheet.Cells[i, 11].Value.ToString() : null,
+                                    SubGlDepreciationCode = workSheet.Cells[i, 12].Value != null ? workSheet.Cells[i, 12].Value.ToString() : null,
+                                    SubGlAccumulatedDepreciationCode = workSheet.Cells[i, 13].Value != null ? workSheet.Cells[i, 13].Value.ToString() : null,
+                                    SubGlDisposalCode = workSheet.Cells[i, 14].Value != null ? workSheet.Cells[i, 14].Value.ToString() : null,
+                                    Location = workSheet.Cells[i, 15].Value != null ? workSheet.Cells[i, 15].Value.ToString() : null,
+                                    DepreciationForThePeriod = workSheet.Cells[i, 16].Value != null ? decimal.Parse(workSheet.Cells[i, 16].Value.ToString()) : 0,
+                                    AccumulatedDepreciation = workSheet.Cells[i, 17].Value != null ? decimal.Parse(workSheet.Cells[i, 17].Value.ToString()) : 0,
+                                    NetBookValue = workSheet.Cells[i, 18].Value != null ? decimal.Parse(workSheet.Cells[i, 18].Value.ToString()) : 0,
+                                };
+                                uploadedRecord.Add(item);
+                            }
+                        }
+                    }
+
+                }
+                if (uploadedRecord.Count > 0)
+                {
+                    foreach (var item in uploadedRecord)
+                    {
+                        var classificationName = _dataContext.ppe_assetclassification.Where(c => c.ClassificationName == item.ClassificationName).FirstOrDefault()?.AsetClassificationId ?? 0;
+                        var SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAdditionCode)?.SubGLId ?? 0;
+                        var SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDepreciationCode)?.SubGLId ?? 0;
+                        var SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAccumulatedDepreciationCode)?.SubGLId ?? 0;
+                        var SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDisposalCode)?.SubGLId ?? 0;
+                        var register = _dataContext.ppe_register.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
+                        if (register != null)
+                        {
+                            register.AssetNumber = item.AssetNumber;
+                            register.LpoNumber = item.LpoNumber;
+                            register.AssetClassificationId = classificationName;
+                            register.Description = item.Description;
+                            register.Cost = item.Cost;
+                            register.DateOfPurchaase = item.DateOfPurchaase;
+                            register.Quantity = item.Quantity;
+                            register.DepreciationStartDate = item.DepreciationStartDate;
+                            register.UsefulLife = item.UsefulLife;
+                            register.ResidualValue = item.ResidualValue;
+                            register.DepreciationForThePeriod = item.DepreciationForThePeriod;
+                            register.AccumulatedDepreciation = item.AccumulatedDepreciation;
+                            register.NetBookValue = item.NetBookValue;
+                            register.SubGlAddition = SubGlAdditionCode;
+                            register.SubGlDepreciation = SubGlDepreciationCode;
+                            register.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
+                            register.SubGlDisposal = SubGlDisposalCode;
+                            register.Location = item.Location;
+                            register.Active = true;
+                            register.Deleted = false;
+                            register.UpdatedBy = createdBy;
+                            register.UpdatedOn = DateTime.Now;
+                        }
+
+                        else
+                        {
+                            var registers = new ppe_register();
+
+                            registers.AssetNumber = item.AssetNumber;
+                            registers.LpoNumber = item.LpoNumber;
+                            registers.AssetClassificationId = classificationName;
+                            registers.Description = item.Description;
+                            registers.Cost = item.Cost;
+                            registers.DateOfPurchaase = item.DateOfPurchaase;
+                            registers.Quantity = item.Quantity;
+                            registers.DepreciationStartDate = item.DepreciationStartDate;
+                            registers.UsefulLife = item.UsefulLife;
+                            registers.ResidualValue = item.ResidualValue;
+                            registers.DepreciationForThePeriod = item.DepreciationForThePeriod;
+                            registers.AccumulatedDepreciation = item.AccumulatedDepreciation;
+                            registers.NetBookValue = item.NetBookValue;
+                            registers.SubGlAddition = SubGlAdditionCode;
+                            registers.SubGlDepreciation = SubGlDepreciationCode;
+                            registers.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
+                            registers.SubGlDisposal = SubGlDisposalCode;
+                            registers.Location = item.Location;
+                            registers.Active = true;
+                            registers.Deleted = false;
+                            registers.CreatedBy = createdBy;
+                            registers.CreatedOn = DateTime.Now;
+
+                            await _dataContext.ppe_register.AddAsync(register);
+                        }
+                    }
+                }
+
+                var response = _dataContext.SaveChanges() > 0;
+                return response;
+
             }
             catch (Exception ex)
             {
@@ -110,7 +317,7 @@ namespace PPE.Repository.Implement
             DataTable dt = new DataTable();
             dt.Columns.Add("Asset Number");
             dt.Columns.Add("LPO Number");
-            dt.Columns.Add("Classification");
+            dt.Columns.Add("Classification Name");
             dt.Columns.Add("Description");
             dt.Columns.Add("Cost");
             dt.Columns.Add("Date Of Purchase");
@@ -122,9 +329,14 @@ namespace PPE.Repository.Implement
             dt.Columns.Add("Depreciation For The Period");
             dt.Columns.Add("Accumulated Depreciation");
             dt.Columns.Add("Net Book Value");
-            var category = (from a in _dataContext.ppe_register
+            dt.Columns.Add("SubGL Addition");
+            dt.Columns.Add("SubGL Depreciation");
+            dt.Columns.Add("SubGL Accumulated Depreciation");
+            dt.Columns.Add("SubGL Disposal");
+            var subGlResponse = _financeRequest.GetAllSubGlAsync().Result;
+            var register = (from a in _dataContext.ppe_register
                             where a.Deleted == false
-                            select new ppe_register
+                            select new RegisterObj
                             {
                                 RegisterId = a.RegisterId,
                                 AssetNumber = a.AssetNumber,
@@ -141,13 +353,30 @@ namespace PPE.Repository.Implement
                                 DepreciationForThePeriod = a.DepreciationForThePeriod,
                                 AccumulatedDepreciation = a.AccumulatedDepreciation,
                                 NetBookValue = a.NetBookValue,
+                                SubGlAddition = a.SubGlAddition,
+                                SubGlDepreciation = a.SubGlDepreciation,
+                                SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation,
+                                SubGlDisposal = a.SubGlDisposal,
                             }).ToList();
-            foreach (var kk in category)
+            if (register.Count() > 0)
+            {
+                foreach (var res in register)
+                {
+                    res.SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLCode;
+                    res.SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLCode;
+                    res.SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLCode;
+                    res.SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLCode;
+                }
+            }
+            var classificationName = _dataContext.ppe_assetclassification.Where(c => c.Deleted == false).ToList();
+
+            foreach (var kk in register)
+
             {
                 var row = dt.NewRow();
                 row["Asset Number"] = kk.AssetNumber;
                 row["LPO Number"] = kk.LpoNumber;
-                row["Classification"] = kk.AssetClassificationId;
+                row["Classification Name"] = classificationName.FirstOrDefault(a => a.AsetClassificationId == kk.AssetClassificationId)?.ClassificationName;
                 row["Description"] = kk.Description;
                 row["Cost"] = kk.Cost;
                 row["Date Of Purchase"] = kk.DateOfPurchaase;
@@ -159,11 +388,15 @@ namespace PPE.Repository.Implement
                 row["Depreciation For The Period"] = kk.DepreciationForThePeriod;
                 row["Accumulated Depreciation"] = kk.AccumulatedDepreciation;
                 row["Net Book Value"] = kk.NetBookValue;
+                row["SubGL Addition"] = kk.SubGlAdditionCode;
+                row["SubGL Depreciation"] = kk.SubGlDepreciationCode;
+                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationCode;
+                row["SubGL Disposal"] = kk.SubGlDisposalCode;
                 dt.Rows.Add(row);
             }
             Byte[] fileBytes = null;
 
-            if (category != null)
+            if (register != null)
             {
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (ExcelPackage pck = new ExcelPackage())
@@ -302,6 +535,7 @@ namespace PPE.Repository.Implement
                                 ResidualValue = currentItem.ResidualValue,
                                 RemainingUsefulLife = remainingUsefulLife,
                                 AssetNumber = currentItem.AssetNumber,
+                                
                             };
 
 

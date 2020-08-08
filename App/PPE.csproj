@@ -54,7 +54,7 @@
 
   <ItemGroup>
     <Reference Include="GOSLibraries">
-      <HintPath>..\App.Contracts\Lib\GOSLibraries.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\goslob\GOSLibraries.dll</HintPath>
     </Reference>
   </ItemGroup>
 

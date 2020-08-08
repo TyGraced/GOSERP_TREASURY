@@ -284,6 +284,7 @@ namespace PPE.Controllers.V1
 
             try
             {
+
                 var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
                 if (!result.IsSuccessStatusCode)
                 {
@@ -331,10 +332,12 @@ namespace PPE.Controllers.V1
                  x.TargetId).ToList(), res.workflowTasks.Select(s =>
                  s.WorkflowToken).ToList());
 
-
+                
                 return Ok(new AdditionFormRespObj
                 {
+
                     AdditionForms = additions.Select(d => new AdditionFormObj
+
                     {
                         AdditionFormId = d.AdditionFormId,
                         Active = d.Active,
@@ -353,6 +356,7 @@ namespace PPE.Controllers.V1
                         SubGlDisposal = d.SubGlDisposal,
                         UsefulLife = d.UsefulLife
                     }).ToList(),
+
                     Status = new APIResponseStatus
                     {
                         IsSuccessful = true,

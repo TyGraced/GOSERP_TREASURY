@@ -277,19 +277,21 @@ namespace PPE.Controllers.V1
                         Active = d.Active,
                         AssetClassificationId = d.AssetClassificationId,
                         Cost = d.Cost,
-                        //DateOfPurchase = d.DateOfPurchase,
+                        DateOfPurchaase = d.DateOfPurchaase,
                         DepreciationStartDate = d.DepreciationStartDate,
                         Description = d.Description,
                         Quantity = d.Quantity,
                         Location = d.Location,
-                        //LpoNumber = d.LpoNumber,
+                        AssetNumber = d.AssetNumber,
                         ResidualValue = d.ResidualValue,
-                        //SubGlAddition = d.SubGlAddition,
+                        DepreciationForThePeriod = d.DepreciationForThePeriod,
                         UsefulLife = d.UsefulLife,
+                        AccumulatedDepreciation = d.AccumulatedDepreciation,
+                        NetBookValue = d.NetBookValue,
                         SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
                         SubGlDepreciation = d.SubGlDepreciation,
                         SubGlDisposal = d.SubGlDisposal
-                        
+
                     }).ToList(),
                     Status = new APIResponseStatus
                     {
@@ -299,7 +301,7 @@ namespace PPE.Controllers.V1
                             FriendlyMessage = disposals.Count() < 1 ? "No Disposal  awaiting approvals" : null
                         }
                     }
-                });
+                }) ;
             }
             catch (Exception ex)
             {

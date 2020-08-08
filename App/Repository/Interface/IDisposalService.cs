@@ -9,7 +9,7 @@ namespace PPE.Repository.Interface
 {
     public interface IDisposalService
     {
-         Task<bool> AddUpdateDisposalAsync(ppe_disposal model);
+         Task<DisposalRegRespObj> AddUpdateDisposalAsync(ppe_disposal model);
 
          Task<bool> DeleteDisposalAsync(int id);
 

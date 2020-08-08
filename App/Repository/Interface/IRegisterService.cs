@@ -11,12 +11,13 @@ namespace PPE.Repository.Interface
     {
         Task<bool> AddUpdateRegisterAsync(ppe_register model);
 
-        Task<bool> DeleteRegisterAsync(int id);
+        //Task<bool> DeleteRegisterAsync(int id);
 
-        Task<ppe_register> GetRegisterByIdAsync(int id);
-
+        //Task<IEnumerable<RegisterObj>> GetRegisterByIdAsync(int id);
+        //Task<ppe_register> GetRegisterByIdAsync(int id);
+        IEnumerable<RegisterObj> GetRegisterByIdAsync(int id);
         IEnumerable<RegisterObj> GetAllRegister();
-
+        Task<bool> UploadRegisterAsync(List<byte[]> record, string createdBy);
         byte[] GenerateExportRegister();
 
         Task<StaffApprovalRegRespObj> RegisterStaffApprovals(StaffApprovalObj request);
