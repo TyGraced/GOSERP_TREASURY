@@ -25,6 +25,7 @@ namespace PPE.Contracts.Response
         public string SubGlAccumulatedDepreciationCode { get; set; }
         public int SubGlDisposal { get; set; }
         public string SubGlDisposalName { get; set; }
+        public string ClassificationName { get; set; }
         public string SubGlDisposalCode { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }

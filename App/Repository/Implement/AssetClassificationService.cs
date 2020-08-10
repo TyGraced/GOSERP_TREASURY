@@ -137,7 +137,7 @@ namespace PPE.Repository.Implement
                             assetclassification.SubGlAddition = SubGlAdditionCode;
                             assetclassification.SubGlDepreciation = SubGlDepreciationCode;
                             assetclassification.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
-                            assetclassification.SubGlDisposal = SubGlAccumulatedDepreciationCode;
+                            assetclassification.SubGlDisposal = SubGlDisposalCode;
                             assetclassification.AsetClassificationId = item.AsetClassificationId;
                             assetclassification.Active = true;
                             assetclassification.Deleted = false;

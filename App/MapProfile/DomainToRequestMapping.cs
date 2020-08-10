@@ -16,6 +16,7 @@ namespace PPE.MapProfile
             CreateMap<ppe_assetclassification, AssetClassificationObj>();
             CreateMap<ppe_reassessment, ReassessmentObj>();
             CreateMap<ppe_register, RegisterObj>();
+            CreateMap<ppe_disposal, DisposalObj>();
             //CreateMap<,>();
         }
     }

@@ -208,6 +208,13 @@ namespace PPE.Repository.Implement
                                     SubGlAccumulatedDepreciationCode = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
                                     SubGlDisposalCode = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
                                     Location = workSheet.Cells[i, 10].Value != null ? workSheet.Cells[i, 10].Value.ToString() : null,
+                                    SubGlAdditionName = workSheet.Cells[i, 11].Value != null ? workSheet.Cells[i, 11].Value.ToString() : null,
+                                    SubGlDepreciationName = workSheet.Cells[i, 12].Value != null ? workSheet.Cells[i, 12].Value.ToString() : null,
+                                    SubGlAccumulatedDepreciationName = workSheet.Cells[i, 13].Value != null ? workSheet.Cells[i, 13].Value.ToString() : null,
+                                    SubGlDisposalName = workSheet.Cells[i, 14].Value != null ? workSheet.Cells[i, 14].Value.ToString() : null,
+                                    ClassificationName = workSheet.Cells[i, 15].Value != null ? workSheet.Cells[i, 15].Value.ToString() : null,
+                                    UsefulLife = workSheet.Cells[i, 16].Value != null ? int.Parse(workSheet.Cells[i, 16].Value.ToString()) : 0,
+                                    ResidualValue = workSheet.Cells[i, 17].Value != null ? int.Parse(workSheet.Cells[i, 17].Value.ToString()) : 0,
                                 };
                                 uploadedRecord.Add(item);
                             }
@@ -223,23 +230,35 @@ namespace PPE.Repository.Implement
                         var SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDepreciationCode)?.SubGLId ?? 0;
                         var SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAccumulatedDepreciationCode)?.SubGLId ?? 0;
                         var SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDisposalCode)?.SubGLId ?? 0;
-                        var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
-                        if (category != null)
+                        var SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
+                        var SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDepreciationName)?.SubGLId ?? 0;
+                        var SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAccumulatedDepreciationName)?.SubGLId ?? 0;
+                        var SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDisposalName)?.SubGLId ?? 0;
+                        var classificationName = _dataContext.ppe_assetclassification.Where(c => c.ClassificationName == item.ClassificationName).FirstOrDefault()?.AsetClassificationId ?? 0;
+                        var additions = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
+                        if (additions != null)
                         {
-                            category.LpoNumber = item.LpoNumber;
-                            category.DateOfPurchase = item.DateOfPurchase;
-                            category.Description = item.Description;
-                            category.Quantity = item.Quantity;
-                            category.Cost = item.Cost;
-                            category.SubGlAddition = SubGlAdditionCode;
-                            category.SubGlDepreciation = SubGlDepreciationCode;
-                            category.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
-                            category.SubGlDisposal = SubGlDisposalCode;
-                            category.Location = item.Location;
-                            category.Active = true;
-                            category.Deleted = false;
-                            category.UpdatedBy = createdBy;
-                            category.UpdatedOn = DateTime.Now;
+                            additions.LpoNumber = item.LpoNumber;
+                            additions.DateOfPurchase = item.DateOfPurchase;
+                            additions.Description = item.Description;
+                            additions.Quantity = item.Quantity;
+                            additions.Cost = item.Cost;
+                            additions.SubGlAddition = SubGlAdditionCode;
+                            additions.SubGlAddition = SubGlAdditionName;
+                            additions.SubGlDepreciation = SubGlDepreciationCode;
+                            additions.SubGlDepreciation = SubGlDepreciationName;
+                            additions.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
+                            additions.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            additions.SubGlDisposal = SubGlDisposalCode;
+                            additions.SubGlDisposal = SubGlDisposalName;
+                            additions.Location = item.Location;
+                            additions.AssetClassificationId = classificationName;
+                            additions.UsefulLife = item.UsefulLife;
+                            additions.ResidualValue = item.ResidualValue;
+                            additions.Active = true;
+                            additions.Deleted = false;
+                            additions.UpdatedBy = createdBy;
+                            additions.UpdatedOn = DateTime.Now;
                         }
 
                         else
@@ -251,11 +270,17 @@ namespace PPE.Repository.Implement
                             addition.Description = item.Description;
                             addition.Quantity = item.Quantity;
                             addition.Cost = item.Cost;
-                            addition.SubGlAddition = SubGlAdditionCode;
+                            addition.SubGlAddition = SubGlAdditionName;
                             addition.SubGlDepreciation = SubGlDepreciationCode;
+                            addition.SubGlDepreciation = SubGlDepreciationName;
                             addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
-                            addition.SubGlDisposal = SubGlAccumulatedDepreciationCode;
+                            addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
+                            addition.SubGlDisposal = SubGlDisposalCode;
+                            addition.SubGlDisposal = SubGlDisposalName;
                             addition.Location = item.Location;
+                            addition.AssetClassificationId = classificationName;
+                            addition.UsefulLife = item.UsefulLife;
+                            addition.ResidualValue = item.ResidualValue;
                             addition.Active = true;
                             addition.Deleted = false;
                             addition.CreatedBy = createdBy;
@@ -285,12 +310,19 @@ namespace PPE.Repository.Implement
             dt.Columns.Add("Quantity");
             dt.Columns.Add("Cost");
             dt.Columns.Add("SubGL Addition");
+            dt.Columns.Add("SubGL Addition Code");
             dt.Columns.Add("SubGL Depreciation");
+            dt.Columns.Add("SubGL Depreciation Code");
             dt.Columns.Add("SubGL Accumulated Depreciation");
+            dt.Columns.Add("SubGL Accumulated Depreciation Code");
             dt.Columns.Add("SubGL Disposal");
+            dt.Columns.Add("SubGL Disposal Code");
             dt.Columns.Add("Location");
+            dt.Columns.Add("Classification Name");
+            dt.Columns.Add("Useful Life");
+            dt.Columns.Add("Residual Value");
             var subGlResponse = _financeRequest.GetAllSubGlAsync().Result;
-            var category = (from a in _dataContext.ppe_additionform
+            var additions = (from a in _dataContext.ppe_additionform
                             where a.Deleted == false
                             select new AdditionFormObj
                             {
@@ -304,21 +336,30 @@ namespace PPE.Repository.Implement
                                 SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation, 
                                 SubGlDisposal = a.SubGlDisposal,
                                 Location = a.Location,
+                                AssetClassificationId = a.AssetClassificationId,
+                                UsefulLife = a.UsefulLife,
+                                ResidualValue = a.ResidualValue,
                             }).ToList();
              
 
-            if (category.Count() > 0)
+            if (additions.Count() > 0)
             {  
-                foreach (var res in category)
+                foreach (var res in additions)
                 {
                     res.SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLCode;
+                    res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
                     res.SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLCode;
+                    res.SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLName;
                     res.SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLCode;
+                    res.SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLName;
                     res.SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLCode;
+                    res.SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLName;
 
                 }
             }
-            foreach (var kk in category)
+            var classificationName = _dataContext.ppe_assetclassification.Where(c => c.Deleted == false).ToList();
+
+            foreach (var kk in additions)
             {
                 var row = dt.NewRow();
                 row["Lpo Number"] = kk.LpoNumber;
@@ -326,16 +367,23 @@ namespace PPE.Repository.Implement
                 row["Description"] = kk.Description;
                 row["Quantity"] = kk.Quantity;
                 row["Cost"] = kk.Cost;
-                row["SubGL Addition"] = kk.SubGlAdditionCode;
-                row["SubGL Depreciation"] = kk.SubGlDepreciationCode;
-                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationCode;
-                row["SubGL Disposal"] = kk.SubGlDisposalCode;
+                row["SubGL Addition"] = kk.SubGlAdditionName;
+                row["SubGL Addition Code"] = kk.SubGlAdditionCode;
+                row["SubGL Depreciation"] = kk.SubGlDepreciationName;
+                row["SubGL Depreciation Code"] = kk.SubGlDepreciationCode;
+                row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationName;
+                row["SubGL Accumulated Depreciation Code"] = kk.SubGlAccumulatedDepreciationCode;
+                row["SubGL Disposal"] = kk.SubGlDisposalName;
+                row["SubGL Disposal Code"] = kk.SubGlDisposalCode;
                 row["Location"] = kk.Location;
+                row["Classification Name"] = classificationName.FirstOrDefault(a => a.AsetClassificationId == kk.AssetClassificationId)?.ClassificationName;
+                row["Useful Life"] = kk.UsefulLife;
+                row["Residual Value"] = kk.ResidualValue;
                 dt.Rows.Add(row);
             }
             Byte[] fileBytes = null;
 
-            if (category != null)
+            if (additions != null)
             {
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (ExcelPackage pck = new ExcelPackage())
@@ -482,10 +530,12 @@ namespace PPE.Repository.Implement
                                 AssetNumber = assetNumber,
                                 SubGlDepreciation = currentItem.SubGlDepreciation,
                                 SubGlAccumulatedDepreciation = currentItem.SubGlAccumulatedDepreciation,
-                                SubGlDisposal = currentItem.SubGlDisposal
+                                SubGlDisposal = currentItem.SubGlDisposal,
+                                CreatedOn = currentItem.CreatedOn,
+                                UpdatedBy = user.UserName,
+                                UpdatedOn = currentItem.AdditionFormId > 0 ? DateTime.Today : DateTime.Today
 
-
-                            };
+                        };
 
                             await AddUpdateRegisterAsync(register);
                             await _dataContext.SaveChangesAsync();

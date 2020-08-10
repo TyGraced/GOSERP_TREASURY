@@ -468,7 +468,10 @@ namespace PPE.Repository.Implement
                                 DepreciationForThePeriod = currentItem.DepreciationForThePeriod,
                                 AccumulatedDepreciation = currentItem.AccumulatedDepreciation,
                                 NetBookValue = currentItem.NetBookValue,
-                                
+                                CreatedOn = currentItem.CreatedOn,
+                                UpdatedBy = user.UserName,
+                                UpdatedOn = currentItem.ReassessmentId > 0 ? DateTime.Today : DateTime.Today
+
                             };
                             
                             await AddUpdateDisposalAsync(disposal);

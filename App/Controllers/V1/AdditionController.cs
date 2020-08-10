@@ -332,7 +332,7 @@ namespace PPE.Controllers.V1
                  x.TargetId).ToList(), res.workflowTasks.Select(s =>
                  s.WorkflowToken).ToList());
 
-                
+                var subGlResponse = await _financeRequest.GetAllSubGlAsync();
                 return Ok(new AdditionFormRespObj
                 {
 
@@ -340,7 +340,7 @@ namespace PPE.Controllers.V1
 
                     {
                         AdditionFormId = d.AdditionFormId,
-                        Active = d.Active,
+                        Active = true,
                         AssetClassificationId = d.AssetClassificationId,
                         Cost = d.Cost,
                         DateOfPurchase = d.DateOfPurchase,
@@ -351,10 +351,22 @@ namespace PPE.Controllers.V1
                         LpoNumber = d.LpoNumber,
                         ResidualValue = d.ResidualValue,
                         SubGlAddition = d.SubGlAddition,
+                        SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlAddition)?.SubGLName,
+                        SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlAddition)?.SubGLCode,
                         SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
+                        SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlAccumulatedDepreciation)?.SubGLName,
+                        SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlAccumulatedDepreciation)?.SubGLCode,
                         SubGlDepreciation = d.SubGlDepreciation,
+                        SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlDepreciation)?.SubGLName,
+                        SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlDepreciation)?.SubGLCode,
                         SubGlDisposal = d.SubGlDisposal,
-                        UsefulLife = d.UsefulLife
+                        SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlDisposal)?.SubGLName,
+                        SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(a => a.SubGLId == d.SubGlDisposal)?.SubGLCode,
+                        UsefulLife = d.UsefulLife,
+                        CreatedBy = d.CreatedBy,
+                        CreatedOn = d.CreatedOn,
+                        UpdatedBy = d.UpdatedBy,
+                        UpdatedOn = d.UpdatedOn
                     }).ToList(),
 
                     Status = new APIResponseStatus

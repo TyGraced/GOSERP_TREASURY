@@ -176,6 +176,11 @@ namespace PPE.Repository.Implement
                                        DepreciationForThePeriod = e.DepreciationForThePeriod,
                                        AccumulatedDepreciation = e.AccumulatedDepreciation,
                                        NetBookValue = e.CB,
+                                       Active = true,
+                                       CreatedBy = a.CreatedBy,
+                                       CreatedOn = a.CreatedOn,
+                                       UpdatedBy = a.UpdatedBy,
+                                       UpdatedOn = a.UpdatedOn
                                        //RemainingUsefulLife = remainingUsefulLife,
                                    }).ToList();
 
