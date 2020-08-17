@@ -24,5 +24,9 @@ namespace PPE.Repository.Interface
         Task<StaffApprovalRegRespObj> ReassessmentStaffApprovals(StaffApprovalObj request);
 
         Task<IEnumerable<ppe_reassessment>> GetReassessmentAwaitingApprovals(List<int> reassessmentIds, List<string> tokens);
+
+        bool UpdateMultipleUsefulLife(List<ReassessmentObj> multipleUsefulLife);
+
+        bool UpdateMultipleResidualValue(List<ReassessmentObj> multipleResidualValue);
     }
 }

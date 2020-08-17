@@ -333,6 +333,7 @@ namespace PPE.Controllers.V1
                  s.WorkflowToken).ToList());
 
                 var subGlResponse = await _financeRequest.GetAllSubGlAsync();
+                var classificationName = _dataContext.ppe_assetclassification.Where(a => a.Deleted == false).ToList();
                 return Ok(new AdditionFormRespObj
                 {
 
@@ -342,6 +343,7 @@ namespace PPE.Controllers.V1
                         AdditionFormId = d.AdditionFormId,
                         Active = true,
                         AssetClassificationId = d.AssetClassificationId,
+                        ClassificationName = classificationName.FirstOrDefault(a => a.AsetClassificationId == d.AssetClassificationId)?.ClassificationName ?? null,
                         Cost = d.Cost,
                         DateOfPurchase = d.DateOfPurchase,
                         //DepreciationStartDate = d.DepreciationStartDate,

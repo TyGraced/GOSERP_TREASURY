@@ -117,7 +117,8 @@ namespace PPE.Controllers.V1
                 domainObj.Quantity = model.Quantity;
                 domainObj.DepreciationStartDate = model.DepreciationStartDate;
                 domainObj.UsefulLife = model.UsefulLife;
-                domainObj.UsefulLife = model.ProposedUsefulLife;
+                //domainObj.UsefulLife = model.ProposedUsefulLife;
+                domainObj.ProposedResidualValue = model.ProposedResidualValue;
                 domainObj.ResidualValue = model.ResidualValue;
                 domainObj.Location = model.Location;
                 domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;
@@ -306,6 +307,68 @@ namespace PPE.Controllers.V1
 
 
 
+        }
+
+        [HttpPost(ApiRoutes.Reassessment.UPDATE_MULTIPLE_USEFULLIFE)]
+        public async Task<ActionResult<ReassessmentRespObj>> UpdateMultipleUsefulLife([FromBody] List<ReassessmentObj> model)
+        {
+            try
+            {
+                var identity = await _identityService.UserDataAsync();
+                var user = identity.UserName;
+                foreach (var item in model)
+                {
+                    item.CreatedBy = user;
+                    item.UpdatedBy = user;
+                }
+
+                var isDone = _repo.UpdateMultipleUsefulLife(model);
+
+                return new ReassessmentRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "Successful" : "Unsuccessful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new ReassessmentRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
+
+        [HttpPost(ApiRoutes.Reassessment.UPDATE_MULTIPLE_RESIDUALVALUE)]
+        public async Task<ActionResult<ReassessmentRespObj>> UpdateMultipleResidualValue([FromBody] List<ReassessmentObj> model)
+        {
+            try
+            {
+                var identity = await _identityService.UserDataAsync();
+                var user = identity.UserName;
+                foreach (var item in model)
+                {
+                    item.CreatedBy = user;
+                    item.UpdatedBy = user;
+                }
+
+                var isDone = _repo.UpdateMultipleResidualValue(model);
+
+                return new ReassessmentRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "Successful" : "Unsuccessful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new ReassessmentRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
         }
     }
 }

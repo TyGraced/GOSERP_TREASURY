@@ -74,6 +74,8 @@ namespace PPE.Contracts.V1
         public class Reassessment
         {
             public const string ADD_UPDATE_REASSESSMENT = Base + "/reassessment/add/update/reassessment";
+            public const string UPDATE_MULTIPLE_USEFULLIFE = Base + "/reassessment/update/multiple/proposedusefullife";
+            public const string UPDATE_MULTIPLE_RESIDUALVALUE = Base + "/reassessment/update/multiple/proposedresidualvalue";
             public const string GET_ALL_REASSESSMENT = Base + "/reassessment/get/all/reassessment";
             public const string GET_REASSESSMENT_BY_ID = Base + "/reassessment/get/reassessmentbyid";
             public const string DELETE_REASSESSMENT = Base + "/reassessment/delete/reassessment";

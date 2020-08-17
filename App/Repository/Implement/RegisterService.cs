@@ -113,7 +113,7 @@ namespace PPE.Repository.Implement
                                    join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
                                    where a.Deleted == false && e.PeriodDate.Value.Date == now.Date
                                    && a.RegisterId == id
-                                   orderby a.CreatedOn descending
+                                   orderby a.CreatedOn ascending
                                    select new RegisterObj
                                    {
                                        RegisterId = a.RegisterId,
@@ -132,6 +132,11 @@ namespace PPE.Repository.Implement
                                        DepreciationForThePeriod = e.DepreciationForThePeriod,
                                        AccumulatedDepreciation = e.AccumulatedDepreciation,
                                        NetBookValue = e.CB,
+                                       Active = true,
+                                       CreatedBy = a.CreatedBy,
+                                       CreatedOn = a.CreatedOn,
+                                       UpdatedBy = a.UpdatedBy,
+                                       UpdatedOn = a.UpdatedOn,
                                        RemainingUsefulLife = remainingUsefulLife,
                                    }).ToList();
 
@@ -147,15 +152,11 @@ namespace PPE.Repository.Implement
         {
             try
             {
-                //var currentItem = _dataContext.ppe_register.Where(a => a.RegisterId == a.RegisterId).FirstOrDefault();
-                //TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-                //int differenceInDays = usedLifeOfAsset.Days;
-                //int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
                 var now = DateTime.Now.Date;
                 var Application = (from a in _dataContext.ppe_register
                                    join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
                                    where a.Deleted == false  && e.PeriodDate.Value.Date == now.Date
-                                   orderby a.CreatedOn descending
+                                   orderby a.CreatedOn ascending
                                    select new RegisterObj
 
 

@@ -25,6 +25,7 @@ namespace PPE.Contracts.Response
         public decimal NetBookValue { get; set; }
         public int RemainingUsefulLife { get; set; }
         public int ProposedUsefulLife { get; set; }
+        public int ProposedResidualValue { get; set; }
         public int SubGlAddition { get; set; }
         public string SubGlAdditionName { get; set; }
         public string SubGlAdditionCode { get; set; }
@@ -68,6 +69,7 @@ namespace PPE.Contracts.Response
         public decimal NetBookValue { get; set; }
         public int RemainingUsefulLife { get; set; }
         public int ProposedUsefulLife { get; set; }
+        public int ProposedResidualValue { get; set; }
         public int SubGlAddition { get; set; }
         public string SubGlAdditionName { get; set; }
         public string SubGlAdditionCode { get; set; }

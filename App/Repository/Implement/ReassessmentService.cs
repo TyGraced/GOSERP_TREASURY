@@ -554,5 +554,61 @@ namespace PPE.Repository.Implement
             var item = await _dataContext.ppe_reassessment.Where(s => reassessmentIds.Contains(s.ReassessmentId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
             return item;
         }
+
+        public bool UpdateMultipleUsefulLife(List<ReassessmentObj> multipleUsefulLife)
+        {
+            try
+            {
+                var reassessments = new List<ReassessmentObj>();
+
+                foreach (var item in multipleUsefulLife)
+                {
+                    if (item.ReassessmentId > 0)
+                    {
+                       
+
+                        var itemToUpdate = _dataContext.ppe_reassessment.Find(item.ReassessmentId);
+                        itemToUpdate.ReassessmentId = item.ReassessmentId;
+                        itemToUpdate.ProposedUsefulLife = item.ProposedUsefulLife;
+                        _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
+                        _dataContext.SaveChanges();
+                    }
+                };
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public bool UpdateMultipleResidualValue(List<ReassessmentObj> multipleResidualValue)
+        {
+            try
+            {
+                var reassessments = new List<ReassessmentObj>();
+
+                foreach (var item in multipleResidualValue)
+                {
+                    if (item.ReassessmentId > 0)
+                    {
+                   
+
+                    var itemToUpdate = _dataContext.ppe_reassessment.Find(item.ReassessmentId);
+                    itemToUpdate.ReassessmentId = item.ReassessmentId;
+                    itemToUpdate.ProposedResidualValue = item.ProposedResidualValue;
+                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
+                    _dataContext.SaveChanges();
+                }
+            };
+            return true;
+
+        }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
