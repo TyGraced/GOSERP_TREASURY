@@ -455,24 +455,24 @@ namespace PPE.Controllers.V1
             }
         }
 
-        [HttpGet(ApiRoutes.Addition.GET_LPONUMBER_BY_ID)]
-        public async Task<ActionResult<LpoRespObj>> GetLpoByIdAsync([FromQuery] SearchObj search)
-        {
-            if (search.SearchId < 1)
-            {
-                return new LpoRespObj
-                {
-                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "LPO Id is required" } }
-                };
-            }
+        //[HttpGet(ApiRoutes.Addition.GET_LPONUMBER_BY_ID)]
+        //public async Task<ActionResult<LpoRespObj>> GetLpoByIdAsync([FromQuery] SearchObj search)
+        //{
+        //    if (search.SearchId < 1)
+        //    {
+        //        return new LpoRespObj
+        //        {
+        //            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "LPO Id is required" } }
+        //        };
+        //    }
 
-            var response = await _repo.GetLpoByIdAsync(search.SearchId);
-            var resplist = new List<ppe_lpo> { response };
-            return new LpoRespObj
-            {
-                lpos = _mapper.Map<List<LpoObj>>(resplist),
-            };
-        }
+        //    var response = await _repo.GetLpoByIdAsync(search.SearchId);
+        //    var resplist = new List<ppe_lpo> { response };
+        //    return new LpoRespObj
+        //    {
+        //        lpos = _mapper.Map<List<LpoObj>>(resplist),
+        //    };
+        //}
 
 
         [HttpGet(ApiRoutes.Addition.GET_ADDITION_APPROVAL_COMMENTS)]
