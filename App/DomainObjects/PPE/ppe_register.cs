@@ -23,7 +23,10 @@ namespace PPE.DomainObjects.PPE
         public int Quantity { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
-        //public int RemainingUsefulLife { get; set; }
+        public int CompanyId { get; set; }
+        public int RemainingUsefulLife { get; set; }
+        public int ProposedUsefulLife { get; set; }
+        public int ProposedResidualValue { get; set; }
         public decimal ResidualValue { get; set; }
         [StringLength(500)]
         public string Location { get; set; }

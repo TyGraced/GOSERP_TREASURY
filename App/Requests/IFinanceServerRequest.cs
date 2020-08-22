@@ -9,5 +9,6 @@ namespace PPE.Requests
     public interface IFinanceServerRequest
     {
         Task<SubGlRespObj> GetAllSubGlAsync();
+        Task<FinTransacRegRespObj> PassEntryToFinance(TransactionObj request);
     }
 }

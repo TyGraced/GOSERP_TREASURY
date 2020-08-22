@@ -43,6 +43,7 @@ namespace PPE.Controllers.V1
                 return new AssetClassificationRespObj
                 {
                     AssetClassifications = _mapper.Map<List<AssetClassificationObj>>(response),
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful"} }
                 };
             }
             catch (Exception ex)

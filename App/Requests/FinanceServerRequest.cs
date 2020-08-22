@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PPE.Requests
@@ -92,5 +94,73 @@ namespace PPE.Requests
                 };
             });
         }
+
+        public async Task<FinTransacRegRespObj> PassEntryToFinance(TransactionObj request)
+        {
+            var gosGatewayClient = _httpClientFactory.CreateClient("GOSDEFAULTGATEWAY");
+            string authorization = _accessor.HttpContext.Request.Headers["Authorization"];
+            gosGatewayClient.DefaultRequestHeaders.Add("Authorization", authorization);
+            FinTransacRegRespObj responseObj = new FinTransacRegRespObj();
+
+            var jsonContent = JsonConvert.SerializeObject(request);
+            var buffer = Encoding.UTF8.GetBytes(jsonContent);
+            var byteContent = new ByteArrayContent(buffer);
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                try
+                {
+                    result = await gosGatewayClient.PostAsync(ApiRoutes.Finance.PASS_TO_ENTRY, byteContent);
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        var data1 = await result.Content.ReadAsStringAsync();
+                        responseObj = JsonConvert.DeserializeObject<FinTransacRegRespObj>(data1);
+                        new FinTransacRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                            }
+                        };
+                    }
+                    var data = await result.Content.ReadAsStringAsync();
+                    responseObj = JsonConvert.DeserializeObject<FinTransacRegRespObj>(data);
+                }
+                catch (Exception ex) { throw ex; }
+                if (responseObj == null)
+                {
+                    return new FinTransacRegRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage { FriendlyMessage = "System Error!! Please contact Administrator" }
+                        }
+                    };
+                }
+                if (!responseObj.Status.IsSuccessful)
+                {
+                    return new FinTransacRegRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = responseObj.Status.IsSuccessful,
+                            Message = responseObj.Status.Message
+                        }
+                    };
+                }
+                return new FinTransacRegRespObj
+                {
+                    Status = new APIResponseStatus
+                    {
+                        IsSuccessful = responseObj.Status.IsSuccessful,
+                        Message = responseObj.Status.Message
+                    }
+                };
+            });
+        }
     }
 }
+
+

@@ -14,6 +14,7 @@ namespace Puchase_and_payables.Requests
         Task<UserDataResponseObj> UserDataAsync();
         Task<HttpResponseMessage> StaffApprovalRequestAsync(IdentityServerApprovalCommand request); 
         Task<HttpResponseMessage> GetAllStaff();
+        Task<StaffRespObj> GetAllStaffAsync();
         Task<HttpResponseMessage> GotForApprovalAsync(GoForApprovalRequest  request);
         Task<HttpResponseMessage> GetAnApproverItemsFromIdentityServer();
     }

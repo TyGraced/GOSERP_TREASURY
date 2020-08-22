@@ -18,6 +18,8 @@ namespace PPE.Repository.Interface
         byte[] GenerateExportAddition();
         Task<StaffApprovalRegRespObj> AdditionStaffApprovals(StaffApprovalObj request);
         Task<IEnumerable<ppe_additionform>> GetAdditionAwaitingApprovals(List<int> additonIds, List<string> tokens);
-
+        Task<bool> AddUpdateLpoNumber(ppe_lpo model);
+        Task<IEnumerable<ppe_lpo>> GetAllLpoAsync();
+        IEnumerable<ApprovalDetailsObj> GetApprovalTrail(int targetId, string workflowToken);
     }
 }

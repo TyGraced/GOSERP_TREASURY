@@ -21,11 +21,15 @@ namespace PPE.Contracts.V1
 
         public static  class Workflow
         {
-
             public const string GO_FOR_APPROVAL = "/workflow/goThroughApprovalFromCode";
             public const string GET_ALL_STAFF_AWAITING_APPROVALS = "/workflow/get/all/staffAwaitingApprovalsFromCode";
             public const string STAFF_APPROVAL_REQUEST = "/workflow/staff/approvaltask";
             public const string GET_ALL_STAFF = "/admin/get/all/staff";
+        }
+
+        public static class Finance
+        {
+            public const string PASS_TO_ENTRY = "/financialtransaction/pass/to/entry";
         }
 
         public static class SubGl
@@ -37,16 +41,17 @@ namespace PPE.Contracts.V1
         public class Addition
         {
             public const string ADD_UPDATE_ADDITION = Base + "/addition/add/update/addition";
-            //public const string ADD_UPDATE_DAILYSCHEDULE = Base + "/addition/add/update/dailyschedule";
-            //public const string ADD_UPDATE_MONTHLYSCHEDULE = Base + "/addition/add/update/monthlyschedule";
+            public const string UPDATE_LPONUMBER = Base + "/addition/update/lponumber";
             public const string GET_ALL_ADDITION = Base + "/addition/get/all/addition";
             public const string GET_ADDITION_BY_ID = Base + "/addition/get/additionbyid";
+            public const string GET_LPONUMBER_BY_ID = Base + "/addition/get/lponumberid";
             public const string DELETE_ADDITION = Base + "/addition/delete/addition";
             public const string DOWNLOAD_ADDITION = Base + "/addition/download/addition";
             public const string UPLOAD_ADDITION = Base + "/addition/upload/addition";
 
             public const string ADDITION_STAFF_APPROVAL = Base + "/addition/staff/approval/request";
             public const string ADDITION_STAFF_APPROVAL_AWAITNG = Base + "/addition/get/all/staff/awaiting/approvals";
+            public const string GET_ADDITION_APPROVAL_COMMENTS = Base + "/addition/get/approval/comments";
         }
 
         public class AssetClassification
@@ -88,14 +93,21 @@ namespace PPE.Contracts.V1
         public class Register
         {
             public const string ADD_UPDATE_REGISTER = Base + "/register/add/update/register";
+            public const string UPDATE_REASSESSMENT = Base + "/register/update/reassessment";
+            public const string UPDATE_DISPOSAL = Base + "/register/update/disposal";
+            public const string GET_ENTRIES = Base + "/register/get/entries";
+            public const string UPDATE_MULTIPLE_USEFULLIFE = Base + "/register/update/multiple/proposedusefullife";
+            public const string UPDATE_MULTIPLE_RESIDUALVALUE = Base + "/register/update/multiple/proposedresidualvalue";
             public const string GET_ALL_REGISTER = Base + "/register/get/all/register";
             public const string GET_REGISTER_BY_ID = Base + "/register/get/registerbyid";
             public const string DELETE_REGISTER = Base + "/register/delete/register";
             public const string DOWNLOAD_REGISTER = Base + "/register/download/register";
             public const string UPLOAD_REGISTER = Base + "/register/upload/register";
 
-            public const string REGISTER_STAFF_APPROVAL = Base + "/register/staff/approval/request";
-            public const string REGISTER_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/awaiting/approvals";
+            public const string REASSESSMENT_STAFF_APPROVAL = Base + "/register/staff/reassessment/approval/request";
+            public const string DISPOSAL_STAFF_APPROVAL = Base + "/register/staff/disposal/approval/request";
+            public const string REASSESSMENT_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/reassessment/awaiting/approvals";
+            public const string DISPOSAL_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/disposal/awaiting/approvals";
         }
 
 

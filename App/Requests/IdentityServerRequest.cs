@@ -240,6 +240,74 @@ namespace PPE.Requests
             });
         }
 
+        public async Task<StaffRespObj> GetAllStaffAsync()
+        {
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                try
+                {
+                    var gosGatewayClient = _httpClientFactory.CreateClient("GOSDEFAULTGATEWAY");
+                    string authorization = _accessor.HttpContext.Request.Headers["Authorization"];
+                    gosGatewayClient.DefaultRequestHeaders.Add("Authorization", authorization);
+                    StaffRespObj responseObj = new StaffRespObj();
+
+                    try
+                    {
+                        result = await gosGatewayClient.GetAsync(ApiRoutes.Workflow.GET_ALL_STAFF);
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            new StaffRespObj
+                            {
+                                Status = new APIResponseStatus
+                                {
+                                    Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                                }
+                            };
+                        }
+                        var data = await result.Content.ReadAsStringAsync();
+                        responseObj = JsonConvert.DeserializeObject<StaffRespObj>(data);
+                    }
+                    catch (Exception ex) { throw ex; }
+                    if (responseObj == null)
+                    {
+                        return new StaffRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = false,
+                                Message = new APIResponseMessage { FriendlyMessage = "System Error!! Please contact Administrator" }
+                            }
+                        };
+                    }
+                    if (!responseObj.Status.IsSuccessful)
+                    {
+                        return new StaffRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = responseObj.Status.IsSuccessful,
+                                Message = responseObj.Status.Message
+                            }
+                        };
+                    }
+                    return new StaffRespObj
+                    {
+                        staff = responseObj.staff,
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = responseObj.Status.IsSuccessful,
+                            Message = responseObj.Status.Message
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+            });
+        }
+
         public async Task<HttpResponseMessage> GotForApprovalAsync(GoForApprovalRequest request)
         {
             var gosGatewayClient = _httpClientFactory.CreateClient("GOSDEFAULTGATEWAY");

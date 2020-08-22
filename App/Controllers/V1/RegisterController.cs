@@ -43,7 +43,6 @@ namespace PPE.Controllers.V1
         }
 
         [HttpGet(ApiRoutes.Register.GET_ALL_REGISTER)]
-
         public async Task<ActionResult<RegisterRespObj>> GetAllRegister()
         {
             try
@@ -83,31 +82,6 @@ namespace PPE.Controllers.V1
             };
         }
 
-        //public async Task<ActionResult<RegisterRespObj>> GetRegisterByIdAsync([FromQuery] SearchObj search)
-        //{
-        //    if (search.SearchId < 1)
-        //    {
-        //        return new RegisterRespObj
-        //        {
-        //            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Register Id is required" } }
-        //        };
-        //    }
-
-        //    var now = DateTime.Now.Date;
-        //    var dailySchedule = await _dataContext.ppe_dailyschedule.ToListAsync();
-        //    var response =  _repo.GetRegisterByIdAsync(search.SearchId);
-        //    var resObj = new List<RegisterObj>();
-        //    var dbObj = new List<ppe_register>() { response };
-        //    resObj = _mapper.Map<List<RegisterObj>>(dbObj);
-        //    foreach (var res in resObj)
-        //    {
-        //        res.DepreciationForThePeriod = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.DepreciationForThePeriod ?? 0;
-        //        res.AccumulatedDepreciation = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.AccumulatedDepreciation ?? 0;
-        //        res.NetBookValue = dailySchedule.Where(x => x.PpeDailyScheduleId == res.RegisterId && x.PeriodDate.Value.Date == now.Date).FirstOrDefault()?.CB ?? 0;
-
-        //    }
-        //    return new RegisterRespObj { Registers = resObj };
-        //}
 
         [HttpPost(ApiRoutes.Register.ADD_UPDATE_REGISTER)]
         public async Task<ActionResult<RegisterRegRespObj>> AddUpdateRegisterAsync([FromBody] AddUpdateRegisterObj model)
@@ -115,7 +89,7 @@ namespace PPE.Controllers.V1
             try
             {
                 var user = await _identityService.UserDataAsync();
-                IEnumerable<RegisterObj> item = null;
+                IEnumerable<RegisterObj> item = new List<RegisterObj>();
                 if (model.RegisterId > 0)
                 {
                     item = _repo.GetRegisterByIdAsync(model.RegisterId);  //_repo.GetRegisterByIdAsync(model.RegisterId);
@@ -147,6 +121,8 @@ namespace PPE.Controllers.V1
                 domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;
                 domainObj.AccumulatedDepreciation = model.AccumulatedDepreciation;
                 domainObj.NetBookValue = model.NetBookValue;
+                domainObj.ProposedResidualValue = model.ProposedResidualValue;
+                domainObj.ProposedUsefulLife = model.ProposedUsefulLife;
                 domainObj.UpdatedBy = user.UserName;
                 domainObj.UpdatedOn = model.RegisterId > 0 ? DateTime.Today : DateTime.Today;
 
@@ -167,30 +143,129 @@ namespace PPE.Controllers.V1
             }
         }
 
-        //[HttpPost(ApiRoutes.Register.DELETE_REGISTER)]
-        //public async Task<IActionResult> DeleteRegister([FromBody] DeleteRequest item)
-        //{
-        //    var response = true;
-        //    var Ids = item.ItemIds;
-        //    foreach (var id in Ids)
-        //    {
-        //        response = await _repo.DeleteRegisterAsync(id);
-        //    }
-        //    if (!response)
-        //        return BadRequest(
-        //            new DeleteRespObjt
-        //            {
-        //                Deleted = false,
-        //                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Unsuccessful" } }
-        //            });
-        //    return Ok(
-        //        new DeleteRespObjt
-        //        {
-        //            Deleted = true,
-        //            Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
-        //        });
+        [HttpPost(ApiRoutes.Register.UPDATE_REASSESSMENT)]
+        public async Task<ActionResult<RegisterRegRespObj>> UpdateReassessment([FromBody] AddUpdateRegisterObj model)
+        {
+            try
+            {
+                var user = await _identityService.UserDataAsync();
+                IEnumerable<RegisterObj> item = new List<RegisterObj>();
+                if (model.RegisterId > 0)
+                {
+                    item = _repo.GetRegisterByIdAsync(model.RegisterId);
+                    if (item == null)
+                        return new RegisterRegRespObj
+                        {
+                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
+                        };
+                }
 
-        //}
+                var domainObj = new ppe_register();
+                domainObj.RegisterId = model.RegisterId > 0 ? model.RegisterId : 0;
+                domainObj.Active = true;
+                domainObj.CreatedBy = user.UserName;
+                domainObj.CreatedOn = DateTime.Today;
+                domainObj.Deleted = false;
+                domainObj.AssetNumber = model.AssetNumber;
+                domainObj.LpoNumber = model.LpoNumber;
+                domainObj.AssetClassificationId = model.AssetClassificationId;
+                domainObj.Description = model.Description;
+                domainObj.Cost = model.Cost;
+                domainObj.DateOfPurchaase = model.DateOfPurchaase;
+                domainObj.Quantity = model.Quantity;
+                domainObj.DepreciationStartDate = model.DepreciationStartDate;
+                domainObj.UsefulLife = model.UsefulLife;
+                domainObj.ProposedResidualValue = model.ProposedResidualValue;
+                domainObj.ResidualValue = model.ResidualValue;
+                domainObj.Location = model.Location;
+                domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;
+                domainObj.AccumulatedDepreciation = model.AccumulatedDepreciation;
+                domainObj.NetBookValue = model.NetBookValue;
+                domainObj.RemainingUsefulLife = model.RemainingUsefulLife;
+                domainObj.ProposedUsefulLife = model.ProposedUsefulLife;
+                domainObj.UpdatedBy = user.UserName;
+                domainObj.UpdatedOn = model.RegisterId > 0 ? DateTime.Today : DateTime.Today;
+
+                await _repo.UpdateReassessmentAsync(domainObj);
+                return new RegisterRegRespObj
+                {
+                    RegisterId = domainObj.RegisterId,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Gone for approval" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new RegisterRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
+
+        [HttpPost(ApiRoutes.Register.UPDATE_DISPOSAL)]
+        public async Task<ActionResult<RegisterRegRespObj>> AddUpDateDisposalAsync([FromBody] AddUpdateRegisterObj model)
+        {
+            try
+            {
+                var user = await _identityService.UserDataAsync();
+                IEnumerable<RegisterObj> item = new List<RegisterObj>();
+                if (model.RegisterId > 0)
+                {
+                    item =  _repo.GetRegisterByIdAsync(model.RegisterId);
+                    if (item == null)
+                        return new RegisterRegRespObj
+                        {
+                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
+                        };
+                }
+
+                var domainObj = new ppe_register();
+                domainObj.RegisterId = model.RegisterId > 0 ? model.RegisterId : 0;
+                domainObj.Active = true;
+                domainObj.CreatedBy = user.UserName;
+                domainObj.CreatedOn = DateTime.Today;
+                domainObj.Deleted = false;
+                domainObj.AssetNumber = model.AssetNumber;
+                domainObj.AssetClassificationId = model.AssetClassificationId;
+                domainObj.Description = model.Description;
+                domainObj.Cost = model.Cost;
+                domainObj.DateOfPurchaase = model.DateOfPurchaase;
+                domainObj.Quantity = model.Quantity;
+                domainObj.DepreciationStartDate = model.DepreciationStartDate;
+                domainObj.UsefulLife = model.UsefulLife;
+                domainObj.ResidualValue = model.ResidualValue;
+                domainObj.Location = model.Location;
+                domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;
+                domainObj.AccumulatedDepreciation = model.AccumulatedDepreciation;
+                domainObj.NetBookValue = model.NetBookValue;
+                /*domainObj.ProceedFromDisposal = model.ProceedFromDisposal;
+                domainObj.ProposedDisposalDate = model.ProposedDisposalDate;
+                domainObj.ReasonForDisposal = model.ReasonForDisposal;*/
+                domainObj.SubGlDisposal = model.SubGlDisposal;
+                domainObj.SubGlDepreciation = model.SubGlDepreciation;
+                domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
+                domainObj.UpdatedBy = user.UserName;
+                domainObj.UpdatedOn = model.RegisterId > 0 ? DateTime.Today : DateTime.Today;
+
+                await _repo.UpdateDisposalAsync(domainObj);
+                return new RegisterRegRespObj
+                {
+                    RegisterId = domainObj.RegisterId,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new RegisterRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
 
         [HttpGet(ApiRoutes.Register.DOWNLOAD_REGISTER)]
         public async Task<ActionResult<RegisterRespObj>> GenerateExportRegister()
@@ -244,8 +319,8 @@ namespace PPE.Controllers.V1
             }
         }
 
-        [HttpPost(ApiRoutes.Register.REGISTER_STAFF_APPROVAL)]
-        public async Task<IActionResult> RegisterStaffApproval([FromBody]StaffApprovalObj request)
+        [HttpPost(ApiRoutes.Register.REASSESSMENT_STAFF_APPROVAL)]
+        public async Task<IActionResult> ReassessmentStaffApproval([FromBody]StaffApprovalObj request)
         {
             try
             {
@@ -263,7 +338,7 @@ namespace PPE.Controllers.V1
                         }
                     });
                 }
-                var res = await _repo.RegisterStaffApprovals(request);
+                var res = await _repo.ReassessmentStaffApprovals(request);
                 if (!res.Status.IsSuccessful) return BadRequest(res);
                 return Ok(res);
             }
@@ -275,8 +350,8 @@ namespace PPE.Controllers.V1
 
         }
 
-        [HttpGet(ApiRoutes.Register.REGISTER_STAFF_APPROVAL_AWAITNG)]
-        public async Task<IActionResult> GetCurrentStaffRegisterAwaittingAprovals()
+        [HttpGet(ApiRoutes.Register.REASSESSMENT_STAFF_APPROVAL_AWAITNG)]
+        public async Task<IActionResult> GetCurrentStaffReassessmentAwaittingAprovals()
         {
 
             try
@@ -324,11 +399,11 @@ namespace PPE.Controllers.V1
                         }
                     });
                 }
-                var register = await _repo.GetRegisterAwaitingApprovals(res.workflowTasks.Select(x =>
+                var register = await _repo.GetReassessmentAwaitingApprovals(res.workflowTasks.Select(x =>
                  x.TargetId).ToList(), res.workflowTasks.Select(s =>
                  s.WorkflowToken).ToList());
 
-
+                var classificationName = _dataContext.ppe_assetclassification.Where(a => a.Deleted == false).ToList();
                 return Ok(new RegisterRespObj
                 {
                     Registers = register.Select(d => new RegisterObj
@@ -336,16 +411,24 @@ namespace PPE.Controllers.V1
                         RegisterId = d.RegisterId,
                         Active = d.Active,
                         AssetClassificationId = d.AssetClassificationId,
+                        ClassificationName = classificationName.FirstOrDefault(a => a.AsetClassificationId == d.AssetClassificationId)?.ClassificationName ?? null,
+                        AssetNumber = d.AssetNumber,
+                        AdditionFormId = d.AdditionFormId,
                         Cost = d.Cost,
-                        //DateOfPurchase = d.DateOfPurchase,
+                        DateOfPurchaase = d.DateOfPurchaase,
                         DepreciationStartDate = d.DepreciationStartDate,
                         Description = d.Description,
                         Quantity = d.Quantity,
                         Location = d.Location,
                         LpoNumber = d.LpoNumber,
                         ResidualValue = d.ResidualValue,
-                        //SubGlAddition = d.SubGlAddition,
-                        UsefulLife = d.UsefulLife
+                        RemainingUsefulLife = d.RemainingUsefulLife,
+                        UsefulLife = d.UsefulLife,
+                        ProposedResidualValue = d.ProposedResidualValue,
+                        ProposedUsefulLife = d.ProposedUsefulLife,
+                        DepreciationForThePeriod = d.DepreciationForThePeriod,
+                        AccumulatedDepreciation = d.AccumulatedDepreciation,
+                        NetBookValue = d.NetBookValue
                     }).ToList(),
                     Status = new APIResponseStatus
                     {
@@ -361,9 +444,215 @@ namespace PPE.Controllers.V1
             {
                 throw ex;
             }
+        }
+
+        [HttpPost(ApiRoutes.Register.DISPOSAL_STAFF_APPROVAL)]
+        public async Task<IActionResult> DisposalStaffApproval([FromBody]StaffApprovalObj request)
+        {
+            try
+            {
+                if (request.TargetId < 1 || request.ApprovalStatus < 1 || string.IsNullOrEmpty(request.ApprovalComment))
+                {
+                    return BadRequest(new StaffApprovalRegRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "All Fields are required for this approval"
+                            }
+                        }
+                    });
+                }
+                var res = await _repo.DisposalStaffApprovals(request);
+                if (!res.Status.IsSuccessful) return BadRequest(res);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+        }
+
+        [HttpGet(ApiRoutes.Register.DISPOSAL_STAFF_APPROVAL_AWAITNG)]
+        public async Task<IActionResult> GetCurrentStaffDisposalAwaittingAprovals()
+        {
+
+            try
+            {
+                var result = await _serverRequest.GetAnApproverItemsFromIdentityServer();
+                if (!result.IsSuccessStatusCode)
+                {
+                    var data1 = await result.Content.ReadAsStringAsync();
+                    var res1 = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data1);
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = false,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}"
+                            }
+                        }
+                    });
+                }
+
+                var data = await result.Content.ReadAsStringAsync();
+                var res = JsonConvert.DeserializeObject<WorkflowTaskRespObj>(data);
+
+                if (res == null)
+                {
+                    return BadRequest(new WorkflowTaskRespObj
+                    {
+                        Status = res.Status
+                    });
+                }
+
+                if (res.workflowTasks.Count() < 1)
+                {
+                    return Ok(new WorkflowTaskRespObj
+                    {
+                        Status = new APIResponseStatus
+                        {
+                            IsSuccessful = true,
+                            Message = new APIResponseMessage
+                            {
+                                FriendlyMessage = "No Pending Approval"
+                            }
+                        }
+                    });
+                }
+                var disposals = await _repo.GetDisposalAwaitingApprovals(res.workflowTasks.Select(x =>
+                 x.TargetId).ToList(), res.workflowTasks.Select(s =>
+                 s.WorkflowToken).ToList());
 
 
+                return Ok(new RegisterRespObj
+                {
+                    Registers = disposals.Select(d => new RegisterObj
+                    {
+                        RegisterId = d.RegisterId,
+                        Active = d.Active,
+                        AssetClassificationId = d.AssetClassificationId,
+                        Cost = d.Cost,
+                        DateOfPurchaase = d.DateOfPurchaase,
+                        DepreciationStartDate = d.DepreciationStartDate,
+                        Description = d.Description,
+                        Quantity = d.Quantity,
+                        Location = d.Location,
+                        AssetNumber = d.AssetNumber,
+                        ResidualValue = d.ResidualValue,
+                        DepreciationForThePeriod = d.DepreciationForThePeriod,
+                        UsefulLife = d.UsefulLife,
+                        AccumulatedDepreciation = d.AccumulatedDepreciation,
+                        NetBookValue = d.NetBookValue,
+                        SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
+                        SubGlDepreciation = d.SubGlDepreciation,
+                        SubGlDisposal = d.SubGlDisposal
 
+                    }).ToList(),
+                    Status = new APIResponseStatus
+                    {
+                        IsSuccessful = true,
+                        Message = new APIResponseMessage
+                        {
+                            FriendlyMessage = disposals.Count() < 1 ? "No Disposal  awaiting approvals" : null
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpPost(ApiRoutes.Register.UPDATE_MULTIPLE_RESIDUALVALUE)]
+        public async Task<ActionResult<RegisterRespObj>> UpdateMultipleResidualValue([FromBody] List<RegisterObj> model)
+        {
+            try
+            {
+                var identity = await _identityService.UserDataAsync();
+                var user = identity.UserName;
+                foreach (var item in model)
+                {
+                    item.CreatedBy = user;
+                    item.UpdatedBy = user;
+                }
+
+                var isDone = _repo.UpdateMultipleResidualValue(model);
+
+                return new RegisterRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "Successful" : "Unsuccessful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new RegisterRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
+
+        [HttpPost(ApiRoutes.Register.UPDATE_MULTIPLE_USEFULLIFE)]
+        public async Task<ActionResult<RegisterRespObj>> UpdateMultipleUsefulLife([FromBody] List<RegisterObj> model)
+        {
+            try
+            {
+                var identity = await _identityService.UserDataAsync();
+                var user = identity.UserName;
+                foreach (var item in model)
+                {
+                    item.CreatedBy = user;
+                    item.UpdatedBy = user;
+                }
+
+                var isDone = _repo.UpdateMultipleUsefulLife(model);
+
+                return new RegisterRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "Successful" : "Unsuccessful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new RegisterRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+
+        }
+
+        [HttpGet(ApiRoutes.Register.GET_ENTRIES)]
+        public async Task<ActionResult<FinTransacRegRespObj>> GetEntries(RegisterObj entries)
+        {
+            try
+            {
+                var response = _repo.GetEntries(entries);
+                return new FinTransacRegRespObj
+                {
+                    Transactions = _mapper.Map<List<TransactionObj>>(response),
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                return new FinTransacRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
         }
     }
 }

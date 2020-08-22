@@ -126,8 +126,22 @@ namespace PPE.Controllers.V1
                             Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
                         };
                 }
-                //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == model.AssetClassificationId).FirstOrDefault().ResidualValue;
-                //var residualValue = ((residlValue * model.Cost) / 100);
+
+                // List of additions
+                var adds = await _repo.GetAllAdditionAsync();
+                if (model.AdditionFormId == 0)
+                {
+                    if (adds.Select(e => e.LpoNumber.Trim().ToLower()).Contains(model.LpoNumber.Trim().ToLower()))
+                    
+                    {
+                        return new AdditionFormRegRespObj
+                        {
+                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "You can't have the same LpoNumber on this table" } }
+                        };
+
+                    }
+                }
+
                 var domainObj = new ppe_additionform();
                 domainObj.AdditionFormId = model.AdditionFormId > 0 ? model.AdditionFormId : 0;
                 domainObj.Active = true;
@@ -155,7 +169,7 @@ namespace PPE.Controllers.V1
                 return new AdditionFormRegRespObj
                 {
                     AdditionFormId = domainObj.AdditionFormId,
-                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Gone for approval" } }
                 };
             }
             catch (Exception ex)
@@ -219,7 +233,7 @@ namespace PPE.Controllers.V1
                     {
                         using (var ms = new MemoryStream())
                         {
-                            await fileBit.CopyToAsync(ms);
+                            await fileBit.CopyToAsync(ms); 
                             byteList.Add(ms.ToArray());
                         }
                     }
@@ -388,7 +402,102 @@ namespace PPE.Controllers.V1
 
         }
 
+        [HttpPost(ApiRoutes.Addition.UPDATE_LPONUMBER)]
+        public async Task<ActionResult<LpoRegRespObj>> AddUpdateLpoNumber([FromBody] LpoObj model)
+        {
+            try
+            {
+                var lpo = await _repo.GetAllLpoAsync();
+                if (model.IsUsed == false)
+                {
+
+                    {
+                        return new LpoRegRespObj
+                        {
+                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "You can't have the same LpoNumber on this table" } }
+                        };
+
+                    }
+                }
+                ppe_lpo item = new ppe_lpo();
+                
+               
+                var domainObj = new ppe_lpo();
+                domainObj.LPOId = model.LPOId > 0 ? model.LPOId : 0;
+                domainObj.Active = true;
+                
+                domainObj.CreatedOn = DateTime.Today;
+                domainObj.Deleted = false;
+                domainObj.LpoNumber = model.LpoNumber;
+                domainObj.DateOfPurchase = model.DateOfPurchase;
+                domainObj.Description = model.Description;
+                domainObj.Quantity = model.Quantity;
+                domainObj.Cost = model.Cost;
+                domainObj.Location = model.Location;
+                domainObj.IsUsed = false;
+               
+
+                await _repo.AddUpdateLpoNumber(domainObj);
+                return new LpoRegRespObj
+                {
+                    LPOId = domainObj.LPOId,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new LpoRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
+
+        [HttpGet(ApiRoutes.Addition.GET_LPONUMBER_BY_ID)]
+        public async Task<ActionResult<LpoRespObj>> GetLpoByIdAsync([FromQuery] SearchObj search)
+        {
+            if (search.SearchId < 1)
+            {
+                return new LpoRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "LPO Id is required" } }
+                };
+            }
+
+            var response = await _repo.GetLpoByIdAsync(search.SearchId);
+            var resplist = new List<ppe_lpo> { response };
+            return new LpoRespObj
+            {
+                lpos = _mapper.Map<List<LpoObj>>(resplist),
+            };
+        }
+
+
+        [HttpGet(ApiRoutes.Addition.GET_ADDITION_APPROVAL_COMMENTS)]
+        public async Task<ActionResult<ApprovalDetailsRespObj>> GetApprovalTrail([FromQuery] ApprovalDetailSearchObj model)
+        {
+            try
+            {
+                return new ApprovalDetailsRespObj
+                {
+                    Details = _repo.GetApprovalTrail(model.TargetId, model.WorkflowToken)
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new ApprovalDetailsRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
+
     }
 }
 
 
+ 

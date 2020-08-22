@@ -10,6 +10,7 @@ namespace PPE.Contracts.Response
     {
         public int RegisterId { get; set; }
         public int AdditionFormId { get; set; }
+        public int CompanyId { get; set; }
         public string AssetNumber { get; set; }
         public string LpoNumber { get; set; }
         public string ClassificationName { get; set; }
@@ -38,6 +39,8 @@ namespace PPE.Contracts.Response
         public int SubGlDisposal { get; set; }
         public string SubGlDisposalName { get; set; }
         public string SubGlDisposalCode { get; set; }
+        public int ProposedUsefulLife { get; set; }
+        public int ProposedResidualValue { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }
@@ -50,6 +53,7 @@ namespace PPE.Contracts.Response
     {
         public int RegisterId { get; set; }
         public int AdditionFormId { get; set; }
+        public int CompanyId { get; set; }
         [StringLength(50)]
         public string AssetNumber { get; set; }
         [StringLength(50)]
@@ -64,6 +68,8 @@ namespace PPE.Contracts.Response
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
         public int RemainingUsefulLife { get; set; }
+        public int ProposedUsefulLife { get; set; }
+        public int ProposedResidualValue { get; set; }
         public decimal ResidualValue { get; set; }
         [StringLength(50)]
         public string Location { get; set; }

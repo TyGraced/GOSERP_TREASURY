@@ -24,9 +24,9 @@ namespace PPE.Installers
 
             services.AddScoped<IAssetClassificationService, AssetClassificationService>();
             services.AddScoped<IAdditionService, AdditionService>();
-            services.AddScoped<IDisposalService, DisposalService>();
+            //services.AddScoped<IDisposalService, DisposalService>();
             services.AddScoped<IRegisterService, RegisterService>();
-            services.AddScoped<IReassessmentService, ReassessmentService>();
+           // services.AddScoped<IReassessmentService, ReassessmentService>();
 
             services.AddDefaultIdentity<ApplicationUser>(opt =>
             {

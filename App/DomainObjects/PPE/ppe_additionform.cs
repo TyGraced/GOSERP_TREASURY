@@ -22,6 +22,7 @@ namespace PPE.DomainObjects.PPE
         public int SubGlDisposal { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
+        public int CompanyId { get; set; }
         public decimal ResidualValue { get; set; }
         public string Location { get; set; }
         public bool Active { get; set; }
