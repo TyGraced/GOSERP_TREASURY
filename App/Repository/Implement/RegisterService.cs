@@ -1022,31 +1022,39 @@ namespace PPE.Repository.Implement
             }
         }
 
-        public TransactionObj GetEntries(RegisterObj entries)
+        public TransactionObj GetEndOfMonthDepreciation(DateTime date)
         {
             try
             {
-                    var depreciationEntries = new TransactionObj
-                    {
-                        IsApproved = false,
-                        CasaAccountNumber = string.Empty,
-                        CompanyId = entries.CompanyId,
-                        Amount = entries.DepreciationForThePeriod,
-                        CurrencyId = 0,
-                        Description = entries.Description,
-                        DebitGL = entries.SubGlDepreciation,
-                        CreditGL = entries.SubGlAccumulatedDepreciation,
-                        ReferenceNo = entries.AssetNumber,
-                        OperationId = (int)OperationsEnum.PPEAdditionApproval,
-                        JournalType = "System",
-                        RateType = 1,//Buying Rate
-                    };
+                var data = (from a in _dataContext.ppe_register 
+                            join b in _dataContext.ppe_dailyschedule on a.AdditionFormId equals b.AdditionId
+                            join c in _dataContext.ppe_additionform on a.AdditionFormId equals c.AdditionFormId
+                            where a.Deleted == false && b.PeriodDate.Value.Date == date.Date && b.EndPeriod == true                         
+                            select new TransactionObj
+                            {
+                                IsApproved = false,
+                                CasaAccountNumber = string.Empty,
+                                CompanyId = c.CompanyId,
+                                Amount = b.DepreciationForThePeriod,
+                                CurrencyId = 0,
+                                Description = "PPE Monthly Depreciation",
+                                DebitGL = _dataContext.ppe_assetclassification.FirstOrDefault(x=>x.AsetClassificationId == a.AssetClassificationId).SubGlDepreciation,
+                                CreditGL = _dataContext.ppe_assetclassification.FirstOrDefault(x => x.AsetClassificationId == a.AssetClassificationId).SubGlAccumulatedDepreciation,
+                                ReferenceNo = a.AssetNumber,
+                                OperationId = (int)OperationsEnum.PPEAdditionApproval,
+                                JournalType = "System",
+                                RateType = 1,//Buying Rate
+                            }).ToList();
 
-                var res = _financeRequest.PassEntryToFinance(depreciationEntries).Result;
-                if (res.Status.IsSuccessful)
+                foreach(var item in data)
                 {
+                    var res = _financeRequest.PassEntryToFinance(item).Result;
+                    if (res.Status.IsSuccessful)
+                    {
 
+                    }
                 }
+
                 return depreciationEntries;
                 //return new FinTransacRegRespObj
                 //{

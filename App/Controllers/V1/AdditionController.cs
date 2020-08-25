@@ -159,6 +159,7 @@ namespace PPE.Controllers.V1
                 domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
                 domainObj.Location = model.Location;
                 domainObj.AssetClassificationId = model.AssetClassificationId;
+                domainObj.CompanyId = user.CompanyId;
                 //domainObj.DepreciationStartDate = model.DepreciationStartDate;
                 domainObj.UsefulLife = model.UsefulLife;
                 domainObj.ResidualValue = model.ResidualValue;
