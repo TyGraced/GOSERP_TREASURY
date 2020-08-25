@@ -1,0 +1,15 @@
+
+
+        //[HttpPost(ApiRoutes.Addition.ADD_UPDATE_DAILYSCHEDULE)]
+        //public ActionResult<bool> GenerateInvestmentDailySchedule([FromBody] AdditionFormObj entity)
+        //{
+        //    try
+        //    {
+        //        var response = _repo.GenerateInvestmentDailySchedule(16);
+        //        return response;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}

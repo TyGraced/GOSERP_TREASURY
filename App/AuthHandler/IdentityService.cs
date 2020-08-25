@@ -193,5 +193,38 @@ namespace PPE.AuthHandler
                 #endregion
             }
         }
+
+        public async Task<HttpResponseMessage> GotForApprovalAsync(GoForApprovalRequest request)
+        {
+            var gosGatewayClient = _httpClientFactory.CreateClient("GOSDEFAULTGATEWAY");
+            string authorization = _httpContextAccessor.HttpContext.Request.Headers["Authorization"];
+            gosGatewayClient.DefaultRequestHeaders.Add("Authorization", authorization);
+
+
+            var jsonContent = JsonConvert.SerializeObject(request);
+            var buffer = Encoding.UTF8.GetBytes(jsonContent);
+            var byteContent = new ByteArrayContent(buffer);
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                try
+                {
+                    var result = await gosGatewayClient.PostAsync(ApiRoutes.Workflow.GO_FOR_APPROVAL, byteContent);
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        new GoForApprovalRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                            }
+                        };
+                    }
+                    return result;
+                }
+                catch (Exception ex) { throw ex; }
+            });
+        }
     }
 }

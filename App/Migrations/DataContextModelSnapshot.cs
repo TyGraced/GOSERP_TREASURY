@@ -19,558 +19,723 @@ namespace PPE.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", b =>
+            modelBuilder.Entity("PPE.DomainObjects.Approval.cor_approvaldetail", b =>
                 {
-                    b.Property<int>("SupplierId")
+                    b.Property<int>("ApprovalDetailId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkflowToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ApprovalDetailId");
+
+                    b.ToTable("cor_approvaldetail");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_additionform", b =>
+                {
+                    b.Property<int>("AdditionFormId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
 
                     b.Property<int>("ApprovalStatusId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CountryId")
+                    b.Property<int>("AssetClassificationId")
                         .HasColumnType("int");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<DateTime?>("CreatedOn")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfPurchase")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("DepreciationStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LpoNumber")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ResidualValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SubGlAccumulatedDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlAddition")
+                        .HasColumnType("int")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("SubGlDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDisposal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UsefulLife")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkflowToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AdditionFormId");
+
+                    b.ToTable("ppe_additionform");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_assetclassification", b =>
+                {
+                    b.Property<int>("AsetClassificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ClassificationName")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Depreciable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DepreciationMethod")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<decimal>("ResidualValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SubGlAccumulatedDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlAddition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDisposal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UsefulLifeMax")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsefulLifeMin")
+                        .HasColumnType("int");
+
+                    b.HasKey("AsetClassificationId");
+
+                    b.ToTable("ppe_assetclassification");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_dailyschedule", b =>
+                {
+                    b.Property<int>("PpeDailyScheduleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("AccumulatedDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool?>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("AdditionId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("CB")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Createdby")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime?>("Createdon")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("DailyDepreciation")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool?>("Deleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Email")
+                    b.Property<decimal>("DepreciationForThePeriod")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool?>("EndPeriod")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("OB")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("Period")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PeriodDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("PeriodId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RegisterId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Updatedby")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime?>("Updatedon")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PpeDailyScheduleId");
+
+                    b.ToTable("ppe_dailyschedule");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_disposal", b =>
+                {
+                    b.Property<int>("DisposalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("AccumulatedDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ApprovalStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AssetClassificationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AssetNumber")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfPurchaase")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("DepreciationForThePeriod")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DepreciationStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<decimal>("NetBookValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ProceedFromDisposal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ProposedDisposalDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReasonForDisposal")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ResidualValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SubGlAccumulatedDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDisposal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UsefulLife")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkflowToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DisposalId");
+
+                    b.ToTable("ppe_disposal");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_lpo", b =>
+                {
+                    b.Property<int>("PLPOId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(550)")
+                        .HasMaxLength(550);
+
+                    b.Property<decimal>("AmountPayable")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ApprovalStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BidAndTenderId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("BidComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("DebitGl")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(2000)")
+                        .HasMaxLength(2000);
+
+                    b.Property<decimal>("GrossAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("JobStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LPONumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<DateTime?>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("HaveWorkPrintPermit")
-                        .HasColumnType("bit");
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
-                    b.Property<string>("Passport")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
+                    b.Property<int>("PurchaseReqNoteId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PostalAddress")
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ServiceTerm")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SupplierAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RegistrationNo")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
+                    b.Property<string>("SupplierIds")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SupplierNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SupplierTypeId")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("money");
 
-                    b.Property<string>("TaxIDorVATID")
+                    b.Property<string>("Taxes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
+                    b.Property<decimal>("Total")
+                        .HasColumnType("money");
 
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("WinnerSupplierId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Website")
+                    b.Property<string>("WorkflowToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("cor_suppliertypeSupplierTypeId")
-                        .HasColumnType("int");
+                    b.HasKey("PLPOId");
 
-                    b.HasKey("SupplierId");
-
-                    b.HasIndex("cor_suppliertypeSupplierTypeId");
-
-                    b.ToTable("cor_supplier");
+                    b.ToTable("ppe_lpo");
                 });
 
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierauthorization", b =>
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_periodicschedule", b =>
                 {
-                    b.Property<int>("SupplierAuthorizationId")
+                    b.Property<int>("PpePeriodicScheduleId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<decimal?>("AccumulatedDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool?>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
+                    b.Property<int>("AdditionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<decimal?>("CB")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Createdby")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<DateTime?>("CreatedOn")
+                    b.Property<DateTime?>("Createdon")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("Deleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
+                    b.Property<bool?>("EndPeriod")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("MonthlyDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("OB")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("Period")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PeriodDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("PeriodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Updatedby")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
+                    b.Property<DateTime?>("Updatedon")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
+                    b.HasKey("PpePeriodicScheduleId");
+
+                    b.ToTable("ppe_periodicschedule");
+                });
+
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_reassessment", b =>
+                {
+                    b.Property<int>("ReassessmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("AccumulatedDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ApprovalStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AssetClassificationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AssetNumber")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<byte[]>("Signature")
-                        .HasColumnType("image");
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SupplierId")
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfPurchaase")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("DepreciationForThePeriod")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DepreciationStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<string>("LpoNumber")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<decimal>("NetBookValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProposedResidualValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProposedUsefulLife")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RemainingUsefulLife")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ResidualValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SubGlAccumulatedDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDisposal")
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<DateTime?>("UpdatedOn")
+                    b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("cor_supplierSupplierId")
+                    b.Property<int>("UsefulLife")
                         .HasColumnType("int");
 
-                    b.HasKey("SupplierAuthorizationId");
+                    b.Property<string>("WorkflowToken")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("cor_supplierSupplierId");
+                    b.HasKey("ReassessmentId");
 
-                    b.ToTable("cor_supplierauthorization");
+                    b.ToTable("ppe_reassessment");
                 });
 
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierbusinessowner", b =>
+            modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_register", b =>
                 {
-                    b.Property<int>("SupplierBusinessOwnerId")
+                    b.Property<int>("RegisterId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool?>("Active")
+                    b.Property<decimal>("AccumulatedDepreciation")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("date");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<byte[]>("Signature")
-                        .HasColumnType("image");
-
-                    b.Property<int>("SupplierId")
+                    b.Property<int>("AdditionFormId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("cor_supplierSupplierId")
+                    b.Property<int>("ApprovalStatusId")
                         .HasColumnType("int");
 
-                    b.HasKey("SupplierBusinessOwnerId");
-
-                    b.HasIndex("cor_supplierSupplierId");
-
-                    b.ToTable("cor_supplierbusinessowner");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierdocument", b =>
-                {
-                    b.Property<int>("SupplierDocumentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<byte[]>("Document")
-                        .HasColumnType("image");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<int>("SupplierId")
+                    b.Property<int>("AssetClassificationId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UpdatedBy")
+                    b.Property<string>("AssetNumber")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("cor_supplierSupplierId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SupplierDocumentId");
-
-                    b.HasIndex("cor_supplierSupplierId");
-
-                    b.ToTable("cor_supplierdocument");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_suppliertype", b =>
-                {
-                    b.Property<int>("SupplierTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("GL")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SupplierTypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SupplierTypeId");
-
-                    b.ToTable("cor_suppliertype");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_topclient", b =>
-                {
-                    b.Property<int>("TopClientId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
-
-                    b.Property<string>("ContactPerson")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<int?>("NoOfStaff")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("TopClientId");
-
-                    b.ToTable("cor_topclient");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_topsupplier", b =>
-                {
-                    b.Property<int>("TopSupplierId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
-
-                    b.Property<string>("ContactPerson")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<int?>("NoOfStaff")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PhoneNo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("cor_supplierSupplierId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TopSupplierId");
-
-                    b.HasIndex("cor_supplierSupplierId");
-
-                    b.ToTable("cor_topsupplier");
-                });
-
-            modelBuilder.Entity("PPE.DomainObjects.Supplier.cor_serviceterms", b =>
-                {
-                    b.Property<int>("ServiceTermsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
 
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
-                    b.Property<DateTime?>("CreatedOn")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Header")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedOn")
+                    b.Property<DateTime>("DateOfPurchaase")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ServiceTermsId");
-
-                    b.ToTable("cor_serviceterms");
-                });
-
-            modelBuilder.Entity("PPE.DomainObjects.Supplier.cor_tasksetup", b =>
-                {
-                    b.Property<int>("TaskSetupId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool?>("Active")
+                    b.Property<bool>("Deleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("CompanyId")
+                    b.Property<decimal>("DepreciationForThePeriod")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("DepreciationStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(500);
+
+                    b.Property<string>("LpoNumber")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.Property<decimal>("NetBookValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProposedResidualValue")
                         .HasColumnType("int");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("Percentage")
-                        .HasColumnType("float");
-
-                    b.Property<int>("SubGL")
+                    b.Property<int>("ProposedUsefulLife")
                         .HasColumnType("int");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RemainingUsefulLife")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ResidualValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SubGlAccumulatedDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlAddition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDepreciation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubGlDisposal")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
-                    b.Property<DateTime?>("UpdatedOn")
+                    b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("TaskSetupId");
+                    b.Property<int>("UsefulLife")
+                        .HasColumnType("int");
 
-                    b.ToTable("cor_tasksetup");
-                });
+                    b.Property<string>("WorkflowToken")
+                        .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", b =>
-                {
-                    b.HasOne("GODP.APIsContinuation.DomainObjects.Supplier.cor_suppliertype", "cor_suppliertype")
-                        .WithMany("cor_supplier")
-                        .HasForeignKey("cor_suppliertypeSupplierTypeId");
-                });
+                    b.HasKey("RegisterId");
 
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierauthorization", b =>
-                {
-                    b.HasOne("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", "cor_supplier")
-                        .WithMany("cor_supplierauthorization")
-                        .HasForeignKey("cor_supplierSupplierId");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierbusinessowner", b =>
-                {
-                    b.HasOne("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", "cor_supplier")
-                        .WithMany("cor_supplierbusinessowner")
-                        .HasForeignKey("cor_supplierSupplierId");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplierdocument", b =>
-                {
-                    b.HasOne("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", "cor_supplier")
-                        .WithMany("cor_supplierdocument")
-                        .HasForeignKey("cor_supplierSupplierId");
-                });
-
-            modelBuilder.Entity("GODP.APIsContinuation.DomainObjects.Supplier.cor_topsupplier", b =>
-                {
-                    b.HasOne("GODP.APIsContinuation.DomainObjects.Supplier.cor_supplier", "cor_supplier")
-                        .WithMany("cor_topsupplier")
-                        .HasForeignKey("cor_supplierSupplierId");
+                    b.ToTable("ppe_register");
                 });
 #pragma warning restore 612, 618
         }

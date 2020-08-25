@@ -52,23 +52,17 @@
   </ItemGroup>
 
 
+  <ItemGroup>
+    <Reference Include="GOSLibraries">
+      <HintPath>..\..\..\..\Desktop\goslob\GOSLibraries.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
   <!--<ItemGroup>
     <Reference Include="GOSLibraries">
       <HintPath>..\..\..\..\..\Desktop\Gos_Nuggets\GOSLibraries.dll</HintPath>
     </Reference>
   </ItemGroup>-->
-
-
-  <ItemGroup>
-    <Folder Include="Repository\" />
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Reference Include="GOSLibraries">
-      <HintPath>..\..\GOSLibraries\GOSLibraries\bin\Debug\netstandard2.0\GOSLibraries.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>
