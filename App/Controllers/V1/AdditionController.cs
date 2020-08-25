@@ -233,7 +233,7 @@ namespace PPE.Controllers.V1
                     {
                         using (var ms = new MemoryStream())
                         {
-                            await fileBit.CopyToAsync(ms); 
+                            await fileBit.CopyToAsync(ms);
                             byteList.Add(ms.ToArray());
                         }
                     }
@@ -246,7 +246,7 @@ namespace PPE.Controllers.V1
                 var isDone = await _repo.UploadAdditionAsync(byteList, createdBy);
                 return new AdditionFormRegRespObj
                 {
-                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "successful" : "Unsuccessful" } }
+                    Status = new APIResponseStatus { IsSuccessful = isDone ? true : false, Message = new APIResponseMessage { FriendlyMessage = isDone ? "Successful" : "Unsuccessful" } }
                 };
             }
             catch (Exception ex)
@@ -259,7 +259,6 @@ namespace PPE.Controllers.V1
                 };
             }
         }
-
 
         [HttpPost(ApiRoutes.Addition.ADDITION_STAFF_APPROVAL)]
         public async Task<IActionResult> AdditionStaffApproval([FromBody]StaffApprovalObj request)
@@ -403,44 +402,38 @@ namespace PPE.Controllers.V1
         }
 
         [HttpPost(ApiRoutes.Addition.UPDATE_LPONUMBER)]
-        public async Task<ActionResult<LpoRegRespObj>> AddUpdateLpoNumber([FromBody] LpoObj model)
+        public async Task<ActionResult<LpoRegRespObj>> AddUpdateLpoNumber([FromBody] List<LpoObj> model)
         {
             try
             {
-                var lpo = await _repo.GetAllLpoAsync();
-                if (model.IsUsed == false)
+                var lpos = _dataContext.ppe_lpo.Where(d => d.Deleted == false);
+                ppe_lpo lpo = new ppe_lpo();
+                foreach (var item in model)
                 {
-
+                    if(!lpos.Select(s => s.PLPOId).Contains(item.PLPOId))
                     {
-                        return new LpoRegRespObj
-                        {
-                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "You can't have the same LpoNumber on this table" } }
-                        };
+                        lpo.PLPOId = item.PLPOId > 0 ? item.PLPOId : 0;
 
+                        lpo.LPONumber = item.LPONumber;
+                        lpo.Name = item.Name;
+                        lpo.Description = item.Description;
+                        lpo.Quantity = item.Quantity;
+                        lpo.AmountPayable = item.AmountPayable;
+                        lpo.Address = item.Address;
+                        lpo.RequestDate = item.RequestDate;
+
+                        await _repo.AddUpdateLpoNumber(lpo);
                     }
+                    return new LpoRegRespObj
+                    {
+                        PLPOId = lpo.PLPOId,
+                        Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "LpoNumber exists already" } }
+                    };
                 }
-                ppe_lpo item = new ppe_lpo();
-                
-               
-                var domainObj = new ppe_lpo();
-                domainObj.LPOId = model.LPOId > 0 ? model.LPOId : 0;
-                domainObj.Active = true;
-                
-                domainObj.CreatedOn = DateTime.Today;
-                domainObj.Deleted = false;
-                domainObj.LpoNumber = model.LpoNumber;
-                domainObj.DateOfPurchase = model.DateOfPurchase;
-                domainObj.Description = model.Description;
-                domainObj.Quantity = model.Quantity;
-                domainObj.Cost = model.Cost;
-                domainObj.Location = model.Location;
-                domainObj.IsUsed = false;
-               
 
-                await _repo.AddUpdateLpoNumber(domainObj);
                 return new LpoRegRespObj
                 {
-                    LPOId = domainObj.LPOId,
+                    PLPOId = lpo.PLPOId,
                     Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
                 };
             }
@@ -454,26 +447,6 @@ namespace PPE.Controllers.V1
                 };
             }
         }
-
-        //[HttpGet(ApiRoutes.Addition.GET_LPONUMBER_BY_ID)]
-        //public async Task<ActionResult<LpoRespObj>> GetLpoByIdAsync([FromQuery] SearchObj search)
-        //{
-        //    if (search.SearchId < 1)
-        //    {
-        //        return new LpoRespObj
-        //        {
-        //            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "LPO Id is required" } }
-        //        };
-        //    }
-
-        //    var response = await _repo.GetLpoByIdAsync(search.SearchId);
-        //    var resplist = new List<ppe_lpo> { response };
-        //    return new LpoRespObj
-        //    {
-        //        lpos = _mapper.Map<List<LpoObj>>(resplist),
-        //    };
-        //}
-
 
         [HttpGet(ApiRoutes.Addition.GET_ADDITION_APPROVAL_COMMENTS)]
         public async Task<ActionResult<ApprovalDetailsRespObj>> GetApprovalTrail([FromQuery] ApprovalDetailSearchObj model)

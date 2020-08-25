@@ -71,7 +71,7 @@ namespace PPE.Repository.Implement
                     ApprovalStatus = (int)ApprovalStatus.Pending,
                     DeferredExecution = true,
                     StaffId = user.StaffId,
-                    CompanyId = 1,
+                    CompanyId = user.CompanyId,
                     EmailNotification = true,
                     ExternalInitialization = false,
                     StatusId = (int)ApprovalStatus.Processing,
@@ -201,66 +201,61 @@ namespace PPE.Repository.Implement
                                 var item = new AdditionFormObj
                                 {
                                     LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                                    DateOfPurchase = workSheet.Cells[i, 2].Value != null ? DateTime.Parse(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
-                                    Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
-                                    Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
-                                    Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                                    SubGlAdditionCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    //SubGlDepreciationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    //SubGlDepreciationCode = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
-                                    //SubGlAccumulatedDepreciationName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
-                                    //SubGlAccumulatedDepreciationCode = workSheet.Cells[i, 10].Value != null ? workSheet.Cells[i, 10].Value.ToString() : null,
-                                    //SubGlDisposalName = workSheet.Cells[i, 11].Value != null ? workSheet.Cells[i, 11].Value.ToString() : null,
-                                    //SubGlDisposalCode = workSheet.Cells[i, 12].Value != null ? workSheet.Cells[i, 12].Value.ToString() : null,
-                                    Location = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
-                                    ClassificationName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
-                                    UsefulLife = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
-                                    ResidualValue = workSheet.Cells[i, 11].Value != null ? int.Parse(workSheet.Cells[i, 11].Value.ToString()) : 0,
+                                    //DateOfPurchase = workSheet.Cells[i, 2].Value != null ? Convert.ToDateTime(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
+                                    Description = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : null,
+                                    Quantity = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
+                                    Cost = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
+                                    SubGlAdditionName = workSheet.Cells[i, 5].Value != null ? workSheet.Cells[i, 5].Value.ToString() : null,
+                                    //SubGlAdditionCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    Location = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    ClassificationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    UsefulLife = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
+                                    ResidualValue = workSheet.Cells[i, 9].Value != null ? decimal.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
                                 };
                                 uploadedRecord.Add(item);
                             }
                         }
                     }
-
+                    /*var item = new AdditionFormObj
+                                {
+                                    LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
+                                    DateOfPurchase = workSheet.Cells[i, 2].Value != null ? Convert.ToDateTime(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
+                                    Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
+                                    Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
+                                    Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
+                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    //SubGlAdditionCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    Location = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
+                                    ClassificationName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
+                                    UsefulLife = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
+                                    ResidualValue = workSheet.Cells[i, 11].Value != null ? decimal.Parse(workSheet.Cells[i, 11].Value.ToString()) : 0,
+                                };*/
                 }
                 if (uploadedRecord.Count > 0)
-                {
+                {   
                     foreach (var item in uploadedRecord)
                     {
-                        var SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAdditionCode)?.SubGLId ?? 0;
-                        var SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
-                        //var SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDepreciationCode)?.SubGLId ?? 0;
-                        //var SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAccumulatedDepreciationCode)?.SubGLId ?? 0;
-                        //var SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlDisposalCode)?.SubGLId ?? 0;
-                        //var SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDepreciationName)?.SubGLId ?? 0;
-                        //var SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAccumulatedDepreciationName)?.SubGLId ?? 0;
-                        //var SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlDisposalName)?.SubGLId ?? 0;
+                        //var subGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAdditionCode)?.SubGLId ?? 0;
+                        var subGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
                         var classificationName = _dataContext.ppe_assetclassification.Where(c => c.ClassificationName == item.ClassificationName).FirstOrDefault()?.AsetClassificationId ?? 0;
-                        var additions = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
-                        if (additions != null)
+                        var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
+                        if (category != null)
                         {
-                            additions.LpoNumber = item.LpoNumber;
-                            additions.DateOfPurchase = item.DateOfPurchase;
-                            additions.Description = item.Description;
-                            additions.Quantity = item.Quantity;
-                            additions.Cost = item.Cost;
-                            additions.SubGlAddition = SubGlAdditionCode;
-                            additions.SubGlAddition = SubGlAdditionName;
-                            //additions.SubGlDepreciation = SubGlDepreciationCode;
-                            //additions.SubGlDepreciation = SubGlDepreciationName;
-                            //additions.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
-                            //additions.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
-                            //additions.SubGlDisposal = SubGlDisposalCode;
-                            //additions.SubGlDisposal = SubGlDisposalName;
-                            additions.Location = item.Location;
-                            additions.AssetClassificationId = classificationName;
-                            additions.UsefulLife = item.UsefulLife;
-                            additions.ResidualValue = item.ResidualValue;
-                            additions.Active = true;
-                            additions.Deleted = false;
-                            additions.UpdatedBy = createdBy;
-                            additions.UpdatedOn = DateTime.Now;
+                            category.LpoNumber = item.LpoNumber;
+                            //category.DateOfPurchase = item.DateOfPurchase;
+                            category.Description = item.Description;
+                            category.Quantity = item.Quantity;
+                            category.Cost = item.Cost;
+                            category.SubGlAddition = subGlAdditionName;
+                            //category.SubGlAddition = subGlAdditionCode;
+                            category.Location = item.Location;
+                            category.AssetClassificationId = classificationName;
+                            category.UsefulLife = item.UsefulLife;
+                            category.ResidualValue = item.ResidualValue;
+                            category.Active = true;
+                            category.Deleted = false;
+                            category.UpdatedBy = createdBy;
+                            category.UpdatedOn = DateTime.Now;
                         }
 
                         else
@@ -268,26 +263,21 @@ namespace PPE.Repository.Implement
                             var addition = new ppe_additionform();
 
                             addition.LpoNumber = item.LpoNumber;
-                            addition.DateOfPurchase = item.DateOfPurchase;
+                            //addition.DateOfPurchase = item.DateOfPurchase;
                             addition.Description = item.Description;
                             addition.Quantity = item.Quantity;
                             addition.Cost = item.Cost;
-                            addition.SubGlAddition = SubGlAdditionName;
-                            //addition.SubGlDepreciation = SubGlDepreciationCode;
-                            //addition.SubGlDepreciation = SubGlDepreciationName;
-                            //addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationCode;
-                            //addition.SubGlAccumulatedDepreciation = SubGlAccumulatedDepreciationName;
-                            //addition.SubGlDisposal = SubGlDisposalCode;
-                            //addition.SubGlDisposal = SubGlDisposalName;
+                            addition.SubGlAddition = subGlAdditionName;
+                            //addition.SubGlAddition = subGlAdditionCode;
                             addition.Location = item.Location;
-                            addition.AssetClassificationId = classificationName;
+                            addition.AssetClassificationId = item.AssetClassificationId;
                             addition.UsefulLife = item.UsefulLife;
                             addition.ResidualValue = item.ResidualValue;
                             addition.Active = true;
                             addition.Deleted = false;
                             addition.CreatedBy = createdBy;
                             addition.CreatedOn = DateTime.Now;
-                            
+
                             await _dataContext.ppe_additionform.AddAsync(addition);
                         }
                     }
@@ -295,7 +285,6 @@ namespace PPE.Repository.Implement
 
                 var response = _dataContext.SaveChanges() > 0;
                 return response;
-
             }
             catch (Exception ex)
             {
@@ -407,7 +396,7 @@ namespace PPE.Repository.Implement
                 var user = await _serverRequest.UserDataAsync();
 
                 var currentItem = await _dataContext.ppe_additionform.FindAsync(request.TargetId);
-                
+
                 using (var _trans = await _dataContext.Database.BeginTransactionAsync())
                 {
                     try
@@ -455,7 +444,7 @@ namespace PPE.Repository.Implement
                         }
                         if (response.ResponseId == (int)ApprovalStatus.Processing)
                         {
-                            await  _dataContext.cor_approvaldetail.AddAsync(details);
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
                             currentItem.WorkflowToken = response.Status.CustomToken;
 
@@ -501,7 +490,7 @@ namespace PPE.Repository.Implement
                             decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
                             decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
                             var assetNumber = AssetNumber.Generate();
-                            //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == currentItem.AssetClassificationId).FirstOrDefault().ResidualValue;
+                            //var residlValue = _dataContext.ppe_addition.Where(c => c.AsetClassificationId == currentItem.additionId).FirstOrDefault().ResidualValue;
                             //var residualValue = ((residlValue * currentItem.Cost)/100);
                             var depreciationStartDate = DateTime.Now;
                             int dailyPeriod = currentItem.UsefulLife * 30;
@@ -532,12 +521,13 @@ namespace PPE.Repository.Implement
                                 AssetNumber = assetNumber,
                                 SubGlDepreciation = currentItem.SubGlDepreciation,
                                 SubGlAccumulatedDepreciation = currentItem.SubGlAccumulatedDepreciation,
+                                WorkflowToken = currentItem.WorkflowToken,
                                 SubGlDisposal = currentItem.SubGlDisposal,
                                 CreatedOn = currentItem.CreatedOn,
                                 UpdatedBy = user.UserName,
                                 UpdatedOn = currentItem.AdditionFormId > 0 ? DateTime.Today : DateTime.Today
 
-                        };
+                            };
 
                             await AddUpdateRegisterAsync(register);
                             await _dataContext.SaveChangesAsync();
@@ -583,6 +573,94 @@ namespace PPE.Repository.Implement
                     finally { await _trans.DisposeAsync(); }
 
                 }
+
+                //using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+                //{
+                //    try
+                //    {
+                //        rejectedLpoBid.IsRejected = true;
+                //        await _purchaseService.AddUpdateBidAndTender(rejectedLpoBid);
+                //        var lostBid = await _dataContext.cor_bid_and_tender.Where(q => q.PLPOId == request.LPOId && q.BidAndTenderId != rejectedLpoBid.BidAndTenderId).ToListAsync();
+                //        targetList.AddRange(lostBid.Select(q => q.BidAndTenderId));
+                //        GoForApprovalRequest wfRequest = new GoForApprovalRequest
+                //        {
+                //            Comment = "Re-Selection of Bid",
+                //            OperationId = (int)OperationsEnum.PurchasePRNApproval,
+                //            TargetId = targetList,
+                //            ApprovalStatus = (int)ApprovalStatus.Pending,
+                //            DeferredExecution = true,
+                //            StaffId = 0,
+                //            CompanyId = 0,
+                //            EmailNotification = true,
+                //            ExternalInitialization = false,
+                //            StatusId = (int)ApprovalStatus.Processing,
+                //        };
+                //        var result = await _serverRequest.GotForApprovalAsync(wfRequest);
+                //        if (!result.IsSuccessStatusCode)
+                //        {
+                //            response.Status.Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" };
+                //            return response;
+                //        }
+                //        var stringData = await result.Content.ReadAsStringAsync();
+                //        var res = JsonConvert.DeserializeObject<GoForApprovalRespObj>(stringData);
+                //        if (res.ApprovalProcessStarted)
+                //        {
+                //            foreach (var id in targetList)
+                //            {
+                //                var item = await _dataContext.cor_bid_and_tender.FindAsync(id);
+                //                if (item != null)
+                //                {
+                //                    item.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                //                    item.WorkflowToken = res.Status.CustomToken;
+                //                }
+                //                await _purchaseService.AddUpdateBidAndTender(item);
+                //            }
+
+                //            await _trans.CommitAsync();
+                //            response.BidAndTenderId = bidAndTenderObj.BidAndTenderId;
+                //            response.Status.IsSuccessful = res.Status.IsSuccessful;
+                //            response.Status.Message = res.Status.Message;
+                //            return response;
+                //        }
+                //        if (res.EnableWorkflow || !res.HasWorkflowAccess)
+                //        {
+                //            await _trans.RollbackAsync();
+                //            return new BidAndTenderRegRespObj
+                //            {
+                //                BidAndTenderId = bidAndTenderObj.BidAndTenderId,
+                //                Status = new APIResponseStatus
+                //                {
+                //                    IsSuccessful = res.Status.IsSuccessful,
+                //                    Message = res.Status.Message
+                //                }
+                //            };
+                //        }
+                //        if (!res.EnableWorkflow)
+                //        {
+                //            await _trans.CommitAsync();
+                //            return new BidAndTenderRegRespObj
+                //            {
+                //                BidAndTenderId = bidAndTenderObj.BidAndTenderId,
+                //                Status = new APIResponseStatus
+                //                {
+                //                    IsSuccessful = true,
+                //                    Message = new APIResponseMessage
+                //                    {
+                //                        FriendlyMessage = "Successful"
+                //                    }
+                //                }
+                //            };
+                //        }
+                //    }
+                //    catch (SqlException ex)
+                //    {
+                //        await _trans.RollbackAsync();
+                //        var errorCode = ErrorID.Generate(4);
+                //        _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                //        throw ex;
+                //    }
+                //    finally { await _trans.DisposeAsync(); }
+                //}
 
                 return new StaffApprovalRegRespObj
                 {
@@ -654,6 +732,25 @@ namespace PPE.Repository.Implement
             }
             return data;
         }
+
+        //private cor_approvaldetail BuildApprovalDetailObject(BidandTenderStaffApprovalCommand request, cor_bid_and_tender currentItem, int staffId)
+        //{
+        //    var approvalDeatil = new cor_approvaldetail();
+        //    var previousDetail = _detailService.GetApprovalDetailsAsync(request.TargetId, currentItem.WorkflowToken).Result;
+        //    approvalDeatil.ArrivalDate = currentItem.RequestDate;
+
+        //    if (previousDetail.Count() > 0)
+        //        approvalDeatil.ArrivalDate = previousDetail.OrderByDescending(s => s.ApprovalDetailId).FirstOrDefault().Date;
+
+        //    approvalDeatil.Comment = request.ApprovalComment;
+        //    approvalDeatil.Date = DateTime.Today;
+        //    approvalDeatil.StatusId = request.ApprovalStatus;
+        //    approvalDeatil.TargetId = request.TargetId;
+        //    approvalDeatil.ReferredStaffId = request.ReferredStaffId;
+        //    approvalDeatil.StaffId = staffId;
+        //    approvalDeatil.WorkflowToken = currentItem.WorkflowToken;
+        //    return approvalDeatil;
+        //}
 
         private bool GenerateInvestmentDailySchedule(int AdditionId)
         {
@@ -734,9 +831,9 @@ namespace PPE.Repository.Implement
             try
             {
 
-                if (model.LPOId > 0)
+                if (model.PLPOId > 0)
                 {
-                    var itemToUpdate = await _dataContext.ppe_lpo.FindAsync(model.LPOId);
+                    var itemToUpdate = await _dataContext.ppe_lpo.FindAsync(model.PLPOId);
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else

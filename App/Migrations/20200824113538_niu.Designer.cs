@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PPE.Data;
 
 namespace PPE.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200824113538_niu")]
+    partial class niu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -368,100 +370,51 @@ namespace PPE.Migrations
 
             modelBuilder.Entity("PPE.DomainObjects.PPE.ppe_lpo", b =>
                 {
-                    b.Property<int>("PLPOId")
+                    b.Property<int>("LPOId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasMaxLength(550);
-
-                    b.Property<decimal>("AmountPayable")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ApprovalStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BidAndTenderId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("BidComplete")
+                    b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int>("DebitGl")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfPurchase")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Deleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("date");
-
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
-
-                    b.Property<decimal>("GrossAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("JobStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LPONumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.Property<int>("PurchaseReqNoteId")
-                        .HasColumnType("int");
+                    b.Property<string>("LpoNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("RequestDate")
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ServiceTerm")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SupplierAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SupplierIds")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SupplierNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Tax")
-                        .HasColumnType("money");
-
-                    b.Property<string>("Taxes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("money");
-
-                    b.Property<int>("WinnerSupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkflowToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("PLPOId");
+                    b.HasKey("LPOId");
 
                     b.ToTable("ppe_lpo");
                 });

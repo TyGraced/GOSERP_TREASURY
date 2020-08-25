@@ -49,6 +49,8 @@ namespace PPE.Repository.Implement
                 }
                 else
                     await _dataContext.ppe_register.AddAsync(model);
+                await _dataContext.SaveChangesAsync();
+                var res = GenerateInvestmentDailySchedule(model.RegisterId);
                 return await _dataContext.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
@@ -441,10 +443,6 @@ namespace PPE.Repository.Implement
                                     DepreciationForThePeriod = workSheet.Cells[i, 12].Value != null ? decimal.Parse(workSheet.Cells[i, 12].Value.ToString()) : 0,
                                     AccumulatedDepreciation = workSheet.Cells[i, 13].Value != null ? decimal.Parse(workSheet.Cells[i, 13].Value.ToString()) : 0,
                                     NetBookValue = workSheet.Cells[i, 14].Value != null ? decimal.Parse(workSheet.Cells[i, 14].Value.ToString()) : 0,
-                                    //SubGlAdditionCode = workSheet.Cells[i, 15].Value != null ? workSheet.Cells[i, 15].Value.ToString() : null,
-                                    //SubGlDepreciationCode = workSheet.Cells[i, 16].Value != null ? workSheet.Cells[i, 16].Value.ToString() : null,
-                                    //SubGlAccumulatedDepreciationCode = workSheet.Cells[i, 17].Value != null ? workSheet.Cells[i, 17].Value.ToString() : null,
-                                    //SubGlDisposalCode = workSheet.Cells[i, 18].Value != null ? workSheet.Cells[i, 18].Value.ToString() : null,
                                     
                                 };
                                 uploadedRecord.Add(item);
@@ -746,8 +744,8 @@ namespace PPE.Repository.Implement
                             decimal accdailyAccumilative = 0;
 
                             itemToUpdate.RegisterId = currentItem.RegisterId;
-                            itemToUpdate.UsefulLife = currentItem.ProposedUsefulLife;
-                            itemToUpdate.ResidualValue = currentItem.ProposedResidualValue;
+                            itemToUpdate.UsefulLife = currentItem.ProposedUsefulLife > 0 ? currentItem.ProposedUsefulLife : itemToUpdate.UsefulLife;
+                            itemToUpdate.ResidualValue = currentItem.ProposedResidualValue > 0 ? currentItem.ProposedResidualValue : itemToUpdate.ResidualValue;
                             itemToUpdate.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
                             itemToUpdate.NetBookValue = (dailyCB - dailyDepreciationCharge);
                             itemToUpdate.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
@@ -1068,6 +1066,78 @@ namespace PPE.Repository.Implement
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        private bool GenerateInvestmentDailySchedule(int RegisterId)
+        {
+            var currentItem = _dataContext.ppe_register.Find(RegisterId);
+            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
+            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+            var day = DateTime.UtcNow.Date;
+            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
+            TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+            int differenceInDays = usedLifeOfAsset.Days;
+            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+            decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
+
+            var depreciationStartDate = currentItem.DepreciationStartDate;
+            var freq = 30;
+            int dailyPeriod = currentItem.UsefulLife * 30;
+            decimal dailyCB = currentItem.Cost;
+            int i = 1;
+            int count = 0;
+            decimal accdailyDepreciationCharge = 0;
+            decimal accdailyAccumilative = 0;
+
+            for (int k = 0; k <= dailyPeriod; k++)
+            {
+                ppe_dailyschedule dailyschedule = new ppe_dailyschedule();
+                if (count == freq)
+                {
+                    i++;
+                    count = 0;
+                    dailyschedule.EndPeriod = true;
+                }
+                if (k == 0)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = 0;
+                    dailyschedule.AccumulatedDepreciation = 0;
+                    dailyschedule.CB = dailyCB;
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyschedule.RegisterId = currentItem.RegisterId;
+                    dailyschedule.EndPeriod = true;
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+                else if (k == 1 || k <= dailyPeriod)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = (dailyDepreciationCharge);
+                    dailyschedule.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    dailyschedule.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.CB = (dailyCB - dailyDepreciationCharge);
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyCB = (dailyCB - dailyDepreciationCharge);
+                    accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.AdditionId = currentItem.AdditionFormId;
+                    if (k == freq)
+                    {
+                        //dailyschedule.DepreciationForThePeriod = 0;
+                        accdailyAccumilative = 0;
+                    }
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+
+                count++;
+            }
+            return true;
         }
     }
 }

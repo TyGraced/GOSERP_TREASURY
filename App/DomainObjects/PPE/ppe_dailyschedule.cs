@@ -24,6 +24,7 @@ namespace PPE.DomainObjects.PPE
         public DateTime? PeriodDate { get; set; }
 
         public int AdditionId { get; set; }
+        public int RegisterId { get; set; }
 
         public int? PeriodId { get; set; }
 
