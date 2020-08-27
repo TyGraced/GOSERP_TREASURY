@@ -20,8 +20,6 @@ namespace PPE.Repository.Interface
         Task<StaffApprovalRegRespObj> DisposalStaffApprovals(StaffApprovalObj request);
         Task<IEnumerable<ppe_register>> GetDisposalAwaitingApprovals(List<int> disposalIds, List<string> tokens);
         Task<IEnumerable<ppe_register>> GetReassessmentAwaitingApprovals(List<int> registerIds, List<string> tokens);
-        bool UpdateMultipleUsefulLife(List<RegisterObj> multipleUsefulLife);
-        bool UpdateMultipleResidualValue(List<RegisterObj> multipleResidualValue);
-        TransactionObj GetEntries(RegisterObj entries);
+        IEnumerable<TransactionObj> GetEndOfMonthDepreciation(DateTime date);
     }
 }

@@ -357,7 +357,7 @@ namespace PPE.Repository.Implement
         {
             try
             {
-                var now = DateTime.Now.Date;
+                //var now = DateTime.Now.Date;
                 var Application = (from a in _dataContext.ppe_register
                                    //join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals //e.AdditionId
                                    where a.Deleted == false // && e.PeriodDate.Value.Date == now.Date
@@ -742,6 +742,7 @@ namespace PPE.Repository.Implement
                             decimal dailyCB = currentItem.Cost;
                             decimal accdailyDepreciationCharge = 0;
                             decimal accdailyAccumilative = 0;
+                            var res = GenerateInvestmentDailySchedule(currentItem.RegisterId);
 
                             itemToUpdate.RegisterId = currentItem.RegisterId;
                             itemToUpdate.UsefulLife = currentItem.ProposedUsefulLife > 0 ? currentItem.ProposedUsefulLife : itemToUpdate.UsefulLife;
@@ -972,69 +973,19 @@ namespace PPE.Repository.Implement
             return item;
         }
 
-        public bool UpdateMultipleUsefulLife(List<RegisterObj> multipleUsefulLife)
-        {
-            try
-            {
-                //var reassessments = new List<RegisterObj>();
-
-                foreach (var item in multipleUsefulLife)
-                {
-                    if (item.RegisterId > 0)
-                    {
-                        var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
-                        itemToUpdate.RegisterId = item.RegisterId;
-                        itemToUpdate.ProposedUsefulLife = item.ProposedUsefulLife;
-                        _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
-                        _dataContext.SaveChanges();
-                    }
-                };
-                return true;
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public bool UpdateMultipleResidualValue(List<RegisterObj> multipleResidualValue)
-        {
-            try
-            {
-                foreach (var item in multipleResidualValue)
-                {
-                    if (item.RegisterId > 0)
-                    {
-                        var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
-                        itemToUpdate.RegisterId = item.RegisterId;
-                        itemToUpdate.ProposedResidualValue = item.ProposedResidualValue;
-                        _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
-                        _dataContext.SaveChanges();
-                    }
-                };
-                return true;
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public TransactionObj GetEndOfMonthDepreciation(DateTime date)
+        public IEnumerable<TransactionObj> GetEndOfMonthDepreciation(DateTime date)
         {
             try
             {
                 var data = (from a in _dataContext.ppe_register 
                             join b in _dataContext.ppe_dailyschedule on a.AdditionFormId equals b.AdditionId
-                            join c in _dataContext.ppe_additionform on a.AdditionFormId equals c.AdditionFormId
+                            //join c in _dataContext.ppe_additionform on a.AdditionFormId equals c.AdditionFormId
                             where a.Deleted == false && b.PeriodDate.Value.Date == date.Date && b.EndPeriod == true                         
                             select new TransactionObj
                             {
                                 IsApproved = false,
                                 CasaAccountNumber = string.Empty,
-                                CompanyId = c.CompanyId,
+                                CompanyId = a.CompanyId,
                                 Amount = b.DepreciationForThePeriod,
                                 CurrencyId = 0,
                                 Description = "PPE Monthly Depreciation",
@@ -1055,19 +1006,7 @@ namespace PPE.Repository.Implement
                     }
                 }
 
-                return depreciationEntries;
-                //return new FinTransacRegRespObj
-                //{
-                //    Status = new APIResponseStatus
-                //    {
-                //        IsSuccessful = true,
-                //        Status = new APIResponseStatus
-                //        {
-                //            IsSuccessful = responseObj.Status.IsSuccessful,
-                //            Message = responseObj.Status.Message
-                //        }
-                //    }
-                //};
+                return data;
                 
             }
             catch (Exception ex)

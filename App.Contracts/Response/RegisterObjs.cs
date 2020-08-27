@@ -102,4 +102,8 @@ namespace PPE.Contracts.Response
         public byte[] export { get; set; }
         public APIResponseStatus Status { get; set; }
     }
+    public class EndOfDayRequestObj
+    {
+        public DateTime RequestDate { get; set; }
+    }
 }

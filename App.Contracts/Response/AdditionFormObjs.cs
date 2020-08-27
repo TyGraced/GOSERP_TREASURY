@@ -31,6 +31,7 @@ namespace PPE.Contracts.Response
         public int UsefulLife { get; set; }
         public decimal ResidualValue { get; set; }
         public string Location { get; set; }
+        public string WorkflowToken { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }
@@ -65,6 +66,7 @@ namespace PPE.Contracts.Response
         public int UsefulLife { get; set; }
         public decimal ResidualValue { get; set; }
         public string Location { get; set; }
+        public string WorkflowToken { get; set; }
     }
 
     public class AdditionFormRegRespObj

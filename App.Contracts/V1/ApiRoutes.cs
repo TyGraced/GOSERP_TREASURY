@@ -44,7 +44,7 @@ namespace PPE.Contracts.V1
             public const string UPDATE_LPONUMBER = Base + "/addition/update/lponumber";
             public const string GET_ALL_ADDITION = Base + "/addition/get/all/addition";
             public const string GET_ADDITION_BY_ID = Base + "/addition/get/additionbyid";
-            public const string GET_LPONUMBER_BY_ID = Base + "/addition/get/lponumberid";
+            public const string GET_ALL_LPONUMBER = Base + "/addition/get/all/lponumbers";
             public const string DELETE_ADDITION = Base + "/addition/delete/addition";
             public const string DOWNLOAD_ADDITION = Base + "/addition/download/addition";
             public const string UPLOAD_ADDITION = Base + "/addition/upload/addition";
@@ -95,7 +95,7 @@ namespace PPE.Contracts.V1
             public const string ADD_UPDATE_REGISTER = Base + "/register/add/update/register";
             public const string UPDATE_REASSESSMENT = Base + "/register/update/reassessment";
             public const string UPDATE_DISPOSAL = Base + "/register/update/disposal";
-            public const string GET_ENTRIES = Base + "/register/get/entries";
+            public const string GET_END_OF_MONTH_DEPRECIATION = Base + "/register/get/end/of/month/depreciation";
             public const string UPDATE_MULTIPLE_USEFULLIFE = Base + "/register/update/multiple/proposedusefullife";
             public const string UPDATE_MULTIPLE_RESIDUALVALUE = Base + "/register/update/multiple/proposedresidualvalue";
             public const string GET_ALL_REGISTER = Base + "/register/get/all/register";

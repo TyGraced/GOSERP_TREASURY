@@ -54,6 +54,7 @@ namespace PPE.Contracts.Response
         public int DebitGl { get; set; }
         public int ServiceTerm { get; set; }
         public bool IsUsed { get; set; }
+        public bool Deleted { get; set; }
     }
 
     public class LpoRegRespObj
@@ -65,7 +66,6 @@ namespace PPE.Contracts.Response
     public class LpoRespObj
     {
         public List<LpoObj> lpos { get; set; }
-        public byte[] export { get; set; }
         public APIResponseStatus Status { get; set; }
     }
 }

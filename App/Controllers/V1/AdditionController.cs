@@ -55,7 +55,6 @@ namespace PPE.Controllers.V1
         }
 
         [HttpGet(ApiRoutes.Addition.GET_ALL_ADDITION)]
-
         public async Task<ActionResult<AdditionFormRespObj>> GetAllAdditionAsync( )
         {
             try
@@ -116,7 +115,7 @@ namespace PPE.Controllers.V1
             try
             {
                 var user = await _identityService.UserDataAsync();
-                ppe_additionform item = null;
+                ppe_additionform item = new ppe_additionform();
                 if (model.AdditionFormId > 0)
                 {
                     item = await _repo.GetAdditionByIdAsync(model.AdditionFormId);
@@ -160,7 +159,6 @@ namespace PPE.Controllers.V1
                 domainObj.Location = model.Location;
                 domainObj.AssetClassificationId = model.AssetClassificationId;
                 domainObj.CompanyId = user.CompanyId;
-                //domainObj.DepreciationStartDate = model.DepreciationStartDate;
                 domainObj.UsefulLife = model.UsefulLife;
                 domainObj.ResidualValue = model.ResidualValue;
                 domainObj.UpdatedBy = user.UserName;
@@ -360,6 +358,7 @@ namespace PPE.Controllers.V1
                         ClassificationName = classificationName.FirstOrDefault(a => a.AsetClassificationId == d.AssetClassificationId)?.ClassificationName ?? null,
                         Cost = d.Cost,
                         DateOfPurchase = d.DateOfPurchase,
+                        WorkflowToken = d.WorkflowToken,
                         //DepreciationStartDate = d.DepreciationStartDate,
                         Description = d.Description,
                         Quantity = d.Quantity,
@@ -409,27 +408,42 @@ namespace PPE.Controllers.V1
             {
                 var lpos = _dataContext.ppe_lpo.Where(d => d.Deleted == false);
                 ppe_lpo lpo = new ppe_lpo();
+               
                 foreach (var item in model)
                 {
-                    if(!lpos.Select(s => s.PLPOId).Contains(item.PLPOId))
+                    if(!lpos.Select(s => s.LPONumber).Contains(item.LPONumber))
                     {
-                        lpo.PLPOId = item.PLPOId > 0 ? item.PLPOId : 0;
-
+                        lpo.PLPOId = 0;
+                        lpo.Address = item.Address;
+                        lpo.SupplierAddress = item.SupplierAddress;
+                        lpo.SupplierIds = item.SupplierIds;
+                        lpo.SupplierNumber = item.SupplierNumber;
+                        lpo.Tax = item.Tax;
+                        lpo.Total = item.Total;
+                        lpo.DeliveryDate = item.DeliveryDate;
+                        lpo.ApprovalStatusId = item.ApprovalStatusId;
+                        lpo.GrossAmount = item.GrossAmount;
+                        lpo.JobStatus = item.JobStatus;
+                        lpo.BidAndTenderId = item.BidAndTenderId;
+                        lpo.BidComplete = item.BidComplete;
+                        lpo.WinnerSupplierId = item.WinnerSupplierId;
+                        lpo.WorkflowToken = item.WorkflowToken;
+                        lpo.Location = item.Location;
+                        lpo.PurchaseReqNoteId = item.PurchaseReqNoteId;
+                        lpo.Taxes = item.Taxes;
+                        lpo.DebitGl = item.DebitGl;
+                        lpo.ServiceTerm = item.ServiceTerm;
                         lpo.LPONumber = item.LPONumber;
                         lpo.Name = item.Name;
                         lpo.Description = item.Description;
                         lpo.Quantity = item.Quantity;
                         lpo.AmountPayable = item.AmountPayable;
-                        lpo.Address = item.Address;
                         lpo.RequestDate = item.RequestDate;
+                        lpo.IsUsed = false;
 
-                        await _repo.AddUpdateLpoNumber(lpo);
+                        await _repo.AddUpdateLpoNumber(lpo); 
                     }
-                    return new LpoRegRespObj
-                    {
-                        PLPOId = lpo.PLPOId,
-                        Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "LpoNumber exists already" } }
-                    };
+                    
                 }
 
                 return new LpoRegRespObj
@@ -470,6 +484,27 @@ namespace PPE.Controllers.V1
             }
         }
 
+        [HttpGet(ApiRoutes.Addition.GET_ALL_LPONUMBER)]
+        public async Task<ActionResult<LpoRespObj>> GetAllLpoAsync()
+        {
+            try
+            {
+                var response =   _repo.GetAllLpo();
+                return new LpoRespObj
+                {
+                    lpos = _mapper.Map<List<LpoObj>>(response),
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                return new LpoRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
+            }
+        }
     }
 }
 

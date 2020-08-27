@@ -49,16 +49,17 @@ namespace PPE.Repository.Implement
             try
             {
                 var user = await _identityService.UserDataAsync();
-
+                //ppe_additionform itemToUpdate = new ppe_additionform();
                 if (model.AdditionFormId > 0)
                 {
-                    var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(model.AdditionFormId);
+                     var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(model.AdditionFormId);
                     _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
                 }
                 else
                 {
                     await _dataContext.ppe_additionform.AddAsync(model);
                 }
+                
                 await _dataContext.SaveChangesAsync();
                 var targetIds = new List<int>();
                 targetIds.Add(model.AdditionFormId);
@@ -94,7 +95,7 @@ namespace PPE.Repository.Implement
 
                     var stringData = await result.Content.ReadAsStringAsync();
                     var res = JsonConvert.DeserializeObject<GoForApprovalRespObj>(stringData);
-
+                   
 
                     if (res.ApprovalProcessStarted)
                     {
@@ -108,6 +109,12 @@ namespace PPE.Repository.Implement
                         else
                         {
                             await _dataContext.ppe_additionform.AddAsync(model);
+                        }
+                        var lpo = _dataContext.ppe_lpo.FirstOrDefault(q => q.LPONumber.ToLower().Trim() == model.LpoNumber.ToLower().Trim());
+                        if (lpo != null)
+                        {
+                            lpo.IsUsed = true;
+                            _dataContext.Entry(lpo).CurrentValues.SetValues(lpo);
                         }
                         await _dataContext.SaveChangesAsync();
 
@@ -175,7 +182,7 @@ namespace PPE.Repository.Implement
 
         public async Task<IEnumerable<ppe_additionform>> GetAllAdditionAsync()
         {
-            return await _dataContext.ppe_additionform.Where(d => d.Deleted == false).ToListAsync();
+            return await _dataContext.ppe_additionform.Where(d => d.Deleted == false && d.ApprovalStatusId !=  (int)ApprovalStatus.Approved).ToListAsync();
         }
 
         public async Task<bool> UploadAdditionAsync(List<byte[]> record, string createdBy)
@@ -846,10 +853,50 @@ namespace PPE.Repository.Implement
             }
         }
 
-        public async Task<IEnumerable<ppe_lpo>> GetAllLpoAsync()
+        public IEnumerable<LpoObj> GetAllLpo()
         {
-            return await _dataContext.ppe_lpo.Where(d => d.Deleted == false).ToListAsync();
-        }
+            try
+            {
 
+                var Lpo = (from a in _dataContext.ppe_lpo
+                                   where a.IsUsed == false 
+                                   select new LpoObj
+                                   {
+                                       PLPOId = a.PLPOId,
+                                       SupplierAddress = a.SupplierAddress,
+                                       SupplierIds = a.SupplierIds,
+                                       SupplierNumber = a.SupplierNumber,
+                                       WinnerSupplierId = a.WinnerSupplierId,
+                                       Tax = a.Tax,
+                                       Taxes = a.Taxes,
+                                       Total = a.Total,
+                                       DeliveryDate = a.DeliveryDate,
+                                       ApprovalStatusId = a.ApprovalStatusId,
+                                       GrossAmount = a.GrossAmount,
+                                       JobStatus = a.JobStatus,
+                                       BidAndTenderId = a.BidAndTenderId,
+                                       BidComplete = a.BidComplete,
+                                       WorkflowToken = a.WorkflowToken,
+                                       Location = a.WorkflowToken,
+                                       PurchaseReqNoteId = a.PurchaseReqNoteId,
+                                       DebitGl = a.DebitGl,
+                                       ServiceTerm = a.ServiceTerm,
+                                       LPONumber = a.LPONumber,
+                                       IsUsed = a.IsUsed,
+                                       Name = a.Name,
+                                       Description = a.Description,
+                                       Quantity = a.Quantity,
+                                       AmountPayable = a.AmountPayable,
+                                       Address = a.Address,
+                                       RequestDate = a.RequestDate
+                                   }).ToList();
+
+                return Lpo;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
