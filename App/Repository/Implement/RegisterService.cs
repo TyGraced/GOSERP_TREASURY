@@ -654,7 +654,107 @@ namespace PPE.Repository.Implement
             return fileBytes;
         }
 
-        public async Task<StaffApprovalRegRespObj> ReassessmentStaffApprovals(StaffApprovalObj request)
+        public byte[] GenerateExportAssetDepreciation()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Asset Number");
+            dt.Columns.Add("Description");
+            dt.Columns.Add("Date Of Purchase");
+            dt.Columns.Add("Cost");
+            dt.Columns.Add("Useful Life");
+            dt.Columns.Add("Residual Value");
+
+            dt.Columns.Add("LPO Number");
+            dt.Columns.Add("Classification Name");
+            
+            dt.Columns.Add("Quantity");
+            dt.Columns.Add("Depreciation Start Date");
+            dt.Columns.Add("Location");
+            dt.Columns.Add("Depreciation For The Period");
+            dt.Columns.Add("Accumulated Depreciation");
+            dt.Columns.Add("Net Book Value");
+            //dt.Columns.Add("SubGL Addition");
+            //dt.Columns.Add("SubGL Depreciation");
+            //dt.Columns.Add("SubGL Accumulated Depreciation");
+            //dt.Columns.Add("SubGL Disposal");
+            var subGlResponse = _financeRequest.GetAllSubGlAsync().Result;
+            var register = (from a in _dataContext.ppe_register
+                            where a.Deleted == false
+                            select new RegisterObj
+                            {
+                                RegisterId = a.RegisterId,
+                                AssetNumber = a.AssetNumber,
+                                LpoNumber = a.LpoNumber,
+                                AssetClassificationId = a.AssetClassificationId,
+                                Description = a.Description,
+                                Cost = a.Cost,
+                                DateOfPurchaase = a.DateOfPurchaase,
+                                Quantity = a.Quantity,
+                                DepreciationStartDate = a.DepreciationStartDate,
+                                UsefulLife = a.UsefulLife,
+                                ResidualValue = a.ResidualValue,
+                                Location = a.Location,
+                                DepreciationForThePeriod = a.DepreciationForThePeriod,
+                                AccumulatedDepreciation = a.AccumulatedDepreciation,
+                                NetBookValue = a.NetBookValue,
+                                //SubGlAddition = a.SubGlAddition,
+                                //SubGlDepreciation = a.SubGlDepreciation,
+                                //SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation,
+                                //SubGlDisposal = a.SubGlDisposal,
+                            }).ToList();
+            //if (register.Count() > 0)
+            //{
+            //    foreach (var res in register)
+            //    {
+            //        res.SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLCode;
+            //        res.SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLCode;
+            //        res.SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLCode;
+            //        res.SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLCode;
+            //    }
+            //}
+            var classificationName = _dataContext.ppe_assetclassification.Where(c => c.Deleted == false).ToList();
+
+            foreach (var kk in register)
+
+            {
+                var row = dt.NewRow();
+                row["Asset Number"] = kk.AssetNumber;
+                row["LPO Number"] = kk.LpoNumber;
+                row["Classification Name"] = classificationName.FirstOrDefault(a => a.AsetClassificationId == kk.AssetClassificationId)?.ClassificationName;
+                row["Description"] = kk.Description;
+                row["Cost"] = kk.Cost;
+                row["Date Of Purchase"] = kk.DateOfPurchaase;
+                row["Quantity"] = kk.Quantity;
+                row["Depreciation Start Date"] = kk.DepreciationStartDate;
+                row["Useful Life"] = kk.UsefulLife;
+                row["Residual Value"] = kk.ResidualValue;
+                row["Location"] = kk.Location;
+                row["Depreciation For The Period"] = kk.DepreciationForThePeriod;
+                row["Accumulated Depreciation"] = kk.AccumulatedDepreciation;
+                row["Net Book Value"] = kk.NetBookValue;
+                //row["SubGL Addition"] = kk.SubGlAdditionCode;
+                //row["SubGL Depreciation"] = kk.SubGlDepreciationCode;
+                //row["SubGL Accumulated Depreciation"] = kk.SubGlAccumulatedDepreciationCode;
+                //row["SubGL Disposal"] = kk.SubGlDisposalCode;
+                dt.Rows.Add(row);
+            }
+            Byte[] fileBytes = null;
+
+            if (register != null)
+            {
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (ExcelPackage pck = new ExcelPackage())
+                {
+                    ExcelWorksheet ws = pck.Workbook.Worksheets.Add("Register");
+                    ws.DefaultColWidth = 20;
+                    ws.Cells["A1"].LoadFromDataTable(dt, true, OfficeOpenXml.Table.TableStyles.None);
+                    fileBytes = pck.GetAsByteArray();
+                }
+            }
+            return fileBytes;
+
+
+            public async Task<StaffApprovalRegRespObj> ReassessmentStaffApprovals(StaffApprovalObj request)
         {
             try
             {
