@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PPE.Data;
 
 namespace PPE.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200901084501_date")]
+    partial class date
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -690,17 +692,8 @@ namespace PPE.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<int>("NBV")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("NetBookValue")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Proceed")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProposedDisposalDate")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ProposedResidualValue")
                         .HasColumnType("decimal(18,2)");
@@ -714,14 +707,8 @@ namespace PPE.Migrations
                     b.Property<decimal>("ReEvaluatedCost")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ReasonForDisposal")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("RemainingUsefulLife")
                         .HasColumnType("int");
-
-                    b.Property<string>("RequestDate")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ResidualValue")
                         .HasColumnType("decimal(18,2)");

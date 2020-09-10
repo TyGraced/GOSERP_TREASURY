@@ -50,7 +50,11 @@ namespace PPE.Repository.Implement
                 else
                     await _dataContext.ppe_register.AddAsync(model);
                 await _dataContext.SaveChangesAsync();
-                var res = GenerateInvestmentDailySchedule(model.RegisterId);
+                var depreciable = _dataContext.ppe_assetclassification.Find(model.AssetClassificationId);
+                if (depreciable.Depreciable)
+                {
+                    var res = GenerateInvestmentDailySchedule(model.RegisterId);
+                }
                 return await _dataContext.SaveChangesAsync() > 0;
             }
             catch (Exception ex)
@@ -297,16 +301,12 @@ namespace PPE.Repository.Implement
         {
             try
             {
-                var currentItem = _dataContext.ppe_register.Where(a => a.RegisterId == id).FirstOrDefault();
-                TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-                int differenceInDays = usedLifeOfAsset.Days;
-                int remainingUsefulLife = currentItem.UsefulLife - differenceInDays;
+               
                 var now = DateTime.Now.Date;
                 var Application = (from a in _dataContext.ppe_register
-                                   join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals e.AdditionId
-                                   where a.Deleted == false && e.PeriodDate.Value.Date == now.Date
+                                   where a.Deleted == false 
                                    && a.RegisterId == id
-                                   orderby a.CreatedOn ascending
+                                   orderby a.CreatedOn descending
                                    select new RegisterObj
                                    {
                                        RegisterId = a.RegisterId,
@@ -322,30 +322,41 @@ namespace PPE.Repository.Implement
                                        UsefulLife = a.UsefulLife,
                                        ResidualValue = a.ResidualValue,
                                        Location = a.Location,
-                                       DepreciationForThePeriod = e.DepreciationForThePeriod,
-                                       AccumulatedDepreciation = e.AccumulatedDepreciation,
                                        ProposedUsefulLife = a.ProposedUsefulLife,
                                        ProposedResidualValue = a.ProposedResidualValue,
-                                       NetBookValue = e.CB,
+                                       ReEvaluatedCost = a.ReEvaluatedCost,
                                        Active = true,
                                        CreatedBy = a.CreatedBy,
                                        CreatedOn = a.CreatedOn,
                                        UpdatedBy = a.UpdatedBy,
                                        UpdatedOn = a.UpdatedOn,
-                                       RemainingUsefulLife = remainingUsefulLife,
+                                       WorkflowToken = a.WorkflowToken,
                                    }).ToList();
 
                 var res = Application;
                 foreach (var j in res)
                 {
-                    j.ClassificationName = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == j.AssetClassificationId).FirstOrDefault()?.ClassificationName ?? null;
+                    var usefulLife = _dataContext.ppe_register.Where(a => a.RegisterId == j.RegisterId).FirstOrDefault();
+                    TimeSpan usedLifeOfAsset = (DateTime.Today - j.DepreciationStartDate);
+                    int differenceInDays = usedLifeOfAsset.Days;
+                    int remainingUsefulLife = usefulLife.UsefulLife - differenceInDays;
+                    j.RemainingUsefulLife = remainingUsefulLife;
+                    j.ClassificationName = _dataContext.ppe_assetclassification.FirstOrDefault(c => c.AsetClassificationId == j.AssetClassificationId)?.ClassificationName ?? null;
+                    if (j.AdditionFormId != 0)
+                    {
+                        j.DepreciationForThePeriod = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.DepreciationForThePeriod ?? 0;
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
+                    else if (j.AdditionFormId == 0)
+                    {
+                        j.DepreciationForThePeriod = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.DepreciationForThePeriod ?? 0;
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
                 }
 
                 return Application;
-
-
-
-
             }
             catch (Exception ex)
             {
@@ -357,13 +368,13 @@ namespace PPE.Repository.Implement
         {
             try
             {
-                //var now = DateTime.Now.Date;
+                
+                var now = DateTime.Now.Date;
                 var Application = (from a in _dataContext.ppe_register
-                                   //join e in _dataContext.ppe_dailyschedule on a.AdditionFormId equals //e.AdditionId
-                                   where a.Deleted == false // && e.PeriodDate.Value.Date == now.Date
-                                   orderby a.CreatedOn ascending
+                                   
+                                   where a.Deleted == false  
+                                   orderby a.CreatedOn descending
                                    select new RegisterObj
-
 
                                    {
                                        RegisterId = a.RegisterId,
@@ -379,25 +390,41 @@ namespace PPE.Repository.Implement
                                        UsefulLife = a.UsefulLife,
                                        ResidualValue = a.ResidualValue,
                                        Location = a.Location,
-                                       //DepreciationForThePeriod = e.DepreciationForThePeriod,
-                                       DepreciationForThePeriod = a.DepreciationForThePeriod,
-                                       //AccumulatedDepreciation = e.AccumulatedDepreciation,
-                                       AccumulatedDepreciation = a.AccumulatedDepreciation,
                                        ProposedUsefulLife = a.ProposedUsefulLife,
                                        ProposedResidualValue = a.ProposedResidualValue,
-                                       //NetBookValue = e.CB,
-                                       NetBookValue = a.NetBookValue,
+                                       ReEvaluatedCost = a.ReEvaluatedCost,
                                        Active = true,
                                        CreatedBy = a.CreatedBy,
                                        CreatedOn = a.CreatedOn,
                                        UpdatedBy = a.UpdatedBy,
-                                       UpdatedOn = a.UpdatedOn
-                                       //RemainingUsefulLife = remainingUsefulLife,
+                                       UpdatedOn = a.UpdatedOn,
+                                       WorkflowToken = a.WorkflowToken,
+                                       
                                    }).ToList();
                 var res = Application;
                 foreach (var j in res)
                 {
-                    j.ClassificationName = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == j.AssetClassificationId).FirstOrDefault()?.ClassificationName ?? null;
+                    var usefulLife = _dataContext.ppe_register.Where(a => a.RegisterId == j.RegisterId).FirstOrDefault();
+                    TimeSpan usedLifeOfAsset = (DateTime.Today - j.DepreciationStartDate);
+                    int differenceInDays = usedLifeOfAsset.Days;
+                    int remainingUsefulLife = usefulLife.UsefulLife - differenceInDays;
+                    j.RemainingUsefulLife = remainingUsefulLife;
+                    j.ClassificationName = _dataContext.ppe_assetclassification.FirstOrDefault(c => c.AsetClassificationId == j.AssetClassificationId)?.ClassificationName ?? null;
+
+                    if (j.AdditionFormId != 0)
+                    {
+                        j.DepreciationForThePeriod = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.DepreciationForThePeriod ?? 0;
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
+                    else if (j.AdditionFormId == 0)
+                    {
+                        j.DepreciationForThePeriod = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.DepreciationForThePeriod ?? 0;
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
+                    
+
                 }
                 return Application;
             }
@@ -687,10 +714,8 @@ namespace PPE.Repository.Implement
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -702,15 +727,12 @@ namespace PPE.Repository.Implement
                                 }
                             };
                         }
-
                         if (response.ResponseId == (int)ApprovalStatus.Revert)
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -733,26 +755,18 @@ namespace PPE.Repository.Implement
                             var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
                             _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
 
-                            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
-                            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
-                            //var residlValue = _dataContext.ppe_assetclassification.Where(c => c.AsetClassificationId == currentItem.AssetClassificationId).FirstOrDefault().ResidualValue;
-                            //var residualValue = ((residlValue * currentItem.Cost)/100);
-                            var depreciationStartDate = DateTime.Now;
-                            int dailyPeriod = currentItem.UsefulLife * 30;
-                            decimal dailyCB = currentItem.Cost;
-                            decimal accdailyDepreciationCharge = 0;
-                            decimal accdailyAccumilative = 0;
-                            var res = GenerateInvestmentDailySchedule(currentItem.RegisterId);
-
                             itemToUpdate.RegisterId = currentItem.RegisterId;
                             itemToUpdate.UsefulLife = currentItem.ProposedUsefulLife > 0 ? currentItem.ProposedUsefulLife : itemToUpdate.UsefulLife;
                             itemToUpdate.ResidualValue = currentItem.ProposedResidualValue > 0 ? currentItem.ProposedResidualValue : itemToUpdate.ResidualValue;
-                            itemToUpdate.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
-                            itemToUpdate.NetBookValue = (dailyCB - dailyDepreciationCharge);
-                            itemToUpdate.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
+                           
                             _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
+                            var depreciable = _dataContext.ppe_assetclassification.Find(currentItem.AssetClassificationId);
+                            if (depreciable.Depreciable)
+                            {
+                                var res = GenerateReassessmentInvestmentDailySchedule(currentItem.RegisterId);
+                            }
                             _dataContext.SaveChanges();
-
+                            
                             await _trans.CommitAsync();
 
                             return new StaffApprovalRegRespObj
@@ -805,6 +819,12 @@ namespace PPE.Repository.Implement
             {
                 throw ex;
             }
+        }
+
+        public async Task<IEnumerable<ppe_register>> GetReassessmentAwaitingApprovals(List<int> reassessmentIds, List<string> tokens)
+        {
+            var item = await _dataContext.ppe_register.Where(s => reassessmentIds.Contains(s.RegisterId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+            return item;
         }
 
         public async Task<StaffApprovalRegRespObj> DisposalStaffApprovals(StaffApprovalObj request)
@@ -867,10 +887,8 @@ namespace PPE.Repository.Implement
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -886,10 +904,8 @@ namespace PPE.Repository.Implement
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -967,9 +983,295 @@ namespace PPE.Repository.Implement
             return item;
         }
 
-        public async Task<IEnumerable<ppe_register>> GetReassessmentAwaitingApprovals(List<int> reassessmentIds, List<string> tokens)
+        public async Task<RegisterRegRespObj> UpdateReEvaluationAsync(ppe_register model)
         {
-            var item = await _dataContext.ppe_register.Where(s => reassessmentIds.Contains(s.RegisterId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
+            try
+            {
+                var user = await _identityService.UserDataAsync();
+
+                if (model.RegisterId > 0)
+                {
+                    var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+                    _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                }
+                else
+                {
+                    await _dataContext.ppe_register.AddAsync(model);
+                }
+                await _dataContext.SaveChangesAsync();
+                var targetIds = new List<int>();
+                targetIds.Add(model.RegisterId);
+
+                GoForApprovalRequest wfRequest = new GoForApprovalRequest
+                {
+                    Comment = "PPE ReEvaluation",
+                    OperationId = (int)OperationsEnum.PPEReassessment,
+                    TargetId = targetIds,
+                    ApprovalStatus = (int)ApprovalStatus.Pending,
+                    DeferredExecution = true,
+                    StaffId = user.StaffId,
+                    CompanyId = 1,
+                    EmailNotification = true,
+                    ExternalInitialization = false,
+                    StatusId = (int)ApprovalStatus.Processing,
+                };
+                var result = await _serverRequest.GotForApprovalAsync(wfRequest);
+
+
+                using (var _trans = _dataContext.Database.BeginTransaction())
+                {
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        new RegisterRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = false,
+                                Message = new APIResponseMessage { FriendlyMessage = $"{result.ReasonPhrase} {result.StatusCode}" }
+                            }
+                        };
+                    }
+
+                    var stringData = await result.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<GoForApprovalRespObj>(stringData);
+
+
+                    if (res.ApprovalProcessStarted)
+                    {
+                        model.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                        model.WorkflowToken = res.Status.CustomToken;
+                        if (model.RegisterId > 0)
+                        {
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(model.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(model);
+                        }
+                        else
+                        {
+                            await _dataContext.ppe_register.AddAsync(model);
+                        }
+                        await _dataContext.SaveChangesAsync();
+
+                        await _trans.CommitAsync();
+                        return new RegisterRegRespObj
+                        {
+                            RegisterId = res.TargetId,
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+
+                    if (res.EnableWorkflow || !res.HasWorkflowAccess)
+                    {
+                        await _trans.RollbackAsync();
+                        return new RegisterRegRespObj
+                        {
+                            Status = new APIResponseStatus
+                            {
+                                IsSuccessful = res.Status.IsSuccessful,
+                                Message = res.Status.Message
+                            }
+                        };
+                    }
+                    if (!res.EnableWorkflow)
+                    {
+
+                        await _trans.CommitAsync();
+                        return new RegisterRegRespObj
+                        {
+                            RegisterId = model.RegisterId,
+                            Status = res.Status
+                        };
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return new RegisterRegRespObj
+            {
+                RegisterId = model.RegisterId,
+                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred" } }
+            };
+        }
+
+        public async Task<StaffApprovalRegRespObj> ReEvaluationStaffApprovals(StaffApprovalObj request)
+        {
+            try
+            {
+                var currentUserId = _httpContextAccessor.HttpContext.User?.FindFirst(x => x.Type == "userId").Value;
+                var user = await _serverRequest.UserDataAsync();
+
+                var currentItem = await _dataContext.ppe_register.FindAsync(request.TargetId);
+
+                var details = new cor_approvaldetail
+                {
+                    Comment = request.ApprovalComment,
+                    Date = DateTime.Today,
+                    StatusId = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    StaffId = user.StaffId,
+                    WorkflowToken = currentItem.WorkflowToken
+                };
+
+                var req = new IdentityServerApprovalCommand
+                {
+                    ApprovalComment = request.ApprovalComment,
+                    ApprovalStatus = request.ApprovalStatus,
+                    TargetId = request.TargetId,
+                    WorkflowToken = currentItem.WorkflowToken,
+                };
+
+                using (var _trans = await _dataContext.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        var result = await _serverRequest.StaffApprovalRequestAsync(req);
+
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = false,
+                                    Message = new APIResponseMessage { FriendlyMessage = result.ReasonPhrase }
+                                }
+                            };
+                        }
+
+                        var stringData = await result.Content.ReadAsStringAsync();
+                        var response = JsonConvert.DeserializeObject<StaffApprovalRegRespObj>(stringData);
+
+                        if (!response.Status.IsSuccessful)
+                        {
+                            return new StaffApprovalRegRespObj
+                            {
+                                Status = response.Status
+                            };
+                        }
+
+                        if (response.ResponseId == (int)ApprovalStatus.Processing)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Processing,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+                        if (response.ResponseId == (int)ApprovalStatus.Revert)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Revert,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+
+                        if (response.ResponseId == (int)ApprovalStatus.Approved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+
+                            
+                           
+
+                            itemToUpdate.RegisterId = currentItem.RegisterId;
+                            itemToUpdate.Cost = currentItem.ReEvaluatedCost > 0 ? currentItem.ReEvaluatedCost : itemToUpdate.Cost;
+                            
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(itemToUpdate);
+                            var depreciable = _dataContext.ppe_assetclassification.Find(currentItem.AssetClassificationId);
+                            if (depreciable.Depreciable)
+                            {
+                                var res = GenerateReassessmentInvestmentDailySchedule(currentItem.RegisterId);
+                            }
+                            _dataContext.SaveChanges();
+
+                            await _trans.CommitAsync();
+
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Approved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message = response.Status.Message
+                                }
+                            };
+                        }
+
+                        if (response.ResponseId == (int)ApprovalStatus.Disapproved)
+                        {
+                            await _dataContext.cor_approvaldetail.AddAsync(details);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Disapproved;
+                            currentItem.WorkflowToken = response.Status.CustomToken;
+
+                            var itemToUpdate = await _dataContext.ppe_register.FindAsync(currentItem.RegisterId);
+                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            await _trans.CommitAsync();
+                            return new StaffApprovalRegRespObj
+                            {
+                                ResponseId = (int)ApprovalStatus.Disapproved,
+                                Status = new APIResponseStatus
+                                {
+                                    IsSuccessful = true,
+                                    Message =
+                            response.Status.Message
+                                }
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _trans.RollbackAsync();
+                        throw ex;
+                    }
+                    finally { await _trans.DisposeAsync(); }
+
+                }
+
+                return new StaffApprovalRegRespObj
+                {
+                    ResponseId = request.TargetId,
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<IEnumerable<ppe_register>> GetReEvaluationAwaitingApprovals(List<int> reevaluationIds, List<string> tokens)
+        {
+            var item = await _dataContext.ppe_register.Where(s => reevaluationIds.Contains(s.RegisterId) && s.Deleted == false && tokens.Contains(s.WorkflowToken)).ToListAsync();
             return item;
         }
 
@@ -1020,12 +1322,11 @@ namespace PPE.Repository.Implement
             var currentItem = _dataContext.ppe_register.Find(RegisterId);
             decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
             decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
-            var day = DateTime.UtcNow.Date;
-            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-            TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-            int differenceInDays = usedLifeOfAsset.Days;
-            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
-            decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
+            //var day = DateTime.UtcNow.Date;
+            //TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+            //int differenceInDays = usedLifeOfAsset.Days;
+            //decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+            //decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
 
             var depreciationStartDate = currentItem.DepreciationStartDate;
             var freq = 30;
@@ -1072,7 +1373,74 @@ namespace PPE.Repository.Implement
                     dailyCB = (dailyCB - dailyDepreciationCharge);
                     accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
                     accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
-                    dailyschedule.AdditionId = currentItem.AdditionFormId;
+                    dailyschedule.RegisterId = currentItem.RegisterId;
+                    if (k == freq)
+                    {
+                        //dailyschedule.DepreciationForThePeriod = 0;
+                        accdailyAccumilative = 0;
+                    }
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+
+                count++;
+            }
+            return true;
+        }
+
+        private bool GenerateReassessmentInvestmentDailySchedule(int RegisterId)
+        {
+            var dailySchd = _dataContext.ppe_dailyschedule.Find(RegisterId);
+            var currentItem = _dataContext.ppe_register.Find(RegisterId);
+            decimal monthlyDepreciation = ((dailySchd.CB - currentItem.ResidualValue) / currentItem.UsefulLife);
+            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+
+            var depreciationStartDate = DateTime.Now;
+            var freq = 30;
+            int dailyPeriod = currentItem.UsefulLife * 30;
+            decimal dailyCB = currentItem.Cost;
+            int i = 1;
+            int count = 0;
+            decimal accdailyDepreciationCharge = 0;
+            decimal accdailyAccumilative = 0;
+
+            for (int k = 0; k <= dailyPeriod; k++)
+            {
+                ppe_dailyschedule dailyschedule = new ppe_dailyschedule();
+                if (count == freq)
+                {
+                    i++;
+                    count = 0;
+                    dailyschedule.EndPeriod = true;
+                }
+                if (k == 0)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = 0;
+                    dailyschedule.AccumulatedDepreciation = 0;
+                    dailyschedule.CB = dailyCB;
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyschedule.RegisterId = currentItem.RegisterId;
+                    dailyschedule.EndPeriod = true;
+                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                    _dataContext.SaveChanges();
+                }
+                else if (k == 1 || k <= dailyPeriod)
+                {
+                    dailyschedule.Period = k;
+                    dailyschedule.PeriodId = i;
+                    dailyschedule.OB = dailyCB;
+                    dailyschedule.DailyDepreciation = (dailyDepreciationCharge);
+                    dailyschedule.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    dailyschedule.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.CB = (dailyCB - dailyDepreciationCharge);
+                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                    dailyCB = (dailyCB - dailyDepreciationCharge);
+                    accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
+                    accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
+                    dailyschedule.RegisterId = currentItem.RegisterId;
                     if (k == freq)
                     {
                         //dailyschedule.DepreciationForThePeriod = 0;

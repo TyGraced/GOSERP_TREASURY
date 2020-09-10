@@ -50,6 +50,7 @@ namespace PPE.Contracts.V1
             public const string UPLOAD_ADDITION = Base + "/addition/upload/addition";
 
             public const string ADDITION_STAFF_APPROVAL = Base + "/addition/staff/approval/request";
+            public const string MULTI_ADDITION_STAFF_APPROVAL = Base + "/addition/staff/multiapproval/request";
             public const string ADDITION_STAFF_APPROVAL_AWAITNG = Base + "/addition/get/all/staff/awaiting/approvals";
             public const string GET_ADDITION_APPROVAL_COMMENTS = Base + "/addition/get/approval/comments";
         }
@@ -94,10 +95,12 @@ namespace PPE.Contracts.V1
         {
             public const string ADD_UPDATE_REGISTER = Base + "/register/add/update/register";
             public const string UPDATE_REASSESSMENT = Base + "/register/update/reassessment";
+            public const string UPDATE_REEVALUATION = Base + "/register/update/reevaluation";
             public const string UPDATE_DISPOSAL = Base + "/register/update/disposal";
             public const string GET_END_OF_MONTH_DEPRECIATION = Base + "/register/get/end/of/month/depreciation";
             public const string UPDATE_MULTIPLE_USEFULLIFE = Base + "/register/update/multiple/proposedusefullife";
             public const string UPDATE_MULTIPLE_RESIDUALVALUE = Base + "/register/update/multiple/proposedresidualvalue";
+            public const string UPDATE_MULTIPLE_REEVALUATION = Base + "/register/update/multiple/reevaluation";
             public const string GET_ALL_REGISTER = Base + "/register/get/all/register";
             public const string GET_REGISTER_BY_ID = Base + "/register/get/registerbyid";
             public const string DELETE_REGISTER = Base + "/register/delete/register";
@@ -105,9 +108,13 @@ namespace PPE.Contracts.V1
             public const string UPLOAD_REGISTER = Base + "/register/upload/register";
 
             public const string REASSESSMENT_STAFF_APPROVAL = Base + "/register/staff/reassessment/approval/request";
+            public const string MULTI_REASSESSMENT_STAFF_APPROVAL = Base + "/register/staff/reassessment/multi/approval/request";
             public const string DISPOSAL_STAFF_APPROVAL = Base + "/register/staff/disposal/approval/request";
+            public const string MULTI_DISPOSAL_STAFF_APPROVAL = Base + "/register/staff/disposal/multi/approval/request";
+            public const string REEVALUATION_STAFF_APPROVAL = Base + "/register/staff/reevaluation/approval/request";
             public const string REASSESSMENT_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/reassessment/awaiting/approvals";
             public const string DISPOSAL_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/disposal/awaiting/approvals";
+            public const string REEVALUATION_STAFF_APPROVAL_AWAITNG = Base + "/register/get/all/staff/reevaluation/awaiting/approvals";
         }
 
 

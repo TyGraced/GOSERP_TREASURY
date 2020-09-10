@@ -9,6 +9,7 @@ namespace PPE.DomainObjects.PPE
         public int AdditionFormId { get; set; }
         [StringLength(50)]
         public string LpoNumber { get; set; }
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime DateOfPurchase { get; set; }
         [StringLength(500)]
         public string Description { get; set; }

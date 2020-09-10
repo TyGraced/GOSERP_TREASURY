@@ -18,6 +18,7 @@ using GOSLibraries.GOS_Error_logger.Service;
 using GOSLibraries.Options;
 using Puchase_and_payables.Requests;
 using PPE.Requests;
+using PPE.Repository.Implement.Approvals;
 
 namespace PPE.Installers
 {
@@ -46,6 +47,7 @@ namespace PPE.Installers
             services.AddSingleton<IIdentityServerRequest, IdentityServerRequest>();
             services.AddSingleton<IFinanceServerRequest, FinanceServerRequest>();
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IApprovalDetailService, ApprovalDetailService>();
             services.AddSingleton<ILoggerService, LoggerService>();
             services.AddMvc(options =>
             {

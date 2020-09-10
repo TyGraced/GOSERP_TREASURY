@@ -26,7 +26,8 @@ namespace PPE.DomainObjects.PPE
         public int CompanyId { get; set; }
         public int RemainingUsefulLife { get; set; }
         public int ProposedUsefulLife { get; set; }
-        public int ProposedResidualValue { get; set; }
+        public decimal ProposedResidualValue { get; set; }
+        public decimal ReEvaluatedCost { get; set; }
         public decimal ResidualValue { get; set; }
         [StringLength(500)]
         public string Location { get; set; }
@@ -48,5 +49,10 @@ namespace PPE.DomainObjects.PPE
 
         public int ApprovalStatusId { get; set; }
         public string WorkflowToken { get; set; }
+        public string RequestDate { get; set; }
+        public string ProposedDisposalDate { get; set; }
+        public int NBV { get; set; }
+        public string ReasonForDisposal { get; set; }
+        public int Proceed { get; set; }
     }
 }

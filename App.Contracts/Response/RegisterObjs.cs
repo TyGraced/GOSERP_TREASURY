@@ -39,14 +39,22 @@ namespace PPE.Contracts.Response
         public int SubGlDisposal { get; set; }
         public string SubGlDisposalName { get; set; }
         public string SubGlDisposalCode { get; set; }
+        public string WorkflowToken { get; set; }
         public int ProposedUsefulLife { get; set; }
-        public int ProposedResidualValue { get; set; }
+        public decimal ReEvaluatedCost { get; set; }
+        public decimal ProposedResidualValue { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public string UpdatedBy { get; set; }
         public DateTime UpdatedOn { get; set; }
+        public string RequestDate { get; set; }
+        public string ProposedDisposalDate { get; set; }
+        public int NBV { get; set; }
+        public string ReasonForDisposal { get; set; }
+        public IList<Disposals> Disposals { get; set; }
+        public List<RegisterObj> Registers { get; set; }
     }
 
     public class AddUpdateRegisterObj
@@ -69,7 +77,8 @@ namespace PPE.Contracts.Response
         public int UsefulLife { get; set; }
         public int RemainingUsefulLife { get; set; }
         public int ProposedUsefulLife { get; set; }
-        public int ProposedResidualValue { get; set; }
+        public decimal ReEvaluatedCost { get; set; }
+        public decimal ProposedResidualValue { get; set; }
         public decimal ResidualValue { get; set; }
         [StringLength(50)]
         public string Location { get; set; }
@@ -94,6 +103,9 @@ namespace PPE.Contracts.Response
     {
         public int RegisterId { get; set; }
         public APIResponseStatus Status { get; set; }
+        public IList<Disposals> Disposals { get; set; }
+        //public List<RegisterObj> Registers { get; set; }
+        public List<RegisterObj> Registers { get; set; }
     }
 
     public class RegisterRespObj
@@ -107,3 +119,37 @@ namespace PPE.Contracts.Response
         public DateTime RequestDate { get; set; }
     }
 }
+
+
+    public class  DisposeObj
+    {
+        public string RequestDate { get; set; }
+        public string ProposedDisposalDate { get; set; }
+        public int NBV { get; set; }
+        public string ReasonForDisposal { get; set; }
+
+    }
+public class Disposals
+{
+    public int RegisterId { get; set; }
+    public int Proceed { get; set; }
+    public string AssetNumber { get; set; }
+    public string ClassificationName { get; set; }
+    public int AssetClassificationId { get; set; }
+    public string Description { get; set; }
+    public decimal Cost { get; set; }
+    public decimal AccumulatedDepreciation { get; set; }
+    public decimal NetBookValue { get; set; }
+
+}
+public class Application
+    {
+        public DisposeObj Dispose { get; set; }
+        public List<Disposals> DisposalList { get; set; }
+    }
+
+    public class DisposeRegRespObj
+    {
+        public int RegisterId { get; set; }
+        public APIResponseStatus Status { get; set; }
+    }

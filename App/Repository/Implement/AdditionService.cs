@@ -19,6 +19,7 @@ using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -208,57 +209,51 @@ namespace PPE.Repository.Implement
                                 var item = new AdditionFormObj
                                 {
                                     LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                                    //DateOfPurchase = workSheet.Cells[i, 2].Value != null ? Convert.ToDateTime(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
-                                    Description = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : null,
-                                    Quantity = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
-                                    Cost = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
-                                    SubGlAdditionName = workSheet.Cells[i, 5].Value != null ? workSheet.Cells[i, 5].Value.ToString() : null,
+                                    DateOfPurchasse = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : string.Empty,
+                                    //Description = workSheet.Cells[i, 2].Value != null ? workSheet.Cells[i, 2].Value.ToString() : null,
+                                    //Quantity = workSheet.Cells[i, 3].Value != null ? int.Parse(workSheet.Cells[i, 3].Value.ToString()) : 0,
+                                    //Cost = workSheet.Cells[i, 4].Value != null ? decimal.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
+                                    //SubGlAdditionName = workSheet.Cells[i, 5].Value != null ? workSheet.Cells[i, 5].Value.ToString() : null,
                                     //SubGlAdditionCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    Location = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                                    ClassificationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    UsefulLife = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
-                                    ResidualValue = workSheet.Cells[i, 9].Value != null ? decimal.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
+                                    //Location = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
+                                    //ClassificationName = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
+                                    //UsefulLife = workSheet.Cells[i, 8].Value != null ? int.Parse(workSheet.Cells[i, 8].Value.ToString()) : 0,
+                                    //ResidualValue = workSheet.Cells[i, 9].Value != null ? decimal.Parse(workSheet.Cells[i, 9].Value.ToString()) : 0,
                                 };
                                 uploadedRecord.Add(item);
                             }
                         }
                     }
-                    /*var item = new AdditionFormObj
-                                {
-                                    LpoNumber = workSheet.Cells[i, 1].Value != null ? workSheet.Cells[i, 1].Value.ToString() : null,
-                                    DateOfPurchase = workSheet.Cells[i, 2].Value != null ? Convert.ToDateTime(workSheet.Cells[i, 2].Value.ToString()) : DateTime.Now,
-                                    Description = workSheet.Cells[i, 3].Value != null ? workSheet.Cells[i, 3].Value.ToString() : null,
-                                    Quantity = workSheet.Cells[i, 4].Value != null ? int.Parse(workSheet.Cells[i, 4].Value.ToString()) : 0,
-                                    Cost = workSheet.Cells[i, 5].Value != null ? decimal.Parse(workSheet.Cells[i, 5].Value.ToString()) : 0,
-                                    SubGlAdditionName = workSheet.Cells[i, 6].Value != null ? workSheet.Cells[i, 6].Value.ToString() : null,
-                                    //SubGlAdditionCode = workSheet.Cells[i, 7].Value != null ? workSheet.Cells[i, 7].Value.ToString() : null,
-                                    Location = workSheet.Cells[i, 8].Value != null ? workSheet.Cells[i, 8].Value.ToString() : null,
-                                    ClassificationName = workSheet.Cells[i, 9].Value != null ? workSheet.Cells[i, 9].Value.ToString() : null,
-                                    UsefulLife = workSheet.Cells[i, 10].Value != null ? int.Parse(workSheet.Cells[i, 10].Value.ToString()) : 0,
-                                    ResidualValue = workSheet.Cells[i, 11].Value != null ? decimal.Parse(workSheet.Cells[i, 11].Value.ToString()) : 0,
-                                };*/
+                    
                 }
                 if (uploadedRecord.Count > 0)
                 {   
                     foreach (var item in uploadedRecord)
                     {
+                        var dateFormat = item.DateOfPurchasse.Split(" ")[0];
+                        var datetime = item.DateOfPurchasse.Split(" ")[1];
+                        var D = dateFormat.Split("/")[1];
+                        var M = dateFormat.Split("/")[0];
+                        var Y = dateFormat.Split("/")[2]; 
+                        var date = Convert.ToDateTime( $"{D}/{M}/{Y} {datetime}");
+
                         //var subGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLCode == item.SubGlAdditionCode)?.SubGLId ?? 0;
-                        var subGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
-                        var classificationName = _dataContext.ppe_assetclassification.Where(c => c.ClassificationName == item.ClassificationName).FirstOrDefault()?.AsetClassificationId ?? 0;
+                        //var subGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLName == item.SubGlAdditionName)?.SubGLId ?? 0;
+                        //var classificationName = _dataContext.ppe_assetclassification.Where(c => c.ClassificationName == item.ClassificationName).FirstOrDefault()?.AsetClassificationId ?? 0;
                         var category = _dataContext.ppe_additionform.Where(x => x.LpoNumber == item.LpoNumber && x.Deleted == false).FirstOrDefault();
                         if (category != null)
                         {
                             category.LpoNumber = item.LpoNumber;
-                            //category.DateOfPurchase = item.DateOfPurchase;
-                            category.Description = item.Description;
-                            category.Quantity = item.Quantity;
-                            category.Cost = item.Cost;
-                            category.SubGlAddition = subGlAdditionName;
+                            category.DateOfPurchase = date;
+                            //category.Description = item.Description;
+                            //category.Quantity = item.Quantity;
+                            //category.Cost = item.Cost;
+                            //category.SubGlAddition = subGlAdditionName;
                             //category.SubGlAddition = subGlAdditionCode;
-                            category.Location = item.Location;
-                            category.AssetClassificationId = classificationName;
-                            category.UsefulLife = item.UsefulLife;
-                            category.ResidualValue = item.ResidualValue;
+                            //category.Location = item.Location;
+                            //category.AssetClassificationId = classificationName;
+                            //category.UsefulLife = item.UsefulLife;
+                            //category.ResidualValue = item.ResidualValue;
                             category.Active = true;
                             category.Deleted = false;
                             category.UpdatedBy = createdBy;
@@ -269,17 +264,18 @@ namespace PPE.Repository.Implement
                         {
                             var addition = new ppe_additionform();
 
+                            addition.AdditionFormId = item.AdditionFormId;
                             addition.LpoNumber = item.LpoNumber;
-                            //addition.DateOfPurchase = item.DateOfPurchase;
-                            addition.Description = item.Description;
-                            addition.Quantity = item.Quantity;
-                            addition.Cost = item.Cost;
-                            addition.SubGlAddition = subGlAdditionName;
+                            addition.DateOfPurchase = date;
+                            //addition.Description = item.Description;
+                            //addition.Quantity = item.Quantity;
+                            //addition.Cost = item.Cost;
+                            //addition.SubGlAddition = subGlAdditionName;
                             //addition.SubGlAddition = subGlAdditionCode;
-                            addition.Location = item.Location;
-                            addition.AssetClassificationId = item.AssetClassificationId;
-                            addition.UsefulLife = item.UsefulLife;
-                            addition.ResidualValue = item.ResidualValue;
+                            //addition.Location = item.Location;
+                            //addition.AssetClassificationId = item.AssetClassificationId;
+                            //addition.UsefulLife = item.UsefulLife;
+                            //addition.ResidualValue = item.ResidualValue;
                             addition.Active = true;
                             addition.Deleted = false;
                             addition.CreatedBy = createdBy;
@@ -309,12 +305,6 @@ namespace PPE.Repository.Implement
             dt.Columns.Add("Cost");
             dt.Columns.Add("SubGL Addition Name");
             dt.Columns.Add("SubGL Addition Code");
-            //dt.Columns.Add("SubGL Depreciation Name");
-            //dt.Columns.Add("SubGL Depreciation Code");
-            //dt.Columns.Add("SubGL Accumulated Depreciation Name");
-            //dt.Columns.Add("SubGL Accumulated Depreciation Code");
-            //dt.Columns.Add("SubGL Disposal Name");
-            //dt.Columns.Add("SubGL Disposal Code");
             dt.Columns.Add("Location");
             dt.Columns.Add("Classification Name");
             dt.Columns.Add("Useful Life");
@@ -330,9 +320,6 @@ namespace PPE.Repository.Implement
                                 Quantity = a.Quantity,
                                 Cost = a.Cost,
                                 SubGlAddition = a.SubGlAddition,
-                                //SubGlDepreciation = a.SubGlDepreciation,
-                                //SubGlAccumulatedDepreciation = a.SubGlAccumulatedDepreciation, 
-                                //SubGlDisposal = a.SubGlDisposal,
                                 Location = a.Location,
                                 AssetClassificationId = a.AssetClassificationId,
                                 UsefulLife = a.UsefulLife,
@@ -346,33 +333,24 @@ namespace PPE.Repository.Implement
                 {
                     res.SubGlAdditionCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLCode;
                     res.SubGlAdditionName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAddition)?.SubGLName;
-                    //res.SubGlDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLCode;
-                    //res.SubGlDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDepreciation)?.SubGLName;
-                    //res.SubGlAccumulatedDepreciationCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLCode;
-                    //res.SubGlAccumulatedDepreciationName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlAccumulatedDepreciation)?.SubGLName;
-                    //res.SubGlDisposalCode = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLCode;
-                    //res.SubGlDisposalName = subGlResponse.subGls.FirstOrDefault(d => d.SubGLId == res.SubGlDisposal)?.SubGLName;
+                    
 
                 }
             }
             var classificationName = _dataContext.ppe_assetclassification.Where(c => c.Deleted == false).ToList();
+            var formattedDate = DateTimeOffset.Now.ToString("d");
+
 
             foreach (var kk in additions)
             {
                 var row = dt.NewRow();
                 row["Lpo Number"] = kk.LpoNumber;
-                row["Date Of Purchase"] = kk.DateOfPurchase;
+                row["Date Of Purchase"] = kk.DateOfPurchase.Date.ToString("dd/MM/yyyy");
                 row["Description"] = kk.Description;
                 row["Quantity"] = kk.Quantity;
                 row["Cost"] = kk.Cost;
                 row["SubGL Addition Name"] = kk.SubGlAdditionName;
                 row["SubGL Addition Code"] = kk.SubGlAdditionCode;
-                //row["SubGL Depreciation Name"] = kk.SubGlDepreciationName;
-                //row["SubGL Depreciation Code"] = kk.SubGlDepreciationCode;
-                //row["SubGL Accumulated Depreciation Name"] = kk.SubGlAccumulatedDepreciationName;
-                //row["SubGL Accumulated Depreciation Code"] = kk.SubGlAccumulatedDepreciationCode;
-                //row["SubGL Disposal Name"] = kk.SubGlDisposalName;
-                //row["SubGL Disposal Code"] = kk.SubGlDisposalCode;
                 row["Location"] = kk.Location;
                 row["Classification Name"] = classificationName.FirstOrDefault(a => a.AsetClassificationId == kk.AssetClassificationId)?.ClassificationName;
                 row["Useful Life"] = kk.UsefulLife;
@@ -426,7 +404,7 @@ namespace PPE.Repository.Implement
                             WorkflowToken = currentItem.WorkflowToken,
                         };
                         var result = await _serverRequest.StaffApprovalRequestAsync(req);
-
+                        
                         if (!result.IsSuccessStatusCode)
                         {
                             return new StaffApprovalRegRespObj
@@ -452,11 +430,9 @@ namespace PPE.Repository.Implement
                         if (response.ResponseId == (int)ApprovalStatus.Processing)
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
-                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            currentItem.ApprovalStatusId = (int)ApprovalStatus.Processing;  
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -472,10 +448,8 @@ namespace PPE.Repository.Implement
                         {
                             await _dataContext.cor_approvaldetail.AddAsync(details);
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Revert;
-                            currentItem.WorkflowToken = response.Status.CustomToken;
-
-                            var itemToUpdate = await _dataContext.ppe_additionform.FindAsync(currentItem.AdditionFormId);
-                            _dataContext.Entry(itemToUpdate).CurrentValues.SetValues(currentItem);
+                            _dataContext.Entry(currentItem).CurrentValues.SetValues(currentItem);
+                            await _dataContext.SaveChangesAsync();
                             await _trans.CommitAsync();
                             return new StaffApprovalRegRespObj
                             {
@@ -494,19 +468,16 @@ namespace PPE.Repository.Implement
                             currentItem.ApprovalStatusId = (int)ApprovalStatus.Approved;
                             currentItem.WorkflowToken = response.Status.CustomToken;
 
-                            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
-                            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+                            
                             var assetNumber = AssetNumber.Generate();
-                            //var residlValue = _dataContext.ppe_addition.Where(c => c.AsetClassificationId == currentItem.additionId).FirstOrDefault().ResidualValue;
-                            //var residualValue = ((residlValue * currentItem.Cost)/100);
+                            
                             var depreciationStartDate = DateTime.Now;
-                            int dailyPeriod = currentItem.UsefulLife * 30;
-                            decimal dailyCB = currentItem.Cost;
-                            decimal accdailyDepreciationCharge = 0;
-                            decimal accdailyAccumilative = 0;
-
-                            var res = GenerateInvestmentDailySchedule(currentItem.AdditionFormId);
-
+                            
+                            var depreciable = _dataContext.ppe_assetclassification.Find(currentItem.AssetClassificationId);
+                            if (depreciable.Depreciable)
+                            {
+                                var res = GenerateInvestmentDailySchedule(currentItem.AdditionFormId);
+                            }
                             var register = new ppe_register
                             {
                                 Active = true,
@@ -520,9 +491,6 @@ namespace PPE.Repository.Implement
                                 LpoNumber = currentItem.LpoNumber,
                                 Quantity = currentItem.Quantity,
                                 DepreciationStartDate = depreciationStartDate,
-                                DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative,
-                                NetBookValue = (dailyCB - dailyDepreciationCharge),
-                                AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge,
                                 UsefulLife = currentItem.UsefulLife,
                                 ResidualValue = currentItem.ResidualValue,
                                 AssetNumber = assetNumber,
@@ -740,96 +708,81 @@ namespace PPE.Repository.Implement
             return data;
         }
 
-        //private cor_approvaldetail BuildApprovalDetailObject(BidandTenderStaffApprovalCommand request, cor_bid_and_tender currentItem, int staffId)
-        //{
-        //    var approvalDeatil = new cor_approvaldetail();
-        //    var previousDetail = _detailService.GetApprovalDetailsAsync(request.TargetId, currentItem.WorkflowToken).Result;
-        //    approvalDeatil.ArrivalDate = currentItem.RequestDate;
-
-        //    if (previousDetail.Count() > 0)
-        //        approvalDeatil.ArrivalDate = previousDetail.OrderByDescending(s => s.ApprovalDetailId).FirstOrDefault().Date;
-
-        //    approvalDeatil.Comment = request.ApprovalComment;
-        //    approvalDeatil.Date = DateTime.Today;
-        //    approvalDeatil.StatusId = request.ApprovalStatus;
-        //    approvalDeatil.TargetId = request.TargetId;
-        //    approvalDeatil.ReferredStaffId = request.ReferredStaffId;
-        //    approvalDeatil.StaffId = staffId;
-        //    approvalDeatil.WorkflowToken = currentItem.WorkflowToken;
-        //    return approvalDeatil;
-        //}
-
         private bool GenerateInvestmentDailySchedule(int AdditionId)
         {
+
             var currentItem =  _dataContext.ppe_additionform.Find(AdditionId);
-            decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
-            decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
-            var day = DateTime.UtcNow.Date;
-            var noOfDaysInThePeriod = day.ToString("D").Split()[0];
-            //decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
-            TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
-            int differenceInDays = usedLifeOfAsset.Days;
-            decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
-            decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
-            var assetNumber = AssetNumber.Generate();
 
-            var depreciationStartDate = DateTime.Now;
-            var freq = 30;
-            int dailyPeriod = currentItem.UsefulLife * 30;
-            decimal dailyCB = currentItem.Cost;
-            int i = 1;
-            int count = 0;
-            decimal accdailyDepreciationCharge = 0;
-            decimal accdailyAccumilative = 0;
-
-            for (int k = 0; k <= dailyPeriod; k++)
-            {
-                ppe_dailyschedule dailyschedule = new ppe_dailyschedule();               
-                if (count == freq)
-                {
-                    i++;
-                    count = 0;
-                    dailyschedule.EndPeriod = true;
-                }
-                if (k == 0)
-                {
-                    dailyschedule.Period = k;
-                    dailyschedule.PeriodId = i;
-                    dailyschedule.OB = dailyCB;
-                    dailyschedule.DailyDepreciation = 0;
-                    dailyschedule.AccumulatedDepreciation = 0;
-                    dailyschedule.CB = dailyCB;                  
-                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
-                    dailyschedule.AdditionId = currentItem.AdditionFormId;
-                    dailyschedule.EndPeriod = true;
-                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
-                    _dataContext.SaveChanges();
-                }
-                else if (k == 1 || k <= dailyPeriod)
-                {
-                    dailyschedule.Period = k;
-                    dailyschedule.PeriodId = i;
-                    dailyschedule.OB = dailyCB;
-                    dailyschedule.DailyDepreciation = (dailyDepreciationCharge);
-                    dailyschedule.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
-                    dailyschedule.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
-                    dailyschedule.CB = (dailyCB - dailyDepreciationCharge);
-                    dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
-                    dailyCB = (dailyCB - dailyDepreciationCharge);
-                    accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
-                    accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
-                    dailyschedule.AdditionId = currentItem.AdditionFormId;
-                    if (k == freq)
-                    {
-                        //dailyschedule.DepreciationForThePeriod = 0;
-                        accdailyAccumilative = 0;
-                    }
-                    _dataContext.ppe_dailyschedule.Add(dailyschedule);
-                    _dataContext.SaveChanges();
-                }
+                decimal monthlyDepreciation = ((currentItem.Cost - currentItem.ResidualValue) / currentItem.UsefulLife);
+                decimal dailyDepreciationCharge = (monthlyDepreciation / 30);
+                var day = DateTime.UtcNow.Date;
+                var noOfDaysInThePeriod = day.ToString("D").Split()[0];
                 
-                count++;
-            }
+                //decimal depreciationForThePeriod = (dailyDepreciationCharge * Convert.ToInt32(noOfDaysInThePeriod));
+                TimeSpan usedLifeOfAsset = (DateTime.Today - currentItem.DepreciationStartDate);
+                int differenceInDays = usedLifeOfAsset.Days;
+                decimal accumulatedDepreciation = (dailyDepreciationCharge * (differenceInDays));
+                decimal netBookValue = currentItem.Cost - accumulatedDepreciation;
+                var assetNumber = AssetNumber.Generate();
+
+                var depreciationStartDate = DateTime.Now;
+                var freq = 30;
+                int dailyPeriod = currentItem.UsefulLife * 30;
+                decimal dailyCB = currentItem.Cost;
+                int i = 1;
+                int count = 0;
+                decimal accdailyDepreciationCharge = 0;
+                decimal accdailyAccumilative = 0;
+
+                for (int k = 0; k <= dailyPeriod; k++)
+                {
+                    ppe_dailyschedule dailyschedule = new ppe_dailyschedule();
+                    if (count == freq)
+                    {
+                        i++;
+                        count = 0;
+                        dailyschedule.EndPeriod = true;
+                    }
+                    if (k == 0)
+                    {
+                        dailyschedule.Period = k;
+                        dailyschedule.PeriodId = i;
+                        dailyschedule.OB = dailyCB;
+                        dailyschedule.DailyDepreciation = 0;
+                        dailyschedule.AccumulatedDepreciation = 0;
+                        dailyschedule.CB = dailyCB;
+                        dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                        dailyschedule.AdditionId = currentItem.AdditionFormId;
+                        dailyschedule.EndPeriod = true;
+                        _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                        _dataContext.SaveChanges();
+                    }
+                    else if (k == 1 || k <= dailyPeriod)
+                    {
+                        dailyschedule.Period = k;
+                        dailyschedule.PeriodId = i;
+                        dailyschedule.OB = dailyCB;
+                        dailyschedule.DailyDepreciation = (dailyDepreciationCharge);
+                        dailyschedule.AccumulatedDepreciation = dailyDepreciationCharge + accdailyDepreciationCharge;
+                        dailyschedule.DepreciationForThePeriod = dailyDepreciationCharge + accdailyAccumilative;
+                        dailyschedule.CB = (dailyCB - dailyDepreciationCharge);
+                        dailyschedule.PeriodDate = depreciationStartDate.AddDays(k);
+                        dailyCB = (dailyCB - dailyDepreciationCharge);
+                        accdailyDepreciationCharge = dailyDepreciationCharge + accdailyDepreciationCharge;
+                        accdailyAccumilative = dailyDepreciationCharge + accdailyAccumilative;
+                        dailyschedule.AdditionId = currentItem.AdditionFormId;
+                        if (k == freq)
+                        {
+                            //dailyschedule.DepreciationForThePeriod = 0;
+                            accdailyAccumilative = 0;
+                        }
+                        _dataContext.ppe_dailyschedule.Add(dailyschedule);
+                        _dataContext.SaveChanges();
+                    }
+
+                    count++;
+                }
+            
             return true;
         }
 

@@ -1,6 +1,7 @@
 ﻿using GOSLibraries.GOS_API_Response;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace PPE.Contracts.Response
@@ -9,8 +10,10 @@ namespace PPE.Contracts.Response
     {
         public int AdditionFormId { get; set; }
         public string LpoNumber { get; set; }
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime DateOfPurchase { get; set; }
         public string Description { get; set; }
+        public string DateOfPurchasse { get; set; }
         public int Quantity { get; set; }
         public decimal Cost { get; set; }
         public int AssetClassificationId { get; set; }
@@ -44,6 +47,7 @@ namespace PPE.Contracts.Response
     {
         public int AdditionFormId { get; set; }
         public string LpoNumber { get; set; }
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime DateOfPurchase { get; set; }
         public string Description { get; set; }
         public string SubGlName { get; set; }

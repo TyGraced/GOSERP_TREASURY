@@ -12,6 +12,7 @@ using PPE.Contracts.V1;
 using PPE.Data;
 using PPE.DomainObjects.PPE;
 using PPE.Repository.Implement.Addition;
+using PPE.Repository.Implement.Approvals;
 using PPE.Repository.Interface;
 using PPE.Requests;
 using Puchase_and_payables.Requests;
@@ -34,6 +35,7 @@ namespace PPE.Controllers.V1
         private readonly ILoggerService _logger;
         private readonly IIdentityServerRequest _serverRequest;
         private readonly IFinanceServerRequest _financeRequest;
+        private readonly IApprovalDetailService _approvalDetailService;
         public AdditionController(
             DataContext dataContext,
             IAdditionService additionService,
@@ -42,7 +44,8 @@ namespace PPE.Controllers.V1
             IHttpContextAccessor httpContextAccessor,
             IIdentityServerRequest serverRequest,
             IFinanceServerRequest financeRequest,
-            ILoggerService logger)
+            ILoggerService logger,
+            IApprovalDetailService approvalDetailService)
         {
             _dataContext = dataContext;
             _mapper = mapper;
@@ -52,6 +55,7 @@ namespace PPE.Controllers.V1
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _serverRequest = serverRequest;
+            _approvalDetailService = approvalDetailService;
         }
 
         [HttpGet(ApiRoutes.Addition.GET_ALL_ADDITION)]
@@ -290,6 +294,31 @@ namespace PPE.Controllers.V1
 
         }
 
+        [HttpPost(ApiRoutes.Addition.MULTI_ADDITION_STAFF_APPROVAL)]
+        public async Task<StaffApprovalRegRespObj> AdditionStaffMultiApproval([FromBody] List<StaffApprovalObj> request)
+        {
+            try
+            {
+                foreach (var item in request)
+                {
+                    item.TargetId = item.TargetId;
+                    item.ApprovalComment = "Okay";
+                    item.ApprovalStatus = 2;
+                    await _repo.AdditionStaffApprovals(item);
+                }
+                return new StaffApprovalRegRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Successful" } }
+                };
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+        }
+
         [HttpGet(ApiRoutes.Addition.ADDITION_STAFF_APPROVAL_AWAITNG)]
         public async Task<IActionResult> GetCurrentStaffAdditionawaittingAprovals()
         {
@@ -359,7 +388,6 @@ namespace PPE.Controllers.V1
                         Cost = d.Cost,
                         DateOfPurchase = d.DateOfPurchase,
                         WorkflowToken = d.WorkflowToken,
-                        //DepreciationStartDate = d.DepreciationStartDate,
                         Description = d.Description,
                         Quantity = d.Quantity,
                         Location = d.Location,
@@ -464,14 +492,11 @@ namespace PPE.Controllers.V1
         }
 
         [HttpGet(ApiRoutes.Addition.GET_ADDITION_APPROVAL_COMMENTS)]
-        public async Task<ActionResult<ApprovalDetailsRespObj>> GetApprovalTrail([FromQuery] ApprovalDetailSearchObj model)
+        public async Task<ActionResult<ApprovalDetailsRespObj>> GetApprovalDetailsAsync([FromQuery] ApprovalDetailSearchObj model)
         {
             try
             {
-                return new ApprovalDetailsRespObj
-                {
-                    Details = _repo.GetApprovalTrail(model.TargetId, model.WorkflowToken)
-                };
+                return await _approvalDetailService.GetApprovalDetailsAsync(model.TargetId, model.WorkflowToken);
             }
             catch (Exception ex)
             {
@@ -507,6 +532,3 @@ namespace PPE.Controllers.V1
         }
     }
 }
-
-
- 
