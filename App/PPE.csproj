@@ -19,6 +19,15 @@
     <None Remove="MailHandler\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Migrations\20200910081612_wk.cs" />
+    <Compile Remove="Migrations\20200910081612_wk.Designer.cs" />
+    <Compile Remove="Migrations\20200910082151_wk.cs" />
+    <Compile Remove="Migrations\20200910082151_wk.Designer.cs" />
+    <Compile Remove="Migrations\20200910082329_wk.cs" />
+    <Compile Remove="Migrations\20200910082329_wk.Designer.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />

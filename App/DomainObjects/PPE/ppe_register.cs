@@ -50,8 +50,7 @@ namespace PPE.DomainObjects.PPE
         public int ApprovalStatusId { get; set; }
         public string WorkflowToken { get; set; }
         public string RequestDate { get; set; }
-        public string ProposedDisposalDate { get; set; }
-        public int NBV { get; set; }
+        public DateTime ProposedDisposalDate { get; set; }
         public string ReasonForDisposal { get; set; }
         public int Proceed { get; set; }
     }

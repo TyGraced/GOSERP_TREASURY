@@ -197,7 +197,7 @@ namespace PPE.Controllers.V1
                         {
                             var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
                             itemToUpdate.RegisterId = item.RegisterId;
-                            itemToUpdate.Proceed = item.Proceed;
+                            //itemToUpdate.Proceed = item.Proceed;
                             await _repo.UpdateDisposalAsync(itemToUpdate);
                         }
                     };
