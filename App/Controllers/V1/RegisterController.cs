@@ -182,14 +182,6 @@ namespace PPE.Controllers.V1
                 try
                 {
                     var user = await _identityService.UserDataAsync();
-                    var domainObj = new DisposeObj();
-                    
-
-                    domainObj.NBV = domainObj.NBV;
-                    domainObj.RequestDate = domainObj.RequestDate;
-                    domainObj.ReasonForDisposal = domainObj.ReasonForDisposal;
-                    domainObj.ProposedDisposalDate = domainObj.ProposedDisposalDate;
-
 
                     foreach (var item in model.DisposalList)
                     {
@@ -197,7 +189,9 @@ namespace PPE.Controllers.V1
                         {
                             var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
                             itemToUpdate.RegisterId = item.RegisterId;
-                            //itemToUpdate.Proceed = item.Proceed;
+                            itemToUpdate.Proceed = item.Proceed;
+                            itemToUpdate.ReasonForDisposal = model.ReasonForDisposal;
+                            itemToUpdate.ProposedDisposalDate = model.ProposedDisposalDate;
                             await _repo.UpdateDisposalAsync(itemToUpdate);
                         }
                     };

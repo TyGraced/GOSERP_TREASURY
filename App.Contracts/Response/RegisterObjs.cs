@@ -144,8 +144,11 @@ public class Disposals
 }
 public class Application
     {
-        public DisposeObj Dispose { get; set; }
-        public List<Disposals> DisposalList { get; set; }
+    public string RequestDate { get; set; }
+    public string ProposedDisposalDate { get; set; }
+    public int NBV { get; set; }
+    public string ReasonForDisposal { get; set; }
+    public List<Disposals> DisposalList { get; set; }
     }
 
     public class DisposeRegRespObj
