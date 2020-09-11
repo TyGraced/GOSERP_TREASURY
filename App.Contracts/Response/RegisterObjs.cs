@@ -21,6 +21,7 @@ namespace PPE.Contracts.Response
         public int Quantity { get; set; }
         public DateTime DepreciationStartDate { get; set; }
         public int UsefulLife { get; set; }
+        public int UsedLife { get; set; }
         public int RemainingUsefulLife { get; set; }
         public decimal ResidualValue { get; set; }
         public string Location { get; set; }
@@ -113,6 +114,8 @@ namespace PPE.Contracts.Response
         public List<RegisterObj> Registers { get; set; }
         public byte[] export { get; set; }
         public APIResponseStatus Status { get; set; }
+        public List<Disposals> DisposalList { get; set; }
+
     }
     public class EndOfDayRequestObj
     {
@@ -121,18 +124,21 @@ namespace PPE.Contracts.Response
 }
 
 
-    public class  DisposeObj
-    {
-        public string RequestDate { get; set; }
-        public string ProposedDisposalDate { get; set; }
-        public int NBV { get; set; }
-        public string ReasonForDisposal { get; set; }
-
-    }
+    public class  DerecognitionObj
+{
+    public int DerecognitionId { get; set; }
+    public DateTime RequestDate { get; set; }
+    public DateTime ProposedDisposalDate { get; set; }
+    public string ReasonForDisposal { get; set; }
+    public decimal NBV { get; set; }
+    public string WorkflowToken { get; set; }
+}
 public class Disposals
 {
+    public int DisposalId { get; set; }
+    public int DerecognitionId { get; set; }
     public int RegisterId { get; set; }
-    public int Proceed { get; set; }
+    public decimal ProceedFromDisposal { get; set; }
     public string AssetNumber { get; set; }
     public string ClassificationName { get; set; }
     public int AssetClassificationId { get; set; }
@@ -140,18 +146,24 @@ public class Disposals
     public decimal Cost { get; set; }
     public decimal AccumulatedDepreciation { get; set; }
     public decimal NetBookValue { get; set; }
-
+    public DateTime DepreciationStartDate { get; set; }
+    public int AdditionFormId { get; set; }
 }
-public class Application
-    {
-    public string RequestDate { get; set; }
-    public string ProposedDisposalDate { get; set; }
-    public int NBV { get; set; }
+public class DisposalsRespObj
+{
+    public int DerecognitionId { get; set; }
+    public decimal NBV { get; set; }
+    public DateTime RequestDate { get; set; }
+    public DateTime ProposedDisposalDate { get; set; }
     public string ReasonForDisposal { get; set; }
+    public string WorkflowToken { get; set; }
+    //public List<DerecognitionObj> derecognitions { get; set; }
     public List<Disposals> DisposalList { get; set; }
-    }
+    public APIResponseStatus Status { get; set; }
+   
+}
 
-    public class DisposeRegRespObj
+public class DisposeRegRespObj
     {
         public int RegisterId { get; set; }
         public APIResponseStatus Status { get; set; }

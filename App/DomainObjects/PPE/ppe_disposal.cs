@@ -10,30 +10,18 @@ namespace PPE.DomainObjects.PPE
     {
         [Key]
         public int DisposalId { get; set; }
+        public int DerecognitionId { get; set; }
         [StringLength(50)]
         public string AssetNumber { get; set; }
         public int AssetClassificationId { get; set; }
         [StringLength(50)]
         public string Description { get; set; }
         public decimal Cost { get; set; }
-        public DateTime DateOfPurchaase { get; set; }
-        public int Quantity { get; set; }
         public DateTime DepreciationStartDate { get; set; }
-        public int UsefulLife { get; set; }
-        public decimal ResidualValue { get; set; }
-        [StringLength(500)]
-        public string Location { get; set; }
-        public decimal DepreciationForThePeriod { get; set; }
         public decimal AccumulatedDepreciation { get; set; }
         public decimal NetBookValue { get; set; }
         public decimal ProceedFromDisposal { get; set; }
         [StringLength(500)]
-        public string ReasonForDisposal { get; set; }
-        public DateTime RequestDate { get; set; }
-        public DateTime ProposedDisposalDate { get; set; }
-        public int SubGlDepreciation { get; set; }
-        public int SubGlAccumulatedDepreciation { get; set; }
-        public int SubGlDisposal { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         [StringLength(50)]

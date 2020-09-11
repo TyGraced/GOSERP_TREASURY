@@ -26,6 +26,12 @@
     <Compile Remove="Migrations\20200910082151_wk.Designer.cs" />
     <Compile Remove="Migrations\20200910082329_wk.cs" />
     <Compile Remove="Migrations\20200910082329_wk.Designer.cs" />
+    <Compile Remove="Migrations\20200911075657_dis.cs" />
+    <Compile Remove="Migrations\20200911075657_dis.Designer.cs" />
+    <Compile Remove="Migrations\20200911081437_dis.cs" />
+    <Compile Remove="Migrations\20200911081437_dis.Designer.cs" />
+    <Compile Remove="Migrations\20200911083726_dis.cs" />
+    <Compile Remove="Migrations\20200911083726_dis.Designer.cs" />
   </ItemGroup>
 
 

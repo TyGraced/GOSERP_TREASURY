@@ -175,45 +175,97 @@ namespace PPE.Controllers.V1
             }
         }
 
-        public async Task<ActionResult<DisposeRegRespObj>> UpdateDispose([FromBody] Application model)
-        {
-            //using (var _trans = _dataContext.Database.BeginTransaction())
-            {
-                try
-                {
-                    var user = await _identityService.UserDataAsync();
+        [HttpPost(ApiRoutes.Register.UPDATE_DISPOSAL)]
+        //public async Task<ActionResult<DisposeRegRespObj>> UpdateDispose([FromBody] Application model)
+        //{
+        //    {
+        //        try
+        //        {
+        //            var user = await _identityService.UserDataAsync();
 
-                    foreach (var item in model.DisposalList)
-                    {
-                        if (item.RegisterId > 0)
-                        {
-                            var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
-                            itemToUpdate.RegisterId = item.RegisterId;
-                            itemToUpdate.Proceed = item.Proceed;
-                            itemToUpdate.ReasonForDisposal = model.ReasonForDisposal;
-                            itemToUpdate.ProposedDisposalDate = model.ProposedDisposalDate;
-                            await _repo.UpdateDisposalAsync(itemToUpdate);
-                        }
-                    };
-                    await _dataContext.SaveChangesAsync();
-                    return new DisposeRegRespObj
-                    {
-                        RegisterId = model.DisposalList.FirstOrDefault().RegisterId,
-                        Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Gone for approval" } }
-                    };
-                }
-                catch (Exception ex)
+        //            foreach (var item in model.DisposalList)
+        //            {
+        //                if (item.RegisterId > 0)
+        //                {
+        //                    var itemToUpdate = _dataContext.ppe_register.Find(item.RegisterId);
+        //                    itemToUpdate.RegisterId = item.RegisterId;
+        //                    itemToUpdate.Proceed = item.Proceed;
+        //                    itemToUpdate.ReasonForDisposal = model.ReasonForDisposal;
+        //                    itemToUpdate.RequestDate = model.RequestDate;
+        //                    itemToUpdate.ProposedDisposalDate = model.ProposedDisposalDate;
+        //                    await _repo.UpdateDisposalAsync(itemToUpdate);
+        //                }
+        //            };
+        //            await _dataContext.SaveChangesAsync();
+        //            return new DisposeRegRespObj
+        //            {
+        //                RegisterId = model.DisposalList.FirstOrDefault().RegisterId,
+        //                Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Gone for approval" } }
+        //            };
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            var errorCode = ErrorID.Generate(5);
+        //            _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+        //            return new DisposeRegRespObj
+        //            {
+        //                Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+        //            };
+        //        }
+        //    }
+        //}
+
+
+
+        public async Task<ActionResult<DisposalsRespObj>> UpdateDisposal([FromBody] DisposalsRespObj model)
+        {
+            try
+            {
+                var user = await _identityService.UserDataAsync();
+
+                var dispos = new ppe_disposal();
+                var domainObj = new ppe_derecognition();
+                domainObj.Active = true;
+                domainObj.Deleted = false;
+                domainObj.RequestDate = model.RequestDate;
+                domainObj.ReasonForDisposal = model.ReasonForDisposal;
+                domainObj.ProposedDisposalDate = model.ProposedDisposalDate;
+                domainObj.NBV = model.NBV;
+                _dataContext.ppe_derecognition.Add(domainObj);
+                _dataContext.SaveChanges();
+
+                foreach (var item in model.DisposalList)
                 {
-                    var errorCode = ErrorID.Generate(5);
-                    _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
-                    return new DisposeRegRespObj
-                    {
-                        Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
-                    };
+                    dispos.DerecognitionId = domainObj.DerecognitionId;
+                    dispos.ProceedFromDisposal = item.ProceedFromDisposal;
+                    dispos.AssetNumber = item.AssetNumber;
+                    dispos.Description = item.Description;
+                    dispos.Cost = item.Cost;
+                    dispos.AccumulatedDepreciation = item.AccumulatedDepreciation;
+                    dispos.NetBookValue = item.NetBookValue;
+                    dispos.DepreciationStartDate = item.DepreciationStartDate;
+                    _dataContext.ppe_disposal.Add(dispos);
+                    _dataContext.SaveChanges();
                 }
+                await _repo.UpdateDisposalAsync(domainObj);
+
+                return new DisposalsRespObj
+                {
+                    DerecognitionId = domainObj.DerecognitionId,
+                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }
+                };
+            }
+
+            catch (Exception ex)
+            {
+                var errorCode = ErrorID.Generate(5);
+                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
+                return new DisposalsRespObj
+                {
+                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
+                };
             }
         }
-
 
         [HttpPost(ApiRoutes.Register.UPDATE_MULTIPLE_RESIDUALVALUE)]
         public async Task<ActionResult<RegisterRegRespObj>> UpdateMultipleResidualValue([FromBody] List<RegisterObj> model)
@@ -296,69 +348,6 @@ namespace PPE.Controllers.V1
                 {
                     RegisterId = domainObj.RegisterId,
                     Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "Gone for approval" } }
-                };
-            }
-            catch (Exception ex)
-            {
-                var errorCode = ErrorID.Generate(5);
-                _logger.Error($"ErrorID : {errorCode} Ex : {ex?.Message ?? ex?.InnerException?.Message} ErrorStack : {ex?.StackTrace}");
-                return new RegisterRegRespObj
-                {
-                    Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Error Occurred", TechnicalMessage = ex?.Message, MessageId = errorCode } }
-                };
-            }
-        }
-
-        [HttpPost(ApiRoutes.Register.UPDATE_DISPOSAL)]
-        public async Task<ActionResult<RegisterRegRespObj>> AddUpDateDisposalAsync([FromBody] AddUpdateRegisterObj model)
-        {
-            try
-            {
-                var user = await _identityService.UserDataAsync();
-                IEnumerable<RegisterObj> item = new List<RegisterObj>();
-                if (model.RegisterId > 0)
-                {
-                    item =  _repo.GetRegisterByIdAsync(model.RegisterId);
-                    if (item == null)
-                        return new RegisterRegRespObj
-                        {
-                            Status = new APIResponseStatus { IsSuccessful = false, Message = new APIResponseMessage { FriendlyMessage = "Item does not Exist" } }
-                        };
-                }
-
-                var domainObj = new ppe_register();
-                domainObj.RegisterId = model.RegisterId > 0 ? model.RegisterId : 0;
-                domainObj.Active = true;
-                domainObj.CreatedBy = user.UserName;
-                domainObj.CreatedOn = DateTime.Today;
-                domainObj.Deleted = false;
-                domainObj.AssetNumber = model.AssetNumber;
-                domainObj.AssetClassificationId = model.AssetClassificationId;
-                domainObj.Description = model.Description;
-                domainObj.Cost = model.Cost;
-                domainObj.DateOfPurchaase = model.DateOfPurchaase;
-                domainObj.Quantity = model.Quantity;
-                domainObj.DepreciationStartDate = model.DepreciationStartDate;
-                domainObj.UsefulLife = model.UsefulLife;
-                domainObj.ResidualValue = model.ResidualValue;
-                domainObj.Location = model.Location;
-                domainObj.DepreciationForThePeriod = model.DepreciationForThePeriod;
-                domainObj.AccumulatedDepreciation = model.AccumulatedDepreciation;
-                domainObj.NetBookValue = model.NetBookValue;
-                /*domainObj.ProceedFromDisposal = model.ProceedFromDisposal;
-                domainObj.ProposedDisposalDate = model.ProposedDisposalDate;
-                domainObj.ReasonForDisposal = model.ReasonForDisposal;*/
-                domainObj.SubGlDisposal = model.SubGlDisposal;
-                domainObj.SubGlDepreciation = model.SubGlDepreciation;
-                domainObj.SubGlAccumulatedDepreciation = model.SubGlAccumulatedDepreciation;
-                domainObj.UpdatedBy = user.UserName;
-                domainObj.UpdatedOn = model.RegisterId > 0 ? DateTime.Today : DateTime.Today;
-
-                await _repo.UpdateDisposalAsync(domainObj);
-                return new RegisterRegRespObj
-                {
-                    RegisterId = domainObj.RegisterId,
-                    Status = new APIResponseStatus { IsSuccessful = true, Message = new APIResponseMessage { FriendlyMessage = "successful" } }
                 };
             }
             catch (Exception ex)
@@ -711,31 +700,59 @@ namespace PPE.Controllers.V1
                  x.TargetId).ToList(), res.workflowTasks.Select(s =>
                  s.WorkflowToken).ToList());
 
-
-                return Ok(new RegisterRespObj
+                var now = DateTime.Now.Date;
+                var reg = disposals.Select(d => new DerecognitionObj
                 {
-                    Registers = disposals.Select(d => new RegisterObj
-                    {
-                        RegisterId = d.RegisterId,
-                        Active = d.Active,
-                        AssetClassificationId = d.AssetClassificationId,
-                        Cost = d.Cost,
-                        DateOfPurchaase = d.DateOfPurchaase,
-                        DepreciationStartDate = d.DepreciationStartDate,
-                        Description = d.Description,
-                        Quantity = d.Quantity,
-                        Location = d.Location,
-                        AssetNumber = d.AssetNumber,
-                        ResidualValue = d.ResidualValue,
-                        DepreciationForThePeriod = d.DepreciationForThePeriod,
-                        UsefulLife = d.UsefulLife,
-                        AccumulatedDepreciation = d.AccumulatedDepreciation,
-                        NetBookValue = d.NetBookValue,
-                        SubGlAccumulatedDepreciation = d.SubGlAccumulatedDepreciation,
-                        SubGlDepreciation = d.SubGlDepreciation,
-                        SubGlDisposal = d.SubGlDisposal
+                    DerecognitionId = d.DerecognitionId,
+                    RequestDate = d.RequestDate,
+                    ProposedDisposalDate = d.ProposedDisposalDate,
+                    ReasonForDisposal = d.ReasonForDisposal,
+                    WorkflowToken = d.WorkflowToken,
+                }).ToList();
 
-                    }).ToList(),
+
+                var ds = _dataContext.ppe_disposal.Where(a => a.DerecognitionId == reg.FirstOrDefault().DerecognitionId).ToList();
+                var disposalList = ds.Select(c => new Disposals
+                {
+                    DisposalId = c.DisposalId,
+                    DerecognitionId = c.DerecognitionId,
+                    ProceedFromDisposal = c.ProceedFromDisposal,
+                    AssetNumber = c.AssetNumber,
+                    Description = c.Description,
+                    Cost = c.Cost,
+                    AccumulatedDepreciation = c.AccumulatedDepreciation,
+                    NetBookValue = c.NetBookValue,
+                }).ToList();
+
+                foreach (var j in disposalList)
+                {
+                   
+                    j.ClassificationName = _dataContext.ppe_assetclassification.FirstOrDefault(c => c.AsetClassificationId == j.AssetClassificationId)?.ClassificationName ?? string.Empty;
+
+                    if (j.AdditionFormId != 0)
+                    {
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.AdditionId == j.AdditionFormId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
+                    else if (j.AdditionFormId == 0)
+                    {
+                        j.AccumulatedDepreciation = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.AccumulatedDepreciation ?? 0;
+                        j.NetBookValue = _dataContext.ppe_dailyschedule.FirstOrDefault(c => c.RegisterId == j.RegisterId && c.PeriodDate.Value.Date == now.Date)?.CB ?? j.Cost;
+                    }
+
+
+                }
+
+                return Ok(new DisposalsRespObj
+
+                {
+                    DerecognitionId = reg.FirstOrDefault().DerecognitionId,
+                    NBV = reg.FirstOrDefault().NBV,
+                    ReasonForDisposal = reg.FirstOrDefault().ReasonForDisposal,
+                    RequestDate = reg.FirstOrDefault().RequestDate,
+                    ProposedDisposalDate = reg.FirstOrDefault().ProposedDisposalDate,
+                    WorkflowToken = reg.FirstOrDefault().WorkflowToken,
+                    DisposalList = disposalList,
                     Status = new APIResponseStatus
                     {
                         IsSuccessful = true,
@@ -752,7 +769,7 @@ namespace PPE.Controllers.V1
             }
         }
 
-       [HttpPost(ApiRoutes.Register.GET_END_OF_MONTH_DEPRECIATION)]
+        [HttpPost(ApiRoutes.Register.GET_END_OF_MONTH_DEPRECIATION)]
         public async Task<ActionResult<FinTransacRegRespObj>> GetEndOfMonthDepreciation([FromBody] EndOfDayRequestObj model)
         {
             try

@@ -6,28 +6,17 @@ using System.Threading.Tasks;
 
 namespace PPE.DomainObjects.PPE
 {
-    public class ppe_periodicschedule
+    public class ppe_derecognition
     {
         [Key]
-        public int PpePeriodicScheduleId { get; set; }
+        public int DerecognitionId { get; set; }
 
-        public int? Period { get; set; }
-
-        public decimal? OB { get; set; }
-
-        public decimal? MonthlyDepreciation { get; set; }
-        public decimal? AccumulatedDepreciation { get; set; }
-
-        public decimal? CB { get; set; }
-
-        public DateTime? PeriodDate { get; set; }
-
-        public int AdditionId { get; set; }
-
-        public int? PeriodId { get; set; }
-
-        public bool? EndPeriod { get; set; }
-
+        public string ReasonForDisposal { get; set; }
+        public DateTime RequestDate { get; set; }
+        public DateTime ProposedDisposalDate { get; set; }
+        public int ApprovalStatusId { get; set; }
+        public decimal NBV { get; set; }
+        public string WorkflowToken { get; set; }
         public bool? Active { get; set; }
 
         public bool? Deleted { get; set; }
