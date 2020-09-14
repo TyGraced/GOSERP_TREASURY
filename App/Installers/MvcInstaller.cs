@@ -12,15 +12,15 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using FluentValidation.AspNetCore;
 using System;
 using GOSLibraries;
-using PPE.AuthHandler;
+using TREASURY.AuthHandler;
 using System.Net.Http.Headers;
 using GOSLibraries.GOS_Error_logger.Service;
 using GOSLibraries.Options;
 using Puchase_and_payables.Requests;
-using PPE.Requests;
-using PPE.Repository.Implement.Approvals;
+using TREASURY.Requests;
+using TREASURY.Repository.Implement.Approvals;
 
-namespace PPE.Installers
+namespace TREASURY.Installers
 {
     public class MvcInstaller : IInstaller
     {
@@ -96,7 +96,7 @@ namespace PPE.Installers
             {
                 x.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "PPE Cloud",
+                    Title = "TREASURY Cloud",
                     Version = "V1",
                     Description = "An API to perform business automated operations",
                     TermsOfService = new Uri("http://www.godp.co.uk/"),

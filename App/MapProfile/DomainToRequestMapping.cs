@@ -1,23 +1,22 @@
-﻿using AutoMapper;
-using PPE.Contracts.Response;
-using PPE.DomainObjects.PPE;
+﻿using AutoMaTREASURYr;
+using TREASURY.Contracts.Response;
+using TREASURY.DomainObjects.TREASURY;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.MapProfile
+namespace TREASURY.MapProfile
 {
     public class DomainToRequestMapping : Profile
     {
         public DomainToRequestMapping()
         {
-            CreateMap<ppe_additionform, AdditionFormObj>();
-            CreateMap<ppe_assetclassification, AssetClassificationObj>();
-            CreateMap<ppe_reassessment, ReassessmentObj>();
-            CreateMap<ppe_register, RegisterObj>();
-            CreateMap<ppe_disposal, DisposalObj>();
-            //CreateMap<,>();
+            CreateMap<TREASURY_additionform, AdditionFormObj>();
+            CreateMap<TREASURY_assetclassification, AssetClassificationObj>();
+            CreateMap<TREASURY_reassessment, ReassessmentObj>();
+            CreateMap<TREASURY_register, RegisterObj>();
+            CreateMap<TREASURY_disposal, DisposalObj>();
         }
     }
 }

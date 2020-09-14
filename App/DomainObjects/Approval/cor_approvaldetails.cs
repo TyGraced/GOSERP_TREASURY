@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.DomainObjects.Approval
+namespace TREASURY.DomainObjects.Approval
 {
 
     public class cor_approvaldetail

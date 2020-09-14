@@ -1,10 +1,10 @@
 ﻿using GOSLibraries.GOS_API_Response; 
-using PPE.Contracts.Response;
+using TREASURY.Contracts.Response;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace PPE.Contracts.Requests.Auth
+namespace TREASURY.Contracts.Requests.Auth
 {
     public class UserRegistrationReqObj
     {

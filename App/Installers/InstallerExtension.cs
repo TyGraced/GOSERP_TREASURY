@@ -1,10 +1,10 @@
-﻿using PPE;
+﻿using TREASURY;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
-namespace PPE.Installers
+namespace TREASURY.Installers
 {
     public static class InstallerExtensions
     {

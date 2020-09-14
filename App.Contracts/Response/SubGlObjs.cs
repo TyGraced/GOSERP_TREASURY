@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PPE.Contracts.Response
+namespace TREASURY.Contracts.Response
 {
     public class SubGlObj
     {

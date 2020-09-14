@@ -36,8 +36,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="AutoMaTREASURYr" Version="9.0.0" />
+    <PackageReference Include="AutoMaTREASURYr.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="EPPlus" Version="5.1.2" />
     <PackageReference Include="FluentValidation" Version="8.6.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="8.6.2" />
@@ -63,14 +63,21 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\App.Contracts\PPE.Contracts.csproj" />
+    <Reference Include="GOSLibraries">
+      <HintPath>..\App.Contracts\Lib\GOSLibraries.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 
   <ItemGroup>
-    <Reference Include="GOSLibraries">
-      <HintPath>..\..\..\..\Desktop\goslob\GOSLibraries.dll</HintPath>
-    </Reference>
+    <Folder Include="Controllers\V1\" />
+    <Folder Include="Lib\" />
+    <Folder Include="Repository\Interface\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\App.Contracts\TREASURY.Contracts.csproj" />
   </ItemGroup>
 
 

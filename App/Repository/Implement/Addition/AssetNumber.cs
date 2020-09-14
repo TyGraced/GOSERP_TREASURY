@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.Repository.Implement.Addition
+namespace TREASURY.Repository.Implement.Addition
 {
     public static class AssetNumber
     {

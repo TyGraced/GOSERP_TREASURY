@@ -2,16 +2,16 @@
 using GOSLibraries.GOS_API_Response;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using PPE.Contracts.Response;
-using PPE.Data;
-using PPE.DomainObjects.Approval;
+using TREASURY.Contracts.Response;
+using TREASURY.Data;
+using TREASURY.DomainObjects.Approval;
 using Puchase_and_payables.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.Repository.Implement.Approvals
+namespace TREASURY.Repository.Implement.Approvals
 {
     public interface IApprovalDetailService
     {

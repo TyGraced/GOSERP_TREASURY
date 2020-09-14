@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
-using PPE.Data;
+using TREASURY.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PPE.Installers;
+using TREASURY.Installers;
 using System.IO;
 using NLog;
 using GOSLibraries.Options;
 
-namespace PPE
+namespace TREASURY
 {
     public class Startup
     {

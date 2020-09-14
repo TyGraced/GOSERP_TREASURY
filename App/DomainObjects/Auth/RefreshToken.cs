@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.DomainObjects.Auth
+namespace TREASURY.DomainObjects.Auth
 {
     public class RefreshToken
     {
@@ -19,7 +19,7 @@ namespace PPE.DomainObjects.Auth
         public bool Used { get; set; }
         public bool Invalidated { get; set; }
         public string UserId { get; set; }
-        [NotMapped]
+        [NotMaTREASURYd]
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; }
     }

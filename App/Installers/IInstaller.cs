@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace PPE.Installers
+namespace TREASURY.Installers
 {
     public interface IInstaller
     {

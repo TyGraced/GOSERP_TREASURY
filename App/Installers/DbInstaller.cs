@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using PPE.Data;
+﻿using TREASURY.Data;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -7,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using PPE.DomainObjects.Auth;
-using PPE.Repository.Interface;
-using PPE.Repository.Implement;
+using TREASURY.DomainObjects.Auth;
+using TREASURY.Repository.Interface;
+using TREASURY.Repository.Implement;
 
-namespace PPE.Installers
+namespace TREASURY.Installers
 {
     public class DbInstaller : IInstaller
     { 
@@ -32,12 +31,12 @@ namespace PPE.Installers
             {
                 opt.Password.RequiredLength = 5;
                 opt.Password.RequireDigit = false;
-                opt.Password.RequireUppercase = false;
+                opt.Password.RequireUTREASURYrcase = false;
             })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>();
 
-            services.AddAutoMapper(typeof(Startup)); 
+            services.AddAutoMaTREASURYr(typeof(Startup)); 
             services.AddMediatR(typeof(Startup));
             services.AddMvc();  
 

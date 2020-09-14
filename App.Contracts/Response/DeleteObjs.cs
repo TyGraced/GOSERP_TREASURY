@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic; 
 
-namespace PPE.Contracts.Response
+namespace TREASURY.Contracts.Response
 {
     public class DeleteItemReqObj
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using PPE.DomainObjects.Approval;
-using PPE.DomainObjects.PPE;
+using TREASURY.DomainObjects.Approval;
+using TREASURY.DomainObjects.TREASURY;
 
-namespace PPE.Data
+namespace TREASURY.Data
 {
     public class DataContext : DbContext
     {
@@ -15,14 +15,7 @@ namespace PPE.Data
             : base(options) { }
 
         public DbSet<cor_approvaldetail> cor_approvaldetail { get; set; }
-        public DbSet<ppe_assetclassification> ppe_assetclassification { get; set; }
-        public DbSet<ppe_additionform> ppe_additionform { get; set; }
-        public DbSet<ppe_reassessment> ppe_reassessment { get; set; }
-        public DbSet<ppe_register> ppe_register { get; set; }
-        public DbSet<ppe_disposal> ppe_disposal { get; set; }
-        public DbSet<ppe_dailyschedule> ppe_dailyschedule { get; set; }
-        public DbSet<ppe_derecognition> ppe_derecognition { get; set; }
-        public DbSet<ppe_lpo> ppe_lpo { get; set; }
+        
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

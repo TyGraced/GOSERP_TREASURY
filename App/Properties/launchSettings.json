@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "PPE": {
+    "TREASURY": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

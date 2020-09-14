@@ -1,11 +1,11 @@
 ﻿using GOSLibraries.GOS_Financial_Identity;
 using Microsoft.AspNetCore.Http;
-using PPE.Contracts.Response;
+using TREASURY.Contracts.Response;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace PPE.AuthHandler
+namespace TREASURY.AuthHandler
 {
     public interface IIdentityService
     {

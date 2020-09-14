@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json;
 using Polly;
 using Polly.Retry;
-using PPE.Contracts.Response;
-using PPE.Contracts.V1;
+using TREASURY.Contracts.Response;
+using TREASURY.Contracts.V1;
 using Puchase_and_payables.Requests;
 using System;
 using System.Net.Http;
@@ -15,7 +15,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PPE.Requests
+namespace TREASURY.Requests
 {
     public class IdentityServerRequest : IIdentityServerRequest
     {

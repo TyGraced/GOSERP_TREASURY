@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PPE.Contracts.V1
+namespace TREASURY.Contracts.V1
 {
     public class ApiRoutes
     {

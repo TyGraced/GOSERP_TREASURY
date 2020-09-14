@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PPE.Contracts.GeneralExtension
+namespace TREASURY.Contracts.GeneralExtension
 {
     public class GeneralEntity
     {

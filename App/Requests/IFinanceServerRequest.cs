@@ -1,10 +1,10 @@
-﻿using PPE.Contracts.Response;
+﻿using TREASURY.Contracts.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PPE.Requests
+namespace TREASURY.Requests
 {
     public interface IFinanceServerRequest
     {
